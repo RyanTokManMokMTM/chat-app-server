@@ -1,0 +1,68 @@
+syntax = "v1"
+
+info(
+    title: "type title here"
+    desc: "type desc here"
+    author: "type author here"
+    email: "type email here"
+    version: "type version here"
+)
+
+type (
+    SignUpReq {
+        Email string `json:"email" validate:"email,min=8,max=32"`
+        Name string `json:"name" validate:"min=8,max=16"`
+        Password string `json:"password" validate:"min=8,max=32"`
+    }
+    SignUpResp {
+        Code string `json:"code"`
+        Token string `json:"token"`
+        ExpiredTime uint `json:"expired_time"`
+    }
+
+    SignInReq {
+        Email string `json:"email" validate:"email,min=8,max=32"`
+        Password string `json:"password" validate:"min=8,max=32"`
+    }
+    SignInResp {
+        Code string `json:"code"`
+        Token string `json:"token"`
+        ExpiredTime uint `json:"expired_time"`
+    }
+
+    GetUserInfoReq {
+        UserID uint `path:"user_id"`
+    }
+    GetUserInfoResp {
+        Code string `json:"code"`
+        Name string `json:"name"`
+        Email string `json:"email"`
+    }
+
+    UpdateUserInfoReq {
+        Name string `json:"name" validate:"min=8,max=32"`
+        Password string `json:"password" validate:"min=8,max=32"`
+    }
+    UpdateUserInfoResp {
+        Code string `json:"code"`
+    }
+)
+
+@server (
+    group : user
+    prefix : /api/v1
+    JWT : Auth
+)
+service ChatApp{
+    @handler UserSignUp
+    post /user/signup(SignUpReq) returns (SignUpResp)
+
+    @handler UserSignIn
+    post /user/signin(SignInReq) returns (SignInResp)
+
+    @handler GetUserInfo
+    get /user/info/:id(GetUserInfoReq) returns (GetUserInfoResp)
+
+    @handler UpdateUserInfo
+    patch /user/info(UpdateUserInfoReq) returns (UpdateUserInfoResp)
+}
