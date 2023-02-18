@@ -4,21 +4,26 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"time"
 )
 
 type UserModel struct {
-	ID       uint      `gorm:"primaryKey"`
-	UUID     uuid.UUID `gorm:"index"`
-	Name     string    `gorm:"type:varchar(32)"`
-	Email    string    `gorm:"type:varchar(64)"`
-	Password string    `gorm:"type:varchar(64)"`
+	ID       uint   `gorm:"primaryKey;autoIncrement;not null"`
+	Uuid     string `gorm:"type:varchar(64);not null;unique_index:idx_uuid"`
+	NickName string `gorm:"type:varchar(32)"`
+	Email    string `gorm:"type:varchar(64)"`
+	Password string `gorm:"type:varchar(64)"`
+	Avatar   string `gorm:"type:varchar(64);null;comment:'user avatar'"`
 	CommonField
 }
 
-// Hook
 func (u *UserModel) BeforeCreate(tx *gorm.DB) error {
-	uniqueID := uuid.New()
-	tx.Statement.SetColumn("ID", uniqueID)
+	u.Uuid = uuid.New().String()
+	return nil
+}
+
+func (u *UserModel) BeforeUpdate(tx *gorm.DB) error {
+	tx.Statement.SetColumn("UpdatedAt", time.Now())
 	return nil
 }
 
@@ -26,12 +31,12 @@ func (u *UserModel) TableName() string {
 	return "user_info"
 }
 
-func (u *UserModel) FindOneUser(db *gorm.DB, ctx context.Context) error {
-	err := db.Debug().WithContext(ctx).Find(&u).Error
-	if err != nil {
-		return err
-	}
-	return nil
+func (u *UserModel) FindOneUserByID(db *gorm.DB, ctx context.Context) error {
+	return db.Debug().WithContext(ctx).First(&u).Error
+}
+
+func (u *UserModel) FindOneUserByEmail(db *gorm.DB, ctx context.Context) error {
+	return db.Debug().WithContext(ctx).Where("email = ?", u.Email).Find(&u).Error
 }
 
 func (u *UserModel) InsertOneUser(db *gorm.DB, ctx context.Context) error {
@@ -42,6 +47,10 @@ func (u *UserModel) DeleteOneUser() error {
 	return nil
 }
 
-func (u *UserModel) UpdateOneUser() error {
-	return nil
+func (u *UserModel) UpdateOneUser(db *gorm.DB, ctx context.Context, name string) error {
+	return db.Debug().WithContext(ctx).Model(u).Where("id = ?", u.ID).Update("NickName", name).Error
+}
+
+func (u *UserModel) UpdateOneUserAvatar(db *gorm.DB, ctx context.Context, avatarName string) error {
+	return db.Debug().WithContext(ctx).Model(u).Where("id = ?", u.ID).Update("Avatar", avatarName).Error
 }

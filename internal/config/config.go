@@ -7,7 +7,7 @@ type Config struct {
 
 	Auth struct {
 		AccessSecret string
-		AccessExpire uint
+		AccessExpire int64
 	}
 
 	MySQL struct {
@@ -15,4 +15,8 @@ type Config struct {
 		MaxIdleConns int
 		MaxOpenConns int
 	}
+
+	Salt          string
+	ResourcesPath string
+	MaxFileSize   int64
 }

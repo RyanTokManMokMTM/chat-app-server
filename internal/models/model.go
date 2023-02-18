@@ -1,7 +1,6 @@
 package models
 
 import (
-	"database/sql"
 	"github.com/ryantokmanmok/chat-app-server/internal/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -12,7 +11,7 @@ import (
 type CommonField struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt sql.NullTime
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 func NewEngine(c *config.Config) *gorm.DB {

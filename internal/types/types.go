@@ -15,7 +15,7 @@ type SignUpReq struct {
 }
 
 type SignUpResp struct {
-	Code        string `json:"code"`
+	Code        uint   `json:"code"`
 	Token       string `json:"token"`
 	ExpiredTime uint   `json:"expired_time"`
 }
@@ -26,7 +26,7 @@ type SignInReq struct {
 }
 
 type SignInResp struct {
-	Code        string `json:"code"`
+	Code        uint   `json:"code"`
 	Token       string `json:"token"`
 	ExpiredTime uint   `json:"expired_time"`
 }
@@ -36,16 +36,25 @@ type GetUserInfoReq struct {
 }
 
 type GetUserInfoResp struct {
-	Code  string `json:"code"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	Code   uint   `json:"code"`
+	UUID   string `json:"uuid"`
+	Name   string `json:"name"`
+	Email  string `json:"email"`
+	Avatar string `json:"avatar"`
 }
 
 type UpdateUserInfoReq struct {
-	Name     string `json:"name" validate:"min=8,max=32"`
-	Password string `json:"password" validate:"min=8,max=32"`
+	Name string `json:"name" validate:"min=8,max=32"`
 }
 
 type UpdateUserInfoResp struct {
-	Code string `json:"code"`
+	Code uint `json:"code"`
+}
+
+type UploadUserAvatarReq struct {
+}
+
+type UploadUserAvatarResp struct {
+	Code uint   `json:"code"`
+	Path string `json:"path"`
 }

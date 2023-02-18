@@ -10,6 +10,11 @@ type CustomError struct {
 	message string       `json:"message"`
 }
 
+type ErrorResp struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
 func NewCustomError(code InternalCode, message string) *CustomError {
 	return &CustomError{
 		code:    code,
@@ -24,12 +29,12 @@ func NewCustomErrMessage(message string) *CustomError {
 	}
 }
 
-//func NewCustomErrCode() *CustomError {
-//	return &CustomError{
-//		code:    SERVER_COMMON_ERROR,
-//		message: message,
-//	}
-//}
+func NewCustomErrCode(code InternalCode) *CustomError {
+	return &CustomError{
+		code:    code,
+		message: MapErrMsg(code),
+	}
+}
 
 func (err *CustomError) Error() string {
 	return fmt.Sprintf("Code %v, Message: %v", err.code, err.message)
@@ -65,4 +70,11 @@ func (err *CustomError) StatusCode() int {
 		return http.StatusUnauthorized
 	}
 	return http.StatusInternalServerError
+}
+
+func (err *CustomError) ToJSON() *ErrorResp {
+	return &ErrorResp{
+		Code:    err.StatusCode(),
+		Message: err.message,
+	}
 }

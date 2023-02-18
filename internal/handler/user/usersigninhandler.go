@@ -41,7 +41,7 @@ func UserSignInHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		if err != nil {
 			//convert to customError
 			if e, ok := err.(*errx.CustomError); ok {
-				httpx.WriteJsonCtx(r.Context(), w, e.StatusCode(), e)
+				httpx.WriteJsonCtx(r.Context(), w, e.StatusCode(), e.ToJSON())
 			} else {
 				httpx.ErrorCtx(r.Context(), w, err)
 			}

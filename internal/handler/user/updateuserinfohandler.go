@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 	"github.com/ryantokmanmok/chat-app-server/common/errx"
+	"github.com/zeromicro/go-zero/core/logx"
 
 	"net/http"
 
@@ -19,6 +20,7 @@ func UpdateUserInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.UpdateUserInfoReq
 		if err := httpx.Parse(r, &req); err != nil {
+			logx.Error(err)
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
@@ -41,7 +43,7 @@ func UpdateUserInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		if err != nil {
 			//convert to customError
 			if e, ok := err.(*errx.CustomError); ok {
-				httpx.WriteJsonCtx(r.Context(), w, e.StatusCode(), e)
+				httpx.WriteJsonCtx(r.Context(), w, e.StatusCode(), e.ToJSON())
 			} else {
 				httpx.ErrorCtx(r.Context(), w, err)
 			}

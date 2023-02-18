@@ -2,6 +2,10 @@ Name: ChatApp
 Host: 0.0.0.0
 Port: 8000
 
+Log:
+  Encoding: plain
+  Level: debug
+
 Auth:
   AccessSecret: 2BNVfmf0WtyX1HQmzYx5rOKLzlHBEPRX729pZ0gpxujnaikoRRCF78T8fKDNTLWy
   AccessExpire: 36800
@@ -12,4 +16,7 @@ MySQL:
   MaxIdleConns: 100
   MaxOpenConns: 100
 
+Salt: W4tiDEeWlwxlRPYYRRMhJ65piS1ochvMymwfVdumittPoSxhkHNnVLe6m12C4v15
+ResourcesPath : ./resources
+MaxFileSize : 1073741824
 

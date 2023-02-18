@@ -1,4 +1,4 @@
-package health
+package user
 
 import (
 	"github.com/go-playground/locales/en"
@@ -9,15 +9,15 @@ import (
 
 	"net/http"
 
-	"github.com/ryantokmanmok/chat-app-server/internal/logic/health"
+	"github.com/ryantokmanmok/chat-app-server/internal/logic/user"
 	"github.com/ryantokmanmok/chat-app-server/internal/svc"
 	"github.com/ryantokmanmok/chat-app-server/internal/types"
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func HealthCheckHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func UploadUserAvatarHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.HealthCheckReq
+		var req types.UploadUserAvatarReq
 		if err := httpx.Parse(r, &req); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
@@ -36,8 +36,8 @@ func HealthCheckHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := health.NewHealthCheckLogic(r.Context(), svcCtx)
-		resp, err := l.HealthCheck(&req)
+		l := user.NewUploadUserAvatarLogic(r.Context(), svcCtx, r)
+		resp, err := l.UploadUserAvatar(&req)
 		if err != nil {
 			//convert to customError
 			if e, ok := err.(*errx.CustomError); ok {
