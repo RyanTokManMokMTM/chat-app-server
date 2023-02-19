@@ -1,7 +1,15 @@
 syntax = "proto3";
 package message;
-option go_package = "./message";
+option go_package = "./socket_message";
 
 message Message {
-  
+  string avatar = 1; //user avatar path
+  string fromUserName = 2; //sender user name
+  string fromUUID = 3; //sender uuid
+  string toUUID = 4; //receiver uuid
+  string content = 5; //sending content
+  int32 contentType = 6; //sending content type. For example 1: text, 2: file, 3: audio, 4: video....
+  string type = 7; //For example: "heatbeat" for checking server/client health , video call/audio call ->"webrtc"
+  int32 messageType = 8; //1: p2p 2: group
+  //more....
 }
