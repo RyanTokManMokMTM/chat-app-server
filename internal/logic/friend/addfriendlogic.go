@@ -48,17 +48,18 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 	}
 
 	//TODO: Check is friend
-	ok, err := l.svcCtx.DAO.FindOneFriend(l.ctx, req.UserID)
-	if err != nil {
+	err = l.svcCtx.DAO.FindOneFriend(l.ctx, userID, req.UserID)
+	ok := errors.Is(err, gorm.ErrRecordNotFound)
+	if err != nil && !ok {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	if ok {
+	if !ok {
 		return nil, errx.NewCustomErrCode(errx.IS_FRIEND_ALREADY)
 	}
 
 	//TODO: Create Friend Relationship
-	err = l.svcCtx.DAO.InsertOneFriend(l.ctx, req.UserID)
+	err = l.svcCtx.DAO.InsertOneFriend(l.ctx, userID, req.UserID)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}

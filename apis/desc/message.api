@@ -10,7 +10,7 @@ info(
 
 type (
     GetMessagesReq {
-        UUID string `json:"uuid"` //can be a user id or a group id
+        ID uint `json:"id"` //can be a user id or a group id
         MessageType uint `json:"message_type"`
         FriendID uint `json:"friend_id"` //only for message type = 1
     }
@@ -19,18 +19,23 @@ type (
         Messages []MessageUser `json:"message"`
     }
 
-//    DeleteMessageReq {}
-//    DeleteMessageResp {}
+    DeleteMessageReq {
+        MesssageID uint `json:"msg_id"`
+    }
+    DeleteMessageResp {
+        Code uint `json:"code"`
+    }
 )
 
 type (
     MessageUser {
-        MessageID uint
-        FromUserID uint
-        ToUserID uint
-        Content string
-        ContentType uint
-        CreatedAt uint
+        MessageID uint `json:"message_id"`
+        FromID uint `json:"from_id"`
+        ToID uint `json:"to_id"`
+        Content string `json:"cotent"`
+        ContentType uint `json:"content_type"`
+        MessageType uint `json:"message_type"`
+        CreatedAt uint `json:"create_at"`
     }
 )
 
@@ -41,8 +46,8 @@ type (
 )
 service ChatApp {
     @handler GetMessages
-    get /message/:group_id(GetMessagesReq) returns (GetMessagesResp);
+    get /message/:ID(GetMessagesReq) returns (GetMessagesResp);
 
-//    @handler DeleteMessage
-//    delete /message/:message_uuid(DeleteMessageReq) returns (DeleteMessageResp);
+    @handler DeleteMessage
+    delete /message/:MesssageID(DeleteMessageReq) returns (DeleteMessageResp);
 }

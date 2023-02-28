@@ -25,3 +25,10 @@ const (
 	IS_FRIEND_ALREADY InternalCode = 300001
 	NOT_YET_FRIEND    InternalCode = 300002
 )
+
+const (
+	GROUP_NOT_EXIST     InternalCode = 400001
+	ALREADY_IN_GROUP    InternalCode = 400002
+	NO_DELETE_AUTHORITY InternalCode = 400003
+	NOT_JOIN_GROUP_YET  InternalCode = 400004
+)

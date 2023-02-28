@@ -1,4 +1,4 @@
-package friend
+package group
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"github.com/ryantokmanmok/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmok/chat-app-server/common/errx"
 	"gorm.io/gorm"
+	"net/http"
 
 	"github.com/ryantokmanmok/chat-app-server/internal/svc"
 	"github.com/ryantokmanmok/chat-app-server/internal/types"
@@ -13,21 +14,21 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type GetFriendListLogic struct {
+type DeleteGroupLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewGetFriendListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFriendListLogic {
-	return &GetFriendListLogic{
+func NewDeleteGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteGroupLogic {
+	return &DeleteGroupLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *types.GetFriendListResp, err error) {
+func (l *DeleteGroupLogic) DeleteGroup(req *types.DeleteGroupReq) (resp *types.DeleteGroupResp, err error) {
 	// todo: add your logic here and delete this line
 	userID := ctxtool.GetUserIDFromCTX(l.ctx)
 	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
@@ -38,19 +39,24 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	list, err := l.svcCtx.DAO.GetUserFriendList(l.ctx, userID)
+	//TODO: GET GROUP INFO
+	group, err := l.svcCtx.DAO.FindOneGroup(l.ctx, req.GroupID)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errx.NewCustomErrCode(errx.GROUP_NOT_EXIST)
+		}
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	var respList []types.FriendInfo
-	for _, info := range list {
-		respList = append(respList, types.FriendInfo{
-			ID: info.Friend,
-		})
+	if group.GroupLead != userID {
+		return nil, errx.NewCustomErrCode(errx.NO_DELETE_AUTHORITY)
 	}
-	//TODO : response to user type
-	return &types.GetFriendListResp{
-		FriendList: respList,
+
+	if err := l.svcCtx.DAO.DeleteOneGroup(l.ctx, req.GroupID); err != nil {
+		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+	}
+
+	return &types.DeleteGroupResp{
+		Code: uint(http.StatusOK),
 	}, nil
 }

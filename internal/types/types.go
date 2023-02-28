@@ -88,3 +88,80 @@ type FriendInfo struct {
 	NickName string `json:"name"`
 	Avatar   string `json:"avatar"`
 }
+
+type CreateGroupReq struct {
+	GroupName string `json:"group_name"`
+}
+
+type CreateGroupResp struct {
+	Code    uint `json:"code"`
+	GroupID uint `json:"group_id"`
+}
+
+type JoinGroupReq struct {
+	GroupID uint `path:"group_id"`
+}
+
+type JoinGroupResp struct {
+	Code uint `json:"code"`
+}
+
+type LeaveGroupReq struct {
+	GroupID uint `path:"group_id"`
+}
+
+type LeaveGroupResp struct {
+	Code uint `json:"code"`
+}
+
+type DeleteGroupReq struct {
+	GroupID uint `path:"group_id"`
+}
+
+type DeleteGroupResp struct {
+	Code uint `json:"code"`
+}
+
+type UpdateGroupInfoReq struct {
+	GroupName string `json:"group_name"`
+}
+
+type UpdateGroupInfoResp struct {
+	Code uint `json:"code"`
+}
+
+type UploadGroupAvatarReq struct {
+}
+
+type UploadGroupAvatarResp struct {
+	Code uint `json:"code"`
+}
+
+type GetMessagesReq struct {
+	ID          uint `json:"id"` //can be a user id or a group id
+	MessageType uint `json:"message_type"`
+	FriendID    uint `json:"friend_id"` //only for message type = 1
+}
+
+type GetMessagesResp struct {
+	Code     uint          `json:"code"`
+	Messages []MessageUser `json:"message"`
+}
+
+type DeleteMessageReq struct {
+	MesssageID uint `json:"msg_id"`
+}
+
+type DeleteMessageResp struct {
+	Code uint `json:"code"`
+}
+
+type MessageUser struct {
+	MessageID   uint   `json:"message_id"`
+	FromID      uint   `json:"from_id"`
+	ToID        uint   `json:"to_id"`
+	Content     string `json:"cotent"`
+	ContentType uint   `json:"content_type"`
+	MessageType uint   `json:"message_type"`
+	CreatedAt   uint   `json:"create_at"`
+}

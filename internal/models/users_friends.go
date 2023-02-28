@@ -23,10 +23,10 @@ func (uf *UserFriend) FindOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().First(&uf).Error
 }
 func (uf *UserFriend) DeleteOne(ctx context.Context, db *gorm.DB) error {
-	return db.WithContext(ctx).Debug().Delete(&uf).Error
+	return db.WithContext(ctx).Debug().Where("user_id = ? AND friend = ?", uf.UserID, uf.Friend).Delete(&uf).Error
 }
 func (uf *UserFriend) GetFriendList(ctx context.Context, db *gorm.DB) ([]*UserFriend, error) {
-	var list []*UserFriend = make([]*UserFriend, 0)
+	var list []*UserFriend
 	if err := db.WithContext(ctx).Debug().Where("user_id = ?", uf.UserID).Find(&list).Error; err != nil {
 		return nil, err
 	}

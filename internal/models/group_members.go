@@ -16,18 +16,18 @@ func (gm *GroupMember) TableName() string {
 	return "groups_members"
 }
 
-func (gm *GroupMember) InsertOne(ctx context.Context, db gorm.DB) error {
+func (gm *GroupMember) InsertOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().Create(&gm).Error
 }
-func (gm *GroupMember) FindOne(ctx context.Context, db gorm.DB) error {
+func (gm *GroupMember) FindOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().First(&gm).Error
 }
-func (gm *GroupMember) DeleteOne(ctx context.Context, db gorm.DB) error {
+func (gm *GroupMember) DeleteOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().Delete(&gm).Error
 }
 
-func (gm *GroupMember) GetGroupMemberList(ctx context.Context, db gorm.DB) ([]*GroupMember, error) {
-	var members []*GroupMember = make([]*GroupMember, 0)
+func (gm *GroupMember) GetGroupMemberList(ctx context.Context, db *gorm.DB) ([]*GroupMember, error) {
+	var members []*GroupMember
 	if err := db.WithContext(ctx).Debug().Where("group_id = ?", gm.GroupID).Find(&members).Error; err != nil {
 		return nil, err
 	}

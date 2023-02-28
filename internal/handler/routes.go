@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	friend "github.com/ryantokmanmok/chat-app-server/internal/handler/friend"
+	group "github.com/ryantokmanmok/chat-app-server/internal/handler/group"
 	health "github.com/ryantokmanmok/chat-app-server/internal/handler/health"
+	message "github.com/ryantokmanmok/chat-app-server/internal/handler/message"
 	user "github.com/ryantokmanmok/chat-app-server/internal/handler/user"
 	"github.com/ryantokmanmok/chat-app-server/internal/svc"
 
@@ -78,6 +80,50 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodGet,
 				Path:    "/user/friends",
 				Handler: friend.GetFriendListHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/group",
+				Handler: group.CreateGroupHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/group/join/:group_id",
+				Handler: group.JoinGroupHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/group/leave/:group_id",
+				Handler: group.LeaveGroupHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/group",
+				Handler: group.DeleteGroupHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/message/:ID",
+				Handler: message.GetMessagesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/message/:MesssageID",
+				Handler: message.DeleteMessageHandler(serverCtx),
 			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),

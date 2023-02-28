@@ -7,7 +7,7 @@ import (
 )
 
 type Message struct {
-	ID   uint   `gorm:"primaryKey;autoIncrement;type:int'"`
+	ID   uint   `gorm:"primaryKey;autoIncrement;type:int"`
 	UUID string `gorm:"type:varchar(64);not null;unique_index:idx_uuid"`
 
 	/*
@@ -25,11 +25,11 @@ type Message struct {
 			UUID - group member(efd) -> group's UUID(aaa)
 			in group's with UUID aaa have 2 message which send from UUID abc and UUID efd
 	*/
-	FromUserID  uint `gorm:"index;comment:'sender userID'"`
-	ToUserID    uint `gorm:"index;comment:'receiver userID'"`
-	Content     uint `gorm:"comment:'message content'"`
-	MessageType uint `gorm:"comment;'sent message type: 1:single ,2: group'"`
-	ContentType uint `gorm:"comment:'content type: 1: text, 2: file,3:audio,4:video'"`
+	FromUserID  uint   `gorm:"index;comment:'sender userID'"`
+	ToUserID    uint   `gorm:"index;comment:'receiver userID'"`
+	Content     string `gorm:"comment:'message content'"`
+	MessageType uint   `gorm:"comment;'sent message type: 1:single ,2: group'"`
+	ContentType uint   `gorm:"comment:'content type: 1: text, 2: file,3:audio,4:video'"`
 	CommonField
 }
 
@@ -37,15 +37,15 @@ func (m *Message) TableName() string {
 	return "messages"
 }
 
-func (m *Message) InsertOne(ctx context.Context, db gorm.DB) error {
+func (m *Message) InsertOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().Create(&m).Error
 }
 
-func (m *Message) FindOne(ctx context.Context, db gorm.DB) error {
+func (m *Message) FindOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().First(&m).Error
 }
 
-func (m *Message) DeleteOne(ctx context.Context, db gorm.DB) error {
+func (m *Message) DeleteOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().Delete(&m).Error
 }
 
