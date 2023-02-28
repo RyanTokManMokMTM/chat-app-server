@@ -1,5 +1,6 @@
 syntax = "v1"
 import "./desc/user.api"
+import  "./desc/friend.api"
 info(
 	title: "chat-app-server"
 	desc: "A server for a chat-app"

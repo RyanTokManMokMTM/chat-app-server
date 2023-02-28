@@ -28,7 +28,7 @@ func (u *UserModel) BeforeUpdate(tx *gorm.DB) error {
 }
 
 func (u *UserModel) TableName() string {
-	return "user_info"
+	return "users_info"
 }
 
 func (u *UserModel) FindOneUserByID(db *gorm.DB, ctx context.Context) error {

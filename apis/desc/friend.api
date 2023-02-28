@@ -1,0 +1,58 @@
+syntax = "v1"
+
+info(
+    title: "type title here"
+    desc: "type desc here"
+    author: "type author here"
+    email: "type email here"
+    version: "type version here"
+)
+
+type (
+    AddFriendReq {
+        userID uint `json:"user_id"`
+    }
+    AddFriendResp {
+        Code uint `json:"code"`
+    }
+
+    DeleteFriendReq {
+        userID uint `json:"user_id"`
+    }
+    DeleteFriendResp {
+        Code uint `json:"code"`
+    }
+
+    GetFriendListReq {}
+    GetFriendListResp {
+        FriendList []FriendInfo `json:"friend_list"`
+    }
+
+    //Notification ???
+)
+
+type (
+    FriendInfo {
+        ID uint `json:"user_id"`
+        UUID string `json:"uuid"`
+        NickName string `json:"name"`
+        Avatar string `json:"avatar"`
+    }
+)
+
+
+@server (
+    group: friend
+    prefix : /api/v1
+    jwt : Auth
+)
+service  ChatApp {
+    @handler AddFriend
+    post /user/friend(AddFriendReq) returns (AddFriendResp);
+
+    @handler DeleteFriendReq
+    delete /user/friend(DeleteFriendReq) returns (DeleteFriendResp);
+
+    @handler GetFriendList
+    get /user/friends(GetFriendListReq) returns (GetFriendListResp)
+}

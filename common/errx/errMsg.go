@@ -20,6 +20,9 @@ func init() {
 	errMessage[EMAIL_HAS_BEEN_REGISTERED] = "EMAIL HAS BEEN REGISTERED"
 	errMessage[USER_NOT_EXIST] = "USER NOT EXISTS"
 
+	errMessage[IS_FRIEND_ALREADY] = "USER IS YOUR FRIEND ALREADY"
+	errMessage[NOT_YET_FRIEND] = "USER IS NOT YOUR FRIEND"
+
 }
 
 func MapErrMsg(code InternalCode) string {

@@ -58,3 +58,33 @@ type UploadUserAvatarResp struct {
 	Code uint   `json:"code"`
 	Path string `json:"path"`
 }
+
+type AddFriendReq struct {
+	UserID uint `json:"user_id"`
+}
+
+type AddFriendResp struct {
+	Code uint `json:"code"`
+}
+
+type DeleteFriendReq struct {
+	UserID uint `json:"user_id"`
+}
+
+type DeleteFriendResp struct {
+	Code uint `json:"code"`
+}
+
+type GetFriendListReq struct {
+}
+
+type GetFriendListResp struct {
+	FriendList []FriendInfo `json:"friend_list"`
+}
+
+type FriendInfo struct {
+	ID       uint   `json:"user_id"`
+	UUID     string `json:"uuid"`
+	NickName string `json:"name"`
+	Avatar   string `json:"avatar"`
+}

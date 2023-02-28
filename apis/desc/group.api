@@ -1,0 +1,71 @@
+syntax = "v1"
+
+info(
+    title: "type title here"
+    desc: "type desc here"
+    author: "type author here"
+    email: "type email here"
+    version: "type version here"
+)
+
+type (
+    CreateGroupReq {
+        GroupName string `json:"group_name"`
+    }
+    CreateGroupResp {
+        Code uint `json:"code"`
+        GroupID uint `json:"group_id"`
+    }
+
+    JoinGroupReq {
+        GroupID uint `path:"group_id"`
+    }
+    JoinGroupResp {
+        Code uint `json:"code"`
+    }
+
+    LeaveGroupReq {
+        GroupID uint `path:"group_id"`
+    }
+    LeaveGroupResp {
+        Code uint `json:"code"`
+    }
+
+    DeleteGroupReq {
+        GroupID uint `path:"group_id"`
+    }
+    DeleteGroupResp {
+        Code uint `json:"code"`
+    }
+
+    UpdateGroupInfoReq {
+        GroupName string `json:"group_name"`
+    }
+    UpdateGroupInfoResp {
+        Code uint `json:"code"`
+    }
+
+    UploadGroupAvatarReq {}
+    UploadGroupAvatarResp {
+        Code uint `json:"code"`
+    }
+)
+
+@server (
+    group: group
+    prefix : /api/v1
+    jwt: Auth
+)
+service  ChatApp {
+    @handler CreateGroup
+    post /group(CreateGroupReq) returns (CreateGroupResp);
+
+    @handler JoinGroup
+    post /group/join/:group_id(JoinGroupReq) returns (JoinGroupResp);
+
+    @handler LeaveGroup
+    delete /group/leave/:group_id(LeaveGroupReq) returns (LeaveGroupResp);
+
+    @handler DeleteGroup
+    delete /group(DeleteGroupReq) returns (DeleteGroupResp);
+}

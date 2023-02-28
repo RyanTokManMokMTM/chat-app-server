@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
+	"github.com/ryantokmanmok/chat-app-server/common/variable"
 	socket_message "github.com/ryantokmanmok/chat-app-server/socket-proto"
 	"github.com/zeromicro/go-zero/core/logx"
 	"sync"
@@ -38,8 +39,8 @@ func (c *SocketClient) ReadLoop() {
 	}()
 
 	//TODO: set read init time
-	c.conn.SetReadDeadline(time.Now().Add(time.Second * ReadWait)) //TODO: Need to read any message before deadline
-	c.conn.SetReadLimit(ReadLimit)                                 //TODO: Size of a message
+	c.conn.SetReadDeadline(time.Now().Add(time.Second * variable.ReadWait)) //TODO: Need to read any message before deadline
+	c.conn.SetReadLimit(variable.ReadLimit)                                 //TODO: Size of a message
 	for {
 		c.conn.PongHandler()
 		//read and message
@@ -56,11 +57,11 @@ func (c *SocketClient) ReadLoop() {
 		var socketMessage socket_message.Message
 		_ = proto.Unmarshal(message, &socketMessage)
 
-		if socketMessage.Type == HEAT_BEAT {
+		if socketMessage.Type == variable.HEAT_BEAT {
 			//ping message -> send pong message
 			msg := socket_message.Message{
-				Content: PONG_MESSAGE,
-				Type:    HEAT_BEAT,
+				Content: variable.PONG_MESSAGE,
+				Type:    variable.HEAT_BEAT,
 			}
 
 			pongBytes, err := proto.Marshal(&msg)
@@ -75,7 +76,7 @@ func (c *SocketClient) ReadLoop() {
 }
 
 func (c *SocketClient) WriteLoop() {
-	t := time.NewTicker(time.Second * ReadWait * 9 / 10)
+	t := time.NewTicker(time.Second * variable.ReadWait * 9 / 10)
 	defer func() {
 		c.server.UnRegister <- c
 		c.conn.Close()
@@ -90,7 +91,7 @@ func (c *SocketClient) WriteLoop() {
 			}
 
 			//TODO: Set WriteDeadLine
-			c.conn.SetWriteDeadline(time.Now().Add(time.Second * WriteWait))
+			c.conn.SetWriteDeadline(time.Now().Add(time.Second * variable.WriteWait))
 			logx.Info("received a message")
 
 			w, err := c.conn.NextWriter(websocket.BinaryMessage)
@@ -111,12 +112,12 @@ func (c *SocketClient) WriteLoop() {
 			}
 
 		case <-t.C:
-			c.conn.SetWriteDeadline(time.Now().Add(time.Second * WriteWait))
+			c.conn.SetWriteDeadline(time.Now().Add(time.Second * variable.WriteWait))
 			logx.Info("received a ping ticker")
 			//TODO: Send Ticket message
 			msg := socket_message.Message{
-				Content: PING_MESSAGE,
-				Type:    HEAT_BEAT,
+				Content: variable.PING_MESSAGE,
+				Type:    variable.HEAT_BEAT,
 			}
 
 			bytes, _ := proto.Marshal(&msg)

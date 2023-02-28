@@ -20,3 +20,8 @@ const (
 	EMAIL_HAS_BEEN_REGISTERED InternalCode = 200003
 	USER_NOT_EXIST            InternalCode = 200004
 )
+
+const (
+	IS_FRIEND_ALREADY InternalCode = 300001
+	NOT_YET_FRIEND    InternalCode = 300002
+)

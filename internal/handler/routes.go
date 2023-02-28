@@ -4,6 +4,7 @@ package handler
 import (
 	"net/http"
 
+	friend "github.com/ryantokmanmok/chat-app-server/internal/handler/friend"
 	health "github.com/ryantokmanmok/chat-app-server/internal/handler/health"
 	user "github.com/ryantokmanmok/chat-app-server/internal/handler/user"
 	"github.com/ryantokmanmok/chat-app-server/internal/svc"
@@ -55,6 +56,28 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/user/avatar",
 				Handler: user.UploadUserAvatarHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/user/friend",
+				Handler: friend.AddFriendHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/user/friend",
+				Handler: friend.DeleteFriendReqHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/user/friends",
+				Handler: friend.GetFriendListHandler(serverCtx),
 			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),

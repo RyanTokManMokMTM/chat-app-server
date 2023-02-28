@@ -1,0 +1,48 @@
+syntax = "v1"
+
+info(
+    title: "type title here"
+    desc: "type desc here"
+    author: "type author here"
+    email: "type email here"
+    version: "type version here"
+)
+
+type (
+    GetMessagesReq {
+        UUID string `json:"uuid"` //can be a user id or a group id
+        MessageType uint `json:"message_type"`
+        FriendID uint `json:"friend_id"` //only for message type = 1
+    }
+    GetMessagesResp {
+        Code uint `json:"code"`
+        Messages []MessageUser `json:"message"`
+    }
+
+//    DeleteMessageReq {}
+//    DeleteMessageResp {}
+)
+
+type (
+    MessageUser {
+        MessageID uint
+        FromUserID uint
+        ToUserID uint
+        Content string
+        ContentType uint
+        CreatedAt uint
+    }
+)
+
+@server (
+    group : message
+    prefix : /api/v1
+    jwt: Auth
+)
+service ChatApp {
+    @handler GetMessages
+    get /message/:group_id(GetMessagesReq) returns (GetMessagesResp);
+
+//    @handler DeleteMessage
+//    delete /message/:message_uuid(DeleteMessageReq) returns (DeleteMessageResp);
+}

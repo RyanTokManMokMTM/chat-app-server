@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/ryantokmanmok/chat-app-server/internal/handler/ws"
+	"net/http"
 
 	"github.com/ryantokmanmok/chat-app-server/internal/config"
 	"github.com/ryantokmanmok/chat-app-server/internal/handler"
@@ -26,6 +28,13 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
 
+	server.AddRoute(rest.Route{
+		Method:  http.MethodGet,
+		Path:    "/ws",
+		Handler: ws.WebSocketHandler(ctx),
+	}, rest.WithJwt(c.Auth.AccessSecret))
+
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	server.Start()
+
 }
