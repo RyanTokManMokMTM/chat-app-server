@@ -6,9 +6,12 @@ import (
 )
 
 type UserFriend struct {
-	ID     uint `gorm:"primaryKey;autoIncrement"`
-	UserID uint `gorm:"not null;index"`
-	Friend uint `gorm:"not null;index"`
+	ID       uint `gorm:"primaryKey;autoIncrement"`
+	UserID   uint `gorm:"not null;index"`
+	FriendID uint `gorm:"not null;index"`
+
+	UserInfo   UserModel `gorm:"foreignKey:UserID"`
+	FriendInfo UserModel `gorm:"foreignKey:FriendID"`
 	CommonField
 }
 
@@ -23,7 +26,7 @@ func (uf *UserFriend) FindOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().First(&uf).Error
 }
 func (uf *UserFriend) DeleteOne(ctx context.Context, db *gorm.DB) error {
-	return db.WithContext(ctx).Debug().Where("user_id = ? AND friend = ?", uf.UserID, uf.Friend).Delete(&uf).Error
+	return db.WithContext(ctx).Debug().Where("user_id = ? AND friend = ?", uf.UserID, uf.FriendID).Delete(&uf).Error
 }
 func (uf *UserFriend) GetFriendList(ctx context.Context, db *gorm.DB) ([]*UserFriend, error) {
 	var list []*UserFriend

@@ -30,5 +30,5 @@ type DAOInterface interface {
 	InsertOneMessage(ctx context.Context, content string, from, to, messageType, contentType uint) error
 	FindOneMessage(ctx context.Context, messageID uint) (*models.Message, error)
 	DeleteOneMessage(ctx context.Context, messageID uint) error
-	GetMessage(ctx context.Context, from, to, messageType, contentType uint) ([]*models.Message, error)
+	GetMessage(ctx context.Context, from, to, messageType uint) ([]*models.Message, error)
 }

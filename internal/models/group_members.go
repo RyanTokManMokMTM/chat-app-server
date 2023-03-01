@@ -9,6 +9,9 @@ type GroupMember struct {
 	ID      uint `gorm:"primaryKey;autoIncrement"`
 	GroupID uint `gorm:"not null;index;comment:'belong to which group ID'"`
 	UserID  uint `gorm:"not null;index;comment:'who belong to this group'"`
+
+	MemberInfo UserModel `gorm:"foreignKey:UserID"`
+	GroupInfo  Group     `gorm:"foreignKey:GroupID"`
 	CommonField
 }
 

@@ -46,7 +46,7 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 	var respList []types.FriendInfo
 	for _, info := range list {
 		respList = append(respList, types.FriendInfo{
-			ID: info.Friend,
+			ID: info.FriendID,
 		})
 	}
 	//TODO : response to user type

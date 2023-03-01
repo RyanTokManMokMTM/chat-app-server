@@ -58,7 +58,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		return nil, errx.NewCustomErrCode(errx.IS_FRIEND_ALREADY)
 	}
 
-	//TODO: Create Friend Relationship
+	//TODO: Create FriendID Relationship
 	err = l.svcCtx.DAO.InsertOneFriend(l.ctx, userID, req.UserID)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())

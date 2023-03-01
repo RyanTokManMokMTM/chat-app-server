@@ -35,7 +35,7 @@ func (d *DAO) DeleteOneMessage(ctx context.Context, messageID uint) error {
 	return msg.DeleteOne(ctx, d.engine)
 }
 
-func (d *DAO) GetMessage(ctx context.Context, from, to, messageType, contentType uint) ([]*models.Message, error) {
+func (d *DAO) GetMessage(ctx context.Context, from, to, messageType uint) ([]*models.Message, error) {
 	msg := &models.Message{
 		FromUserID:  from,
 		ToUserID:    to,

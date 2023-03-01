@@ -49,7 +49,7 @@ func (l *DeleteGroupLogic) DeleteGroup(req *types.DeleteGroupReq) (resp *types.D
 	}
 
 	if group.GroupLead != userID {
-		return nil, errx.NewCustomErrCode(errx.NO_DELETE_AUTHORITY)
+		return nil, errx.NewCustomErrCode(errx.NO_GROUP_DELETE_AUTHORITY)
 	}
 
 	if err := l.svcCtx.DAO.DeleteOneGroup(l.ctx, req.GroupID); err != nil {

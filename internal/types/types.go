@@ -149,7 +149,8 @@ type GetMessagesResp struct {
 }
 
 type DeleteMessageReq struct {
-	MesssageID uint `json:"msg_id"`
+	MesssageID  uint `json:"msg_id"`
+	MessageType uint `json:"message_type"`
 }
 
 type DeleteMessageResp struct {

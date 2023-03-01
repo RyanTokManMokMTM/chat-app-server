@@ -11,6 +11,8 @@ type Group struct {
 	GroupName   string `gorm:"type:varchar(64);not null"`
 	GroupAvatar string
 	GroupLead   uint `gorm:"not null;index"`
+
+	LeadInfo UserModel `gorm:"foreignKey:GroupLead;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	CommonField
 }
 
