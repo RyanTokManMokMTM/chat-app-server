@@ -2,28 +2,29 @@ package models
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"github.com/ryantokmanmok/chat-app-server/common/variable"
 	"gorm.io/gorm"
 )
 
 type Message struct {
 	ID   uint   `gorm:"primaryKey;autoIncrement;type:int"`
-	UUID string `gorm:"type:varchar(64);not null;unique_index:idx_uuid"`
+	Uuid string `gorm:"type:varchar(64);not null;unique_index:idx_uuid"`
 
 	/*
 		MessageType: 1 -> single
 		From A User to Other User
 		example:
-			UUID: abc -> UUID:edf
-			UUID: edf -> UUID:abc....
+			Uuid: abc -> Uuid:edf
+			Uuid: edf -> Uuid:abc....
 		MessageType: 2 -> group
 		But it different to group chat
-		ToUserID will always be the group UUID
+		ToUserID will always be the group Uuid
 		example:
 
-			UUID - group member(abc) -> group's UUID(aaa)
-			UUID - group member(efd) -> group's UUID(aaa)
-			in group's with UUID aaa have 2 message which send from UUID abc and UUID efd
+			Uuid - group member(abc) -> group's Uuid(aaa)
+			Uuid - group member(efd) -> group's Uuid(aaa)
+			in group's with Uuid aaa have 2 message which send from Uuid abc and Uuid efd
 	*/
 	FromUserID  uint   `gorm:"index;comment:'sender userID'"`
 	ToUserID    uint   `gorm:"index;comment:'receiver userID'"`
@@ -31,6 +32,11 @@ type Message struct {
 	MessageType uint   `gorm:"comment;'sent message type: 1:single ,2: group'"`
 	ContentType uint   `gorm:"comment:'content type: 1: text, 2: file,3:audio,4:video'"`
 	CommonField
+}
+
+func (m *Message) BeforeCreate(tx *gorm.DB) error {
+	m.Uuid = uuid.New().String()
+	return nil
 }
 
 func (m *Message) TableName() string {

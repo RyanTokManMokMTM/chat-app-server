@@ -19,6 +19,7 @@ type UserModel struct {
 
 func (u *UserModel) BeforeCreate(tx *gorm.DB) error {
 	u.Uuid = uuid.New().String()
+	u.Avatar = "/default.jpg"
 	return nil
 }
 

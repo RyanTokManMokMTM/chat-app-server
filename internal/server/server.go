@@ -68,7 +68,7 @@ func (s *SocketServer) Start() {
 			//TODO: Send To Who?
 			//TODO: Send To Nobody , it means broadcast to all user who is connected to the server
 			if socketMessage.ToUUID != "" {
-				//TODO: Send it to someone with a specific UUID
+				//TODO: Send it to someone with a specific Uuid
 				if socketMessage.MessageType >= variable.TEXT && socketMessage.MessageType <= variable.VIDEO {
 					//TODO: save message
 					_, ok := s.Clients[socketMessage.FromUUID]

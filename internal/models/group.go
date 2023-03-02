@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -14,6 +15,11 @@ type Group struct {
 
 	LeadInfo UserModel `gorm:"foreignKey:GroupLead;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	CommonField
+}
+
+func (g *Group) BeforeCreate(tx *gorm.DB) error {
+	g.Uuid = uuid.New().String()
+	return nil
 }
 
 func (g *Group) TableName() string {

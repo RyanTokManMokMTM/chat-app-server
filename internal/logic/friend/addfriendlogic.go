@@ -49,21 +49,21 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 
 	//TODO: Check is friend
 	err = l.svcCtx.DAO.FindOneFriend(l.ctx, userID, req.UserID)
-	ok := errors.Is(err, gorm.ErrRecordNotFound)
-	if err != nil && !ok {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
-	}
-
-	if !ok {
-		return nil, errx.NewCustomErrCode(errx.IS_FRIEND_ALREADY)
-	}
-
-	//TODO: Create FriendID Relationship
-	err = l.svcCtx.DAO.InsertOneFriend(l.ctx, userID, req.UserID)
 	if err != nil {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			//TODO: Create FriendID Relationship
+			logx.Infof("create")
+			err = l.svcCtx.DAO.InsertOneFriend(l.ctx, userID, req.UserID)
+			if err != nil {
+				return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+			}
+			return &types.AddFriendResp{
+				Code: uint(http.StatusOK),
+			}, nil
+		} else {
+			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		}
 	}
-	return &types.AddFriendResp{
-		Code: uint(http.StatusOK),
-	}, nil
+
+	return nil, errx.NewCustomErrCode(errx.IS_FRIEND_ALREADY)
 }

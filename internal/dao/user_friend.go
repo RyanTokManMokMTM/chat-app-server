@@ -13,11 +13,10 @@ func (d *DAO) InsertOneFriend(ctx context.Context, userID, friendID uint) error 
 	return uf.InsertOne(ctx, d.engine)
 }
 func (d *DAO) FindOneFriend(ctx context.Context, userID, friendID uint) error {
-	uf := &models.UserFriend{
-		UserID:   userID,
-		FriendID: friendID,
-	}
-	return uf.FindOne(ctx, d.engine)
+	uf := &models.UserFriend{}
+	err := uf.FindOne(ctx, d.engine, userID, friendID)
+
+	return err
 }
 func (d *DAO) DeleteOneFriend(ctx context.Context, userID, friendID uint) error {
 	uf := &models.UserFriend{

@@ -5,11 +5,9 @@ import (
 	"errors"
 	"github.com/ryantokmanmok/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmok/chat-app-server/common/errx"
-	"gorm.io/gorm"
-	"net/http"
-
 	"github.com/ryantokmanmok/chat-app-server/internal/svc"
 	"github.com/ryantokmanmok/chat-app-server/internal/types"
+	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -48,18 +46,15 @@ func (l *JoinGroupLogic) JoinGroup(req *types.JoinGroupReq) (resp *types.JoinGro
 	}
 
 	_, err = l.svcCtx.DAO.FindOneGroupMember(l.ctx, req.GroupID, userID)
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		if err := l.svcCtx.DAO.InsertOneGroupMember(l.ctx, req.GroupID, userID); err != nil {
+			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		}
+	} else if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errx.NewCustomErrCode(errx.ALREADY_IN_GROUP)
+		}
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
-	} else if errors.Is(err, gorm.ErrRecordNotFound) {
-		//NOT JOIN THE GROUP YES
-		return nil, errx.NewCustomErrCode(errx.ALREADY_IN_GROUP)
 	}
 
-	if err := l.svcCtx.DAO.InsertOneGroupMember(l.ctx, req.GroupID, userID); err != nil {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
-	}
-
-	return &types.JoinGroupResp{
-		Code: uint(http.StatusOK),
-	}, nil
 }

@@ -31,7 +31,7 @@ func (gm *GroupMember) DeleteOne(ctx context.Context, db *gorm.DB) error {
 
 func (gm *GroupMember) GetGroupMemberList(ctx context.Context, db *gorm.DB) ([]*GroupMember, error) {
 	var members []*GroupMember
-	if err := db.WithContext(ctx).Debug().Where("group_id = ?", gm.GroupID).Find(&members).Error; err != nil {
+	if err := db.WithContext(ctx).Debug().Where("group_id = ?", gm.GroupID).Preload("MemberInfo").Find(&members).Error; err != nil {
 		return nil, err
 	}
 	return members, nil
