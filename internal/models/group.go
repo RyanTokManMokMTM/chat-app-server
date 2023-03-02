@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"errors"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -19,6 +20,7 @@ type Group struct {
 
 func (g *Group) BeforeCreate(tx *gorm.DB) error {
 	g.Uuid = uuid.New().String()
+	g.GroupAvatar = "/defaultGroup.jpg"
 	return nil
 }
 
@@ -27,7 +29,20 @@ func (g *Group) TableName() string {
 }
 
 func (g *Group) InsertOne(ctx context.Context, db *gorm.DB) error {
-	return db.WithContext(ctx).Debug().Create(&g).Error
+	//TODO: Add Group Lead to the group member list?
+	return db.WithContext(ctx).Debug().Transaction(func(tx *gorm.DB) error {
+		db := tx.WithContext(ctx).Debug().Create(&g)
+		err := db.Error
+		if err != nil {
+			return err
+		}
+
+		if db.RowsAffected == 0 {
+			return errors.New("db row affected 0")
+		}
+
+		return tx.WithContext(ctx).Debug().Create(&GroupMember{GroupID: g.ID, UserID: g.GroupLead}).Error
+	})
 }
 
 func (g *Group) FindOne(ctx context.Context, db *gorm.DB) error {
@@ -35,7 +50,7 @@ func (g *Group) FindOne(ctx context.Context, db *gorm.DB) error {
 }
 
 func (g *Group) DeleteOne(ctx context.Context, db *gorm.DB) error {
-	return db.WithContext(ctx).Debug().Where("group_id = ?", g.ID).Delete(&g).Error
+	return db.WithContext(ctx).Debug().Where("id = ?", g.ID).Delete(&g).Error
 }
 
 func (g *Group) UpdateOne(ctx context.Context, db *gorm.DB) error {

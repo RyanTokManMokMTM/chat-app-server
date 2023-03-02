@@ -33,6 +33,14 @@ func (d *DAO) DeleteGroupMember(ctx context.Context, groupID, userID uint) error
 
 	return gm.DeleteOne(ctx, d.engine)
 }
+
+func (d *DAO) DeleteAllGroupMembers(ctx context.Context, groupID uint) error {
+	gm := &models.GroupMember{
+		GroupID: groupID,
+	}
+
+	return gm.DeleteAll(ctx, d.engine)
+}
 func (d *DAO) GetGroupMembers(ctx context.Context, groupID uint) ([]*models.GroupMember, error) {
 	gm := &models.GroupMember{
 		GroupID: groupID,

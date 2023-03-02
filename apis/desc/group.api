@@ -32,10 +32,19 @@ type (
     }
 
     DeleteGroupReq {
-        GroupID uint `path:"group_id"`
+        GroupID uint `json:"group_id"`
     }
     DeleteGroupResp {
         Code uint `json:"code"`
+    }
+
+
+    GetGroupMembersReq {
+        GroupID uint `path:"group_id"`
+    }
+    GetGroupMembersResp {
+        Code uint `json:"code"`
+        MemberList []GroupMemberInfo `json:"member_list"`
     }
 
     UpdateGroupInfoReq {
@@ -48,6 +57,13 @@ type (
     UploadGroupAvatarReq {}
     UploadGroupAvatarResp {
         Code uint `json:"code"`
+    }
+)
+
+type (
+    GroupMemberInfo {
+        CommonUserInfo
+        IsGroupLead bool `json:"is_group_lead"`
     }
 )
 
@@ -68,4 +84,7 @@ service  ChatApp {
 
     @handler DeleteGroup
     delete /group(DeleteGroupReq) returns (DeleteGroupResp);
+
+    @handler GetGroupMembers
+    get   /group/members/:group_id(GetGroupMembersReq) returns (GetGroupMembersResp)
 }

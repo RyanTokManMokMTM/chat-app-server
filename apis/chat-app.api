@@ -18,6 +18,15 @@ type (
 	}
 )
 
+type (
+	CommonUserInfo {
+		ID       uint   `json:"user_id"`
+		Uuid     string `json:"uuid"`
+		NickName string `json:"name"`
+		Avatar   string `json:"avatar"`
+	}
+)
+
 @server (
 	group: health
 	prefix: /api/v1

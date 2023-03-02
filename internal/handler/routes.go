@@ -108,6 +108,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/group",
 				Handler: group.DeleteGroupHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/group/members/:group_id",
+				Handler: group.GetGroupMembersHandler(serverCtx),
+			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),

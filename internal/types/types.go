@@ -8,6 +8,13 @@ type HealthCheckResp struct {
 	Resp string `json:"resp"`
 }
 
+type CommonUserInfo struct {
+	ID       uint   `json:"user_id"`
+	Uuid     string `json:"uuid"`
+	NickName string `json:"name"`
+	Avatar   string `json:"avatar"`
+}
+
 type SignUpReq struct {
 	Email    string `json:"email" validate:"email,min=8,max=32"`
 	Name     string `json:"name" validate:"min=8,max=16"`
@@ -115,11 +122,20 @@ type LeaveGroupResp struct {
 }
 
 type DeleteGroupReq struct {
-	GroupID uint `path:"group_id"`
+	GroupID uint `json:"group_id"`
 }
 
 type DeleteGroupResp struct {
 	Code uint `json:"code"`
+}
+
+type GetGroupMembersReq struct {
+	GroupID uint `path:"group_id"`
+}
+
+type GetGroupMembersResp struct {
+	Code       uint              `json:"code"`
+	MemberList []GroupMemberInfo `json:"member_list"`
 }
 
 type UpdateGroupInfoReq struct {
@@ -137,6 +153,11 @@ type UploadGroupAvatarResp struct {
 	Code uint `json:"code"`
 }
 
+type GroupMemberInfo struct {
+	CommonUserInfo
+	IsGroupLead bool `json:"is_group_lead"`
+}
+
 type GetMessagesReq struct {
 	ID          uint `json:"id"` //can be a user id or a group id
 	MessageType uint `json:"message_type"`
@@ -149,8 +170,7 @@ type GetMessagesResp struct {
 }
 
 type DeleteMessageReq struct {
-	MesssageID  uint `json:"msg_id"`
-	MessageType uint `json:"message_type"`
+	MesssageID uint `json:"msg_id"`
 }
 
 type DeleteMessageResp struct {

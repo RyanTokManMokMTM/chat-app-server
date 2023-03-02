@@ -14,21 +14,21 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type DeleteGroupLogic struct {
+type GetGroupMembersLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewDeleteGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteGroupLogic {
-	return &DeleteGroupLogic{
+func NewGetGroupMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetGroupMembersLogic {
+	return &GetGroupMembersLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *DeleteGroupLogic) DeleteGroup(req *types.DeleteGroupReq) (resp *types.DeleteGroupResp, err error) {
+func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GetGroupMembersReq) (resp *types.GetGroupMembersResp, err error) {
 	// todo: add your logic here and delete this line
 	userID := ctxtool.GetUserIDFromCTX(l.ctx)
 	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
@@ -39,8 +39,7 @@ func (l *DeleteGroupLogic) DeleteGroup(req *types.DeleteGroupReq) (resp *types.D
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	//TODO: GET GROUP INFO
-	group, err := l.svcCtx.DAO.FindOneGroup(l.ctx, req.GroupID)
+	_, err = l.svcCtx.DAO.FindOneGroup(l.ctx, req.GroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.GROUP_NOT_EXIST)
@@ -48,21 +47,23 @@ func (l *DeleteGroupLogic) DeleteGroup(req *types.DeleteGroupReq) (resp *types.D
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	if group.GroupLead != userID {
-		return nil, errx.NewCustomErrCode(errx.NO_GROUP_DELETE_AUTHORITY)
+	members, err := l.svcCtx.DAO.GetGroupMembers(l.ctx, req.GroupID)
+
+	var membersList = make([]types.GroupMemberInfo, 0)
+	for _, mem := range members {
+		membersList = append(membersList, types.GroupMemberInfo{
+			CommonUserInfo: types.CommonUserInfo{
+				ID:       mem.MemberInfo.ID,
+				Uuid:     mem.MemberInfo.Uuid,
+				NickName: mem.MemberInfo.NickName,
+				Avatar:   mem.MemberInfo.Avatar,
+			},
+			IsGroupLead: mem.GroupInfo.GroupLead == mem.MemberInfo.ID,
+		})
 	}
 
-	//TODO: Remove all user/members that joined the group
-	if err := l.svcCtx.DAO.DeleteAllGroupMembers(l.ctx, req.GroupID); err != nil {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
-	}
-
-	//TODO: Remove entire group
-	if err := l.svcCtx.DAO.DeleteOneGroup(l.ctx, req.GroupID); err != nil {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
-	}
-
-	return &types.DeleteGroupResp{
-		Code: uint(http.StatusOK),
+	return &types.GetGroupMembersResp{
+		Code:       uint(http.StatusOK),
+		MemberList: membersList,
 	}, nil
 }
