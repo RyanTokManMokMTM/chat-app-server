@@ -134,7 +134,9 @@ func sendGroupMessage(message *socket_message.Message, server *SocketServer) {
 }
 
 // saveMessage, TEXT:Save directly and other types need to be store to FS
-func saveMessage(message *socket_message.Message) {}
+func saveMessage(message *socket_message.Message) {
+
+}
 
 func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request, wsServer *SocketServer) {
 	//TODO: Upgrade http to websocket
