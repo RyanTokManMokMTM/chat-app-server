@@ -30,6 +30,19 @@ func (d *DAO) FindOneGroup(ctx context.Context, groupID uint) (*models.Group, er
 
 	return g, nil
 }
+
+func (d *DAO) FindOneGroupByUUID(ctx context.Context, groupUUID string) (*models.Group, error) {
+	g := &models.Group{
+		Uuid: groupUUID,
+	}
+
+	if err := g.FindOneByUUID(ctx, d.engine); err != nil {
+		return nil, err
+	}
+
+	return g, nil
+}
+
 func (d *DAO) DeleteOneGroup(ctx context.Context, groupID uint) error {
 	g := &models.Group{
 		ID: groupID,

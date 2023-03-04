@@ -1,9 +1,11 @@
 package server
 
 import (
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"github.com/ryantokmanmok/chat-app-server/common/variable"
+	"github.com/ryantokmanmok/chat-app-server/internal/svc"
 	socket_message "github.com/ryantokmanmok/chat-app-server/socket-proto"
 	"github.com/zeromicro/go-zero/core/logx"
 	"sync"
@@ -18,9 +20,10 @@ type SocketClient struct {
 	sendChannel chan []byte
 	isClose     chan struct{}
 	server      *SocketServer
+	svcCtx      *svc.ServiceContext
 }
 
-func NewSocketClient(uuid string, name string, conn *websocket.Conn, server *SocketServer) *SocketClient {
+func NewSocketClient(uuid string, name string, conn *websocket.Conn, server *SocketServer, svcCtx *svc.ServiceContext) *SocketClient {
 	return &SocketClient{
 		UUID:        uuid,
 		Name:        name,
@@ -28,9 +31,11 @@ func NewSocketClient(uuid string, name string, conn *websocket.Conn, server *Soc
 		sendChannel: make(chan []byte),
 		isClose:     make(chan struct{}),
 		server:      server,
+		svcCtx:      svcCtx,
 	}
 }
 
+// ReadLoop from client via its channel/socket
 func (c *SocketClient) ReadLoop() {
 
 	defer func() {
@@ -41,8 +46,12 @@ func (c *SocketClient) ReadLoop() {
 	//TODO: set read init time
 	c.conn.SetReadDeadline(time.Now().Add(time.Second * variable.ReadWait)) //TODO: Need to read any message before deadline
 	c.conn.SetReadLimit(variable.ReadLimit)                                 //TODO: Size of a message
+	c.conn.SetPongHandler(func(appData string) error {                      //TODO: Received a ping message from client, we need to handle it by setting a handle function
+		logx.Info(appData)
+		return nil
+	})
+
 	for {
-		c.conn.PongHandler()
 		//read and message
 		//client may send a ping signal
 		_, message, err := c.conn.ReadMessage()
@@ -54,11 +63,16 @@ func (c *SocketClient) ReadLoop() {
 			break
 		}
 
+		//TODO: Unmarshal message to prototype message
 		var socketMessage socket_message.Message
-		_ = proto.Unmarshal(message, &socketMessage)
+		err = jsonpb.UnmarshalString(string(message), &socketMessage)
+		if err != nil {
+			logx.Error(err)
+		}
 
 		if socketMessage.Type == variable.HEAT_BEAT {
 			//ping message -> send pong message
+			logx.Info("Get a ping message from client")
 			msg := socket_message.Message{
 				Content: variable.PONG_MESSAGE,
 				Type:    variable.HEAT_BEAT,
@@ -68,9 +82,11 @@ func (c *SocketClient) ReadLoop() {
 			if err != nil {
 				logx.Error("marshal message error : %v", err)
 			}
+
 			c.conn.WriteMessage(websocket.BinaryMessage, pongBytes) //TODO: Send it to client directly
 		} else {
 			//normal message
+			c.server.Broadcast <- message
 		}
 	}
 }
@@ -121,6 +137,7 @@ func (c *SocketClient) WriteLoop() {
 			}
 
 			bytes, _ := proto.Marshal(&msg)
+
 			c.server.Broadcast <- bytes
 		case <-c.isClose:
 			logx.Info("received a connection closed signal and user is disconnected")

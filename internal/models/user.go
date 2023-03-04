@@ -36,6 +36,10 @@ func (u *UserModel) FindOneUserByID(db *gorm.DB, ctx context.Context) error {
 	return db.Debug().WithContext(ctx).First(&u).Error
 }
 
+func (u *UserModel) FindOneUserByUUID(db *gorm.DB, ctx context.Context) error {
+	return db.Debug().WithContext(ctx).Where("uuid = ?", u.Uuid).First(&u).Error
+}
+
 func (u *UserModel) FindOneUserByEmail(db *gorm.DB, ctx context.Context) error {
 	return db.Debug().WithContext(ctx).Where("email = ?", u.Email).Find(&u).Error
 }

@@ -14,6 +14,7 @@ const (
 const (
 	TEXT = iota + 1
 	FILE
+	Image
 	AUDIO
 	VIDEO
 )

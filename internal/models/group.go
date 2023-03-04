@@ -48,6 +48,9 @@ func (g *Group) InsertOne(ctx context.Context, db *gorm.DB) error {
 func (g *Group) FindOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().First(&g).Error
 }
+func (g *Group) FindOneByUUID(ctx context.Context, db *gorm.DB) error {
+	return db.WithContext(ctx).Debug().Where("uuid = ?", g.Uuid).First(&g).Error
+}
 
 func (g *Group) DeleteOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().Where("id = ?", g.ID).Delete(&g).Error

@@ -26,6 +26,14 @@ func (gm *GroupMember) FindOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().Where("group_id = ? AND user_id = ?", gm.GroupID, gm.UserID).First(&gm).Error
 }
 
+func (gm *GroupMember) FindAll(ctx context.Context, db *gorm.DB) ([]*GroupMember, error) {
+	var members []*GroupMember
+	if err := db.WithContext(ctx).Debug().Where("group_id = ?", gm.GroupID).Preload("MemberInfo").Find(&members).Error; err != nil {
+		return nil, err
+	}
+	return members, nil
+}
+
 func (gm *GroupMember) DeleteOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().Where("group_id = ? AND user_id = ?", gm.GroupID, gm.UserID).Delete(&gm).Error
 }

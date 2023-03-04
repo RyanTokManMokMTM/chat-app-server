@@ -25,6 +25,14 @@ func (d *DAO) FindOneGroupMember(ctx context.Context, groupID, userID uint) (*mo
 	return gm, nil
 }
 
+func (d *DAO) FindOneGroupMembers(ctx context.Context, groupID uint) ([]*models.GroupMember, error) {
+	gm := &models.GroupMember{
+		GroupID: groupID,
+	}
+
+	return gm.FindAll(ctx, d.engine)
+}
+
 func (d *DAO) DeleteGroupMember(ctx context.Context, groupID, userID uint) error {
 	gm := &models.GroupMember{
 		GroupID: groupID,

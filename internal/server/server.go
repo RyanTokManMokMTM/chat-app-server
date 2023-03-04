@@ -1,7 +1,9 @@
 package server
 
 import (
-	"github.com/golang/protobuf/proto"
+	"context"
+	"encoding/json"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/gorilla/websocket"
 	"github.com/ryantokmanmok/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmok/chat-app-server/common/errx"
@@ -57,37 +59,38 @@ func (s *SocketServer) Start() {
 			s.Remove(client)
 
 		case message := <-s.Broadcast: //received protoBuffer message -> it need to be decoded
-			logx.Infof("A new message need to be broadcast : %v ", message)
 			//decode back to protoBuffer type -Message
 			var socketMessage socket_message.Message
-			err := proto.UnmarshalMerge(message, &socketMessage)
+
+			err := jsonpb.UnmarshalString(string(message), &socketMessage)
 			if err != nil {
-				logx.Error("Unmarshal message error : %v ", err)
+				logx.Error(err)
+				continue
 			}
 
+			logx.Infof("A new message need to be broadcast : %+v ", socketMessage)
+
 			//TODO: Send To Who?
-			//TODO: Send To Nobody , it means broadcast to all user who is connected to the server
+			//TODO: Send To Nobody , it means broadcast to a specific user/group
 			if socketMessage.ToUUID != "" {
 				//TODO: Send it to someone with a specific Uuid
-				if socketMessage.MessageType >= variable.TEXT && socketMessage.MessageType <= variable.VIDEO {
+				if socketMessage.ContentType >= variable.TEXT && socketMessage.ContentType <= variable.VIDEO {
 					//TODO: save message
-					_, ok := s.Clients[socketMessage.FromUUID]
+					conn, ok := s.Clients[socketMessage.FromUUID]
 					if ok {
-						saveMessage(&socketMessage)
+						saveMessage(conn.svcCtx, &socketMessage)
 					}
 
 					if socketMessage.MessageType == variable.MESSAGE_TYPE_USERCHAT {
 						//TODO: Send Group Message
 						client, ok := s.Clients[socketMessage.ToUUID]
 						if ok {
-							bytes, err := proto.Marshal(&socketMessage)
-							if err != nil {
-								client.sendChannel <- bytes
-							}
+							logx.Infof("user %v is online", socketMessage.ToUUID)
+							client.sendChannel <- message
 						}
 					} else if socketMessage.MessageType == variable.MESSAGE_TYPE_GROUPCHAT {
 						//TODO: Send Peer to Peer Message
-						sendGroupMessage(&socketMessage, s)
+						sendGroupMessage(&socketMessage, s, conn.svcCtx)
 					}
 
 				}
@@ -128,14 +131,65 @@ func (s *SocketServer) Remove(client *SocketClient) {
 	}
 }
 
-func sendGroupMessage(message *socket_message.Message, server *SocketServer) {
+func sendGroupMessage(message *socket_message.Message, server *SocketServer, svcCtx *svc.ServiceContext) {
 	//TODO: GET ALL GROUP MEMBER
-	//TODO: SEND TO ALL ONLINE USER
+	//TODO: Check if group is exist
+	ctx := context.Background()
+	group, err := svcCtx.DAO.FindOneGroupByUUID(ctx, message.ToUUID)
+	if err != nil {
+		logx.Error(err.Error())
+		return
+	}
+
+	//TODO: Get All Group Members
+	members, err := svcCtx.DAO.FindOneGroupMembers(ctx, group.ID)
+	if err != nil {
+		logx.Error(err.Error())
+		return
+
+	}
+	for _, mem := range members {
+		if mem.MemberInfo.Uuid == message.FromUUID {
+			continue
+		}
+
+		conn, ok := server.Clients[mem.MemberInfo.Uuid]
+		if !ok {
+			logx.Infof("Group %v 's member %v is offline", message.ToUUID, mem.MemberInfo.Uuid)
+			continue
+		}
+
+		socketMessage := socket_message.Message{
+			Avatar:       mem.MemberInfo.Avatar,
+			FromUserName: mem.MemberInfo.NickName,
+			FromUUID:     message.ToUUID,   //From Group UUID
+			ToUUID:       message.FromUUID, //To Member UUID
+			Content:      message.Content,
+			ContentType:  message.ContentType,
+			MessageType:  message.MessageType,
+		}
+
+		messageBytes, err := json.MarshalIndent(socketMessage, "", "\t")
+		if err != nil {
+			logx.Error(err)
+			continue
+		}
+
+		conn.sendChannel <- messageBytes
+	}
 }
 
 // saveMessage, TEXT:Save directly and other types need to be store to FS
-func saveMessage(message *socket_message.Message) {
+func saveMessage(svcCtx *svc.ServiceContext, message *socket_message.Message) {
+	//Saved by different type
+	if message.ContentType == variable.FILE {
+		//TODO: Save File
+	} else if message.ContentType == variable.Image {
+		//TODO: Save Image
+	}
 
+	//TODO : Save Message into db
+	svcCtx.DAO.InsertOneMessage(context.Background(), message)
 }
 
 func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request, wsServer *SocketServer) {
@@ -156,7 +210,7 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 		return
 	}
 
-	client := NewSocketClient(u.Uuid, u.NickName, conn, wsServer)
+	client := NewSocketClient(u.Uuid, u.NickName, conn, wsServer, svcCtx)
 	wsServer.Register <- client
 
 	go client.ReadLoop()
