@@ -31,6 +31,7 @@ func (uf *UserFriend) DeleteOne(ctx context.Context, db *gorm.DB) error {
 }
 func (uf *UserFriend) GetFriendList(ctx context.Context, db *gorm.DB) ([]*UserFriend, error) {
 	var list []*UserFriend
+	
 	if err := db.WithContext(ctx).Debug().Model(&uf).Where("user_id = ?", uf.UserID).Preload("FriendInfo").Find(&list).Error; err != nil {
 		return nil, err
 	}

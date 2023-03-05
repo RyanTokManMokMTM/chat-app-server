@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/ryantokmanmok/chat-app-server/common/errx"
 	"github.com/ryantokmanmok/chat-app-server/internal/handler/ws"
+	"github.com/zeromicro/go-zero/rest/httpx"
 	"net/http"
 
 	"github.com/ryantokmanmok/chat-app-server/internal/config"
@@ -28,6 +30,14 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
 
+	httpx.SetErrorHandler(func(err error) (int, interface{}) {
+		switch e := err.(type) {
+		case *errx.CustomError:
+			return http.StatusOK, e.ToJSON()
+		default:
+			return http.StatusInternalServerError, errx.NewCustomError(errx.SERVER_COMMON_ERROR, err.Error()).ToJSON()
+		}
+	})
 	server.AddRoute(rest.Route{
 		Method:  http.MethodGet,
 		Path:    "/ws",

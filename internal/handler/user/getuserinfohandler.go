@@ -32,7 +32,7 @@ func GetUserInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		if err := validate.StructCtx(r.Context(), req); err != nil {
 			err := err.(validator.ValidationErrors)
 			commonErr := errx.NewCustomError(errx.REQ_PARAM_ERROR, err[0].Translate(trans))
-			httpx.WriteJson(w, commonErr.StatusCode(), commonErr)
+			httpx.WriteJsonCtx(r.Context(), w, commonErr.StatusCode(), commonErr.ToJSON())
 			return
 		}
 
