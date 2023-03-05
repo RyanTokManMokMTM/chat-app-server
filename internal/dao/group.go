@@ -51,6 +51,19 @@ func (d *DAO) DeleteOneGroup(ctx context.Context, groupID uint) error {
 	return g.DeleteOne(ctx, d.engine)
 }
 
-func (d *DAO) UpdateOneGroup(ctx context.Context, g *models.Group) error {
+func (d *DAO) UpdateOneGroup(ctx context.Context, groupID uint, groupName string) error {
+	group := &models.Group{
+		ID:        groupID,
+		GroupName: groupName,
+	}
+	return group.UpdateOne(ctx, d.engine)
+}
+
+func (d *DAO) UpdateOneGroupAvatar(ctx context.Context, groupID uint, avatarName string) error {
+	g := &models.Group{
+		ID:          groupID,
+		GroupAvatar: avatarName,
+	}
+
 	return g.UpdateOne(ctx, d.engine)
 }

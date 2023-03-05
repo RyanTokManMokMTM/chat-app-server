@@ -48,13 +48,16 @@ type (
     }
 
     UpdateGroupInfoReq {
+        GroupID uint `json:"group_id"`
         GroupName string `json:"group_name"`
     }
     UpdateGroupInfoResp {
         Code uint `json:"code"`
     }
 
-    UploadGroupAvatarReq {}
+    UploadGroupAvatarReq {
+        GroupID uint `path:"grou_id"`
+    }
     UploadGroupAvatarResp {
         Code uint `json:"code"`
     }
@@ -87,4 +90,10 @@ service  ChatApp {
 
     @handler GetGroupMembers
     get   /group/members/:group_id(GetGroupMembersReq) returns (GetGroupMembersResp)
+
+    @handler UploadGroupAvatar
+    post /group/avatar/:grou_id(UploadGroupAvatarReq) returns ( UploadGroupAvatarResp)
+
+    @handler UpdateGroupInfo
+    patch /group/update(UpdateGroupInfoReq) returns ( UpdateGroupInfoResp)
 }

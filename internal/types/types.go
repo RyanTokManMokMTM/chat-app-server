@@ -139,6 +139,7 @@ type GetGroupMembersResp struct {
 }
 
 type UpdateGroupInfoReq struct {
+	GroupID   uint   `json:"group_id"`
 	GroupName string `json:"group_name"`
 }
 
@@ -147,6 +148,7 @@ type UpdateGroupInfoResp struct {
 }
 
 type UploadGroupAvatarReq struct {
+	GroupID uint `path:"grou_id"`
 }
 
 type UploadGroupAvatarResp struct {

@@ -14,21 +14,21 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type DeleteGroupLogic struct {
+type UpdateGroupInfoLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewDeleteGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteGroupLogic {
-	return &DeleteGroupLogic{
+func NewUpdateGroupInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateGroupInfoLogic {
+	return &UpdateGroupInfoLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *DeleteGroupLogic) DeleteGroup(req *types.DeleteGroupReq) (resp *types.DeleteGroupResp, err error) {
+func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (resp *types.UpdateGroupInfoResp, err error) {
 	// todo: add your logic here and delete this line
 	userID := ctxtool.GetUserIDFromCTX(l.ctx)
 	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
@@ -39,7 +39,6 @@ func (l *DeleteGroupLogic) DeleteGroup(req *types.DeleteGroupReq) (resp *types.D
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	//TODO: GET GROUP INFO
 	group, err := l.svcCtx.DAO.FindOneGroup(l.ctx, req.GroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -52,17 +51,11 @@ func (l *DeleteGroupLogic) DeleteGroup(req *types.DeleteGroupReq) (resp *types.D
 		return nil, errx.NewCustomErrCode(errx.NO_GROUP_AUTHORITY)
 	}
 
-	//TODO: Remove all user/members that joined the group
-	if err := l.svcCtx.DAO.DeleteAllGroupMembers(l.ctx, req.GroupID); err != nil {
+	if err := l.svcCtx.DAO.UpdateOneGroup(l.ctx, group.ID, req.GroupName); err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	//TODO: Remove entire group
-	if err := l.svcCtx.DAO.DeleteOneGroup(l.ctx, req.GroupID); err != nil {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
-	}
-
-	return &types.DeleteGroupResp{
+	return &types.UpdateGroupInfoResp{
 		Code: uint(http.StatusOK),
 	}, nil
 }

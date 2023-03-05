@@ -113,6 +113,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/group/members/:group_id",
 				Handler: group.GetGroupMembersHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/group/avatar/:grou_id",
+				Handler: group.UploadGroupAvatarHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
+				Path:    "/group/update",
+				Handler: group.UpdateGroupInfoHandler(serverCtx),
+			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),

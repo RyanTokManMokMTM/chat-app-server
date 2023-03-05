@@ -57,5 +57,9 @@ func (g *Group) DeleteOne(ctx context.Context, db *gorm.DB) error {
 }
 
 func (g *Group) UpdateOne(ctx context.Context, db *gorm.DB) error {
-	return db.WithContext(ctx).Debug().Updates(&g).Error
+	return db.WithContext(ctx).Debug().Model(g).Where("id = ?", g.ID).Update("GroupName", g.GroupName).Error
+}
+
+func (g *Group) UpdateOneAvatar(ctx context.Context, db *gorm.DB) error {
+	return db.WithContext(ctx).Debug().Model(g).Where("id = ?", g.ID).Update("GroupAvatar", g.GroupAvatar).Error
 }

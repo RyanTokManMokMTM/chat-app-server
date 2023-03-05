@@ -27,10 +27,10 @@ const (
 )
 
 const (
-	GROUP_NOT_EXIST           InternalCode = 400001
-	ALREADY_IN_GROUP          InternalCode = 400002
-	NO_GROUP_DELETE_AUTHORITY InternalCode = 400003
-	NOT_JOIN_GROUP_YET        InternalCode = 400004
+	GROUP_NOT_EXIST    InternalCode = 400001
+	ALREADY_IN_GROUP   InternalCode = 400002
+	NO_GROUP_AUTHORITY InternalCode = 400003
+	NOT_JOIN_GROUP_YET InternalCode = 400004
 )
 
 const (
