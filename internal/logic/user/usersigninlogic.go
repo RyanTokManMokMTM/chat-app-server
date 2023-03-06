@@ -61,5 +61,12 @@ func (l *UserSignInLogic) UserSignIn(req *types.SignInReq) (resp *types.SignInRe
 		Code:        uint(http.StatusOK),
 		Token:       token,
 		ExpiredTime: uint(exp),
+		UserInfo: types.CommonUserInfo{
+			ID:       u.ID,
+			Uuid:     u.Uuid,
+			NickName: u.NickName,
+			Avatar:   u.Avatar,
+			Email:    u.Email,
+		},
 	}, nil
 }

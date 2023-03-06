@@ -28,6 +28,7 @@ type (
         Code uint `json:"code"`
         Token string `json:"token"`
         ExpiredTime uint `json:"expired_time"`
+        UserInfo CommonUserInfo `json:"user_info"`
     }
 
     GetUserInfoReq {
@@ -55,6 +56,8 @@ type (
         Path string `json:"path"`
     }
 )
+
+
 
 @server (
     group : user

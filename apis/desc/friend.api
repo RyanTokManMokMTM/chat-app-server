@@ -33,7 +33,7 @@ type (
 
 type (
     FriendInfo {
-        ID uint `json:"user_id"`
+        ID uint `json:"id"`
         UUID string `json:"uuid"`
         NickName string `json:"name"`
         Avatar string `json:"avatar"`
@@ -50,7 +50,7 @@ service  ChatApp {
     @handler AddFriend
     post /user/friend(AddFriendReq) returns (AddFriendResp);
 
-    @handler DeleteFriendReq
+    @handler DeleteFriend
     delete /user/friend(DeleteFriendReq) returns (DeleteFriendResp);
 
     @handler GetFriendList

@@ -44,6 +44,12 @@ func main() {
 		Handler: ws.WebSocketHandler(ctx),
 	}, rest.WithJwt(c.Auth.AccessSecret))
 
+	server.AddRoute(rest.Route{
+		Method:  http.MethodGet,
+		Path:    "/resources/:file",
+		Handler: http.StripPrefix("/resources/", http.FileServer(http.Dir("./resources"))).ServeHTTP,
+	})
+
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	server.Start()
 

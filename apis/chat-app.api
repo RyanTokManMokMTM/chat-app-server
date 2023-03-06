@@ -20,10 +20,11 @@ type (
 
 type (
 	CommonUserInfo {
-		ID       uint   `json:"user_id"`
+		ID       uint   `json:"id"`
 		Uuid     string `json:"uuid"`
 		NickName string `json:"name"`
 		Avatar   string `json:"avatar"`
+		Email    string `json:"email"`
 	}
 )
 

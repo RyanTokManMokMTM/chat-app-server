@@ -29,10 +29,10 @@ type (
 
 type (
     MessageUser {
-        MessageID uint `json:"message_id"`
+        MessageID uint `json:"id"`
         FromID uint `json:"from_id"`
         ToID uint `json:"to_id"`
-        Content string `json:"cotent"`
+        Content string `json:"content"`
         ContentType uint `json:"content_type"`
         MessageType uint `json:"message_type"`
         CreatedAt uint `json:"create_at"`
@@ -46,8 +46,8 @@ type (
 )
 service ChatApp {
     @handler GetMessages
-    get /message/:ID(GetMessagesReq) returns (GetMessagesResp);
+    get /message(GetMessagesReq) returns (GetMessagesResp);
 
     @handler DeleteMessage
-    delete /message/:MesssageID(DeleteMessageReq) returns (DeleteMessageResp);
+    delete /message(DeleteMessageReq) returns (DeleteMessageResp);
 }

@@ -74,7 +74,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				Method:  http.MethodDelete,
 				Path:    "/user/friend",
-				Handler: friend.DeleteFriendReqHandler(serverCtx),
+				Handler: friend.DeleteFriendHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,

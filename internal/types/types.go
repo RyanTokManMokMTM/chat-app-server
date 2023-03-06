@@ -9,10 +9,11 @@ type HealthCheckResp struct {
 }
 
 type CommonUserInfo struct {
-	ID       uint   `json:"user_id"`
+	ID       uint   `json:"id"`
 	Uuid     string `json:"uuid"`
 	NickName string `json:"name"`
 	Avatar   string `json:"avatar"`
+	Email    string `json:"email"`
 }
 
 type SignUpReq struct {
@@ -33,9 +34,10 @@ type SignInReq struct {
 }
 
 type SignInResp struct {
-	Code        uint   `json:"code"`
-	Token       string `json:"token"`
-	ExpiredTime uint   `json:"expired_time"`
+	Code        uint           `json:"code"`
+	Token       string         `json:"token"`
+	ExpiredTime uint           `json:"expired_time"`
+	UserInfo    CommonUserInfo `json:"user_info"`
 }
 
 type GetUserInfoReq struct {
@@ -90,7 +92,7 @@ type GetFriendListResp struct {
 }
 
 type FriendInfo struct {
-	ID       uint   `json:"user_id"`
+	ID       uint   `json:"id"`
 	UUID     string `json:"uuid"`
 	NickName string `json:"name"`
 	Avatar   string `json:"avatar"`
@@ -180,10 +182,10 @@ type DeleteMessageResp struct {
 }
 
 type MessageUser struct {
-	MessageID   uint   `json:"message_id"`
+	MessageID   uint   `json:"id"`
 	FromID      uint   `json:"from_id"`
 	ToID        uint   `json:"to_id"`
-	Content     string `json:"cotent"`
+	Content     string `json:"content"`
 	ContentType uint   `json:"content_type"`
 	MessageType uint   `json:"message_type"`
 	CreatedAt   uint   `json:"create_at"`
