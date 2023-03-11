@@ -12,6 +12,7 @@ type DAOInterface interface {
 	FindOneUserByEmail(ctx context.Context, email string) (*models.UserModel, error)
 	UpdateUserProfile(ctx context.Context, id uint, name string) error
 	UpdateUserAvatar(ctx context.Context, id uint, avatarName string) error
+	FindUsers(ctx context.Context, query string) ([]*models.UserModel, error)
 
 	InsertOneFriend(ctx context.Context, userID, friendID uint) error
 	FindOneFriend(ctx context.Context, userID, friendID uint) error

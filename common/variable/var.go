@@ -12,6 +12,12 @@ const (
 )
 
 const (
+	HEAT_BEAT uint = iota + 1
+	SYSTEM
+	MESSAGE
+)
+
+const (
 	TEXT = iota + 1
 	FILE
 	Image

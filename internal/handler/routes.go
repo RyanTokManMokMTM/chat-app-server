@@ -59,6 +59,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/user/avatar",
 				Handler: user.UploadUserAvatarHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/user/search",
+				Handler: user.SearchUserHandler(serverCtx),
+			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),
@@ -132,12 +137,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodGet,
-				Path:    "/message/:ID",
+				Path:    "/message",
 				Handler: message.GetMessagesHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodDelete,
-				Path:    "/message/:MesssageID",
+				Path:    "/message",
 				Handler: message.DeleteMessageHandler(serverCtx),
 			},
 		},

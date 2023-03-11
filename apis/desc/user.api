@@ -55,6 +55,14 @@ type (
         Code uint `json:"code"`
         Path string `json:"path"`
     }
+
+    SearchUserReq {
+         qurey string `form:"query"`
+    }
+    SearchUserResp {
+        Code uint `json:"code"`
+        Results []CommonUserInfo `json:"results"`
+    }
 )
 
 
@@ -72,6 +80,7 @@ service ChatApp{
 
     @handler GetUserInfo
     get /user/info/:user_id(GetUserInfoReq) returns (GetUserInfoResp)
+
 }
 
 @server (
@@ -86,4 +95,7 @@ service ChatApp{
 
     @handler UploadUserAvatar
     post /user/avatar(UploadUserAvatarReq) returns (UploadUserAvatarResp)
+
+    @handler SearchUser
+    get /user/search(SearchUserReq) returns (SearchUserResp)
 }

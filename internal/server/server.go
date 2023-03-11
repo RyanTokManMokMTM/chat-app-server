@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 	"encoding/json"
-	"github.com/golang/protobuf/jsonpb"
+	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"github.com/ryantokmanmok/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmok/chat-app-server/common/errx"
@@ -61,8 +61,8 @@ func (s *SocketServer) Start() {
 		case message := <-s.Broadcast: //received protoBuffer message -> it need to be decoded
 			//decode back to protoBuffer type -Message
 			var socketMessage socket_message.Message
-
-			err := jsonpb.UnmarshalString(string(message), &socketMessage)
+			err := proto.Unmarshal(message, &socketMessage)
+			//err := jsonpb.UnmarshalString(string(message), &socketMessage)
 			if err != nil {
 				logx.Error(err)
 				continue

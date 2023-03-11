@@ -52,6 +52,7 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 			Avatar:   info.FriendInfo.Avatar,
 		})
 	}
+
 	//TODO : response to user type
 	return &types.GetFriendListResp{
 		FriendList: respList,

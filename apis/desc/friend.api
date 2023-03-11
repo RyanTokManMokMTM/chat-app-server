@@ -25,10 +25,9 @@ type (
 
     GetFriendListReq {}
     GetFriendListResp {
-        FriendList []FriendInfo `json:"friend_list"`
+        FriendList []FriendInfo `json:"friends"`
     }
 
-    //Notification ???
 )
 
 type (

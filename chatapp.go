@@ -32,6 +32,7 @@ func main() {
 
 	httpx.SetErrorHandler(func(err error) (int, interface{}) {
 		switch e := err.(type) {
+
 		case *errx.CustomError:
 			return http.StatusOK, e.ToJSON()
 		default:

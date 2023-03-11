@@ -53,3 +53,7 @@ func (d *DAO) UpdateUserAvatar(ctx context.Context, id uint, avatarName string) 
 
 	return u.UpdateOneUserAvatar(d.engine, ctx, avatarName)
 }
+
+func (d *DAO) FindUsers(ctx context.Context, query string) ([]*models.UserModel, error) {
+	return (&models.UserModel{}).FindUsers(d.engine, ctx, query)
+}

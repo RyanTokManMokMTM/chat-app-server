@@ -8,6 +8,7 @@ import (
 	"github.com/ryantokmanmok/chat-app-server/internal/svc"
 	socket_message "github.com/ryantokmanmok/chat-app-server/socket-proto"
 	"github.com/zeromicro/go-zero/core/logx"
+	"google.golang.org/protobuf/encoding/protojson"
 	"sync"
 	"time"
 )
@@ -136,9 +137,12 @@ func (c *SocketClient) WriteLoop() {
 				Type:    variable.HEAT_BEAT,
 			}
 
-			bytes, _ := proto.Marshal(&msg)
-
-			c.server.Broadcast <- bytes
+			bytes, err := protojson.Marshal(&msg)
+			if err != nil {
+				logx.Error(err)
+			}
+			//logx.Info(string(bytes))
+			c.conn.WriteMessage(websocket.BinaryMessage, bytes)
 		case <-c.isClose:
 			logx.Info("received a connection closed signal and user is disconnected")
 			return

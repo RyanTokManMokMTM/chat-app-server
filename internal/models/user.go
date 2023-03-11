@@ -41,7 +41,7 @@ func (u *UserModel) FindOneUserByUUID(db *gorm.DB, ctx context.Context) error {
 }
 
 func (u *UserModel) FindOneUserByEmail(db *gorm.DB, ctx context.Context) error {
-	return db.Debug().WithContext(ctx).Where("email = ?", u.Email).Find(&u).Error
+	return db.Debug().WithContext(ctx).Where("email = ?", u.Email).First(&u).Error
 }
 
 func (u *UserModel) InsertOneUser(db *gorm.DB, ctx context.Context) error {
@@ -58,4 +58,12 @@ func (u *UserModel) UpdateOneUser(db *gorm.DB, ctx context.Context, name string)
 
 func (u *UserModel) UpdateOneUserAvatar(db *gorm.DB, ctx context.Context, avatarName string) error {
 	return db.Debug().WithContext(ctx).Model(u).Where("id = ?", u.ID).Update("Avatar", avatarName).Error
+}
+
+func (u *UserModel) FindUsers(db *gorm.DB, ctx context.Context, query string) ([]*UserModel, error) {
+	var results []*UserModel
+	if err := db.WithContext(ctx).Debug().Model(&u).Where("nick_name like ?", "%"+query+"%").Find(&results).Error; err != nil {
+		return nil, err
+	}
+	return results, nil
 }

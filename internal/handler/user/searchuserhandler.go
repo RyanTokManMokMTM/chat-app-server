@@ -1,4 +1,4 @@
-package friend
+package user
 
 import (
 	"github.com/go-playground/locales/en"
@@ -6,21 +6,19 @@ import (
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 	"github.com/ryantokmanmok/chat-app-server/common/errx"
-	"github.com/zeromicro/go-zero/core/logx"
 
 	"net/http"
 
-	"github.com/ryantokmanmok/chat-app-server/internal/logic/friend"
+	"github.com/ryantokmanmok/chat-app-server/internal/logic/user"
 	"github.com/ryantokmanmok/chat-app-server/internal/svc"
 	"github.com/ryantokmanmok/chat-app-server/internal/types"
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func GetFriendListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func SearchUserHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.GetFriendListReq
+		var req types.SearchUserReq
 		if err := httpx.Parse(r, &req); err != nil {
-			logx.Info(err.Error())
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
@@ -38,8 +36,8 @@ func GetFriendListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := friend.NewGetFriendListLogic(r.Context(), svcCtx)
-		resp, err := l.GetFriendList(&req)
+		l := user.NewSearchUserLogic(r.Context(), svcCtx)
+		resp, err := l.SearchUser(&req)
 		if err != nil {
 			//convert to customError
 			if e, ok := err.(*errx.CustomError); ok {

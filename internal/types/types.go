@@ -9,11 +9,11 @@ type HealthCheckResp struct {
 }
 
 type CommonUserInfo struct {
-	ID       uint   `json:"id"`
-	Uuid     string `json:"uuid"`
-	NickName string `json:"name"`
-	Avatar   string `json:"avatar"`
-	Email    string `json:"email"`
+	ID       uint   `json:"id,omitempty"`
+	Uuid     string `json:"uuid,omitempty"`
+	NickName string `json:"name,omitempty"`
+	Avatar   string `json:"avatar,omitempty"`
+	Email    string `json:"email,omitempty"`
 }
 
 type SignUpReq struct {
@@ -68,6 +68,15 @@ type UploadUserAvatarResp struct {
 	Path string `json:"path"`
 }
 
+type SearchUserReq struct {
+	Qurey string `form:"query"`
+}
+
+type SearchUserResp struct {
+	Code    uint             `json:"code"`
+	Results []CommonUserInfo `json:"results"`
+}
+
 type AddFriendReq struct {
 	UserID uint `json:"user_id"`
 }
@@ -88,7 +97,7 @@ type GetFriendListReq struct {
 }
 
 type GetFriendListResp struct {
-	FriendList []FriendInfo `json:"friend_list"`
+	FriendList []FriendInfo `json:"friends"`
 }
 
 type FriendInfo struct {
