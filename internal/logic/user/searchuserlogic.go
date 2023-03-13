@@ -54,20 +54,37 @@ func (l *SearchUserLogic) SearchUser(req *types.SearchUserReq) (resp *types.Sear
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	var users []types.CommonUserInfo
+	var users = make([]types.SearchUserResult, 0)
 	for _, info := range results {
 		if info.ID == userID {
 			continue
 		}
-		users = append(users, types.CommonUserInfo{
-			ID:       info.ID,
-			Uuid:     info.Uuid,
-			NickName: info.NickName,
-			Email:    info.Email,
-			Avatar:   info.Avatar,
+
+		var isFriend = true
+		err := l.svcCtx.DAO.FindOneFriend(l.ctx, userID, info.ID)
+		if err != nil {
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				continue
+			}
+			isFriend = false
+		}
+
+		users = append(users, types.SearchUserResult{
+			UserInfo: types.CommonUserInfo{
+				ID:       info.ID,
+				Uuid:     info.Uuid,
+				NickName: info.NickName,
+				Email:    info.Email,
+				Avatar:   info.Avatar,
+				Cover:    info.Cover,
+			}, IsFriend: isFriend,
 		})
 	}
-
+	if len(users) == 0 {
+		return &types.SearchUserResp{ //User Not Exist
+			Code: uint(http.StatusNotFound),
+		}, nil
+	}
 	return &types.SearchUserResp{
 		Code:    uint(http.StatusOK),
 		Results: users,

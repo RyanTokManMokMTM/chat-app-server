@@ -1,8 +1,6 @@
 package server
 
 import (
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"github.com/ryantokmanmok/chat-app-server/common/variable"
 	"github.com/ryantokmanmok/chat-app-server/internal/svc"
@@ -63,28 +61,36 @@ func (c *SocketClient) ReadLoop() {
 			}
 			break
 		}
+		_ = c.conn.SetReadDeadline(time.Now().Add(time.Second * variable.ReadWait))
 
 		//TODO: Unmarshal message to prototype message
 		var socketMessage socket_message.Message
-		err = jsonpb.UnmarshalString(string(message), &socketMessage)
+		err = protojson.Unmarshal(message, &socketMessage)
 		if err != nil {
 			logx.Error(err)
+			continue
 		}
 
-		if socketMessage.Type == variable.HEAT_BEAT {
+		logx.Infof("%+v", socketMessage)
+
+		if socketMessage.Type == variable.HEAT_BEAT_PING {
 			//ping message -> send pong message
 			logx.Info("Get a ping message from client")
 			msg := socket_message.Message{
 				Content: variable.PONG_MESSAGE,
-				Type:    variable.HEAT_BEAT,
+				Type:    variable.HEAT_BEAT_PONG,
 			}
 
-			pongBytes, err := proto.Marshal(&msg)
+			bytes, err := protojson.Marshal(&msg)
 			if err != nil {
-				logx.Error("marshal message error : %v", err)
-			}
+				logx.Error(err)
+				continue
 
-			c.conn.WriteMessage(websocket.BinaryMessage, pongBytes) //TODO: Send it to client directly
+			}
+			c.conn.WriteMessage(websocket.BinaryMessage, bytes) //TODO: Send it to client directly
+		} else if socketMessage.Type == variable.HEAT_BEAT_PONG {
+			logx.Info("received pong message from client")
+			continue
 		} else {
 			//normal message
 			c.server.Broadcast <- message
@@ -134,14 +140,13 @@ func (c *SocketClient) WriteLoop() {
 			//TODO: Send Ticket message
 			msg := socket_message.Message{
 				Content: variable.PING_MESSAGE,
-				Type:    variable.HEAT_BEAT,
+				Type:    variable.HEAT_BEAT_PING,
 			}
 
 			bytes, err := protojson.Marshal(&msg)
 			if err != nil {
 				logx.Error(err)
 			}
-			//logx.Info(string(bytes))
 			c.conn.WriteMessage(websocket.BinaryMessage, bytes)
 		case <-c.isClose:
 			logx.Info("received a connection closed signal and user is disconnected")

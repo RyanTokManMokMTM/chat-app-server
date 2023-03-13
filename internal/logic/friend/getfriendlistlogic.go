@@ -43,13 +43,15 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	var respList = make([]types.FriendInfo, 0)
+	var respList = make([]types.CommonUserInfo, 0)
 	for _, info := range list {
-		respList = append(respList, types.FriendInfo{
+		respList = append(respList, types.CommonUserInfo{
 			ID:       info.ID,
-			UUID:     info.FriendInfo.Uuid,
+			Uuid:     info.FriendInfo.Uuid,
 			NickName: info.FriendInfo.NickName,
 			Avatar:   info.FriendInfo.Avatar,
+			Email:    info.FriendInfo.Email,
+			Cover:    info.FriendInfo.Cover,
 		})
 	}
 

@@ -67,6 +67,7 @@ func (l *UserSignInLogic) UserSignIn(req *types.SignInReq) (resp *types.SignInRe
 			NickName: u.NickName,
 			Avatar:   u.Avatar,
 			Email:    u.Email,
+			Cover:    u.Cover,
 		},
 	}, nil
 }

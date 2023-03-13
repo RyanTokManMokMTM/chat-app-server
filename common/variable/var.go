@@ -6,15 +6,16 @@ const (
 )
 
 const (
-	HEAT_BEAT    string = "HEATBEAT"
-	PONG_MESSAGE        = "PONG"
-	PING_MESSAGE        = "PING"
+	PONG_MESSAGE = "PONG"
+	PING_MESSAGE = "PING"
 )
 
 const (
-	HEAT_BEAT uint = iota + 1
+	HEAT_BEAT_PING int32 = iota + 1
+	HEAT_BEAT_PONG
 	SYSTEM
 	MESSAGE
+	WEB_RTC
 )
 
 const (

@@ -14,6 +14,7 @@ type CommonUserInfo struct {
 	NickName string `json:"name,omitempty"`
 	Avatar   string `json:"avatar,omitempty"`
 	Email    string `json:"email,omitempty"`
+	Cover    string `json:"cover,omitempty"`
 }
 
 type SignUpReq struct {
@@ -50,6 +51,7 @@ type GetUserInfoResp struct {
 	Name   string `json:"name"`
 	Email  string `json:"email"`
 	Avatar string `json:"avatar"`
+	Cover  string `json:"cover"`
 }
 
 type UpdateUserInfoReq struct {
@@ -73,8 +75,13 @@ type SearchUserReq struct {
 }
 
 type SearchUserResp struct {
-	Code    uint             `json:"code"`
-	Results []CommonUserInfo `json:"results"`
+	Code    uint               `json:"code"`
+	Results []SearchUserResult `json:"results"`
+}
+
+type SearchUserResult struct {
+	UserInfo CommonUserInfo `json:"user_info"`
+	IsFriend bool           `json:"is_friend"`
 }
 
 type AddFriendReq struct {
@@ -97,14 +104,7 @@ type GetFriendListReq struct {
 }
 
 type GetFriendListResp struct {
-	FriendList []FriendInfo `json:"friends"`
-}
-
-type FriendInfo struct {
-	ID       uint   `json:"id"`
-	UUID     string `json:"uuid"`
-	NickName string `json:"name"`
-	Avatar   string `json:"avatar"`
+	FriendList []CommonUserInfo `json:"friends"`
 }
 
 type CreateGroupReq struct {
@@ -112,8 +112,8 @@ type CreateGroupReq struct {
 }
 
 type CreateGroupResp struct {
-	Code    uint `json:"code"`
-	GroupID uint `json:"group_id"`
+	Code      uint   `json:"code"`
+	GroupUUID string `json:"group_uuid"`
 }
 
 type JoinGroupReq struct {

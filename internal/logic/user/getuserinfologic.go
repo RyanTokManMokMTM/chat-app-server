@@ -41,5 +41,6 @@ func (l *GetUserInfoLogic) GetUserInfo(req *types.GetUserInfoReq) (resp *types.G
 		Email:  u.Email,
 		Name:   u.NickName,
 		Avatar: u.Avatar,
+		Cover:  u.Cover,
 	}, nil
 }

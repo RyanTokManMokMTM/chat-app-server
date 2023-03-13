@@ -14,12 +14,14 @@ type UserModel struct {
 	Email    string `gorm:"type:varchar(64)"`
 	Password string `gorm:"type:varchar(64)"`
 	Avatar   string `gorm:"type:varchar(64);null;comment:'user avatar'"`
+	Cover    string `gorm:"type:varchar(64);null;comment:'user cover'"`
 	CommonField
 }
 
 func (u *UserModel) BeforeCreate(tx *gorm.DB) error {
 	u.Uuid = uuid.New().String()
 	u.Avatar = "/default.jpg"
+	u.Cover = "/cover.jpg"
 	return nil
 }
 

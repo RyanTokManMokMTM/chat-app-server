@@ -44,7 +44,7 @@ func (l *CreateGroupLogic) CreateGroup(req *types.CreateGroupReq) (resp *types.C
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 	return &types.CreateGroupResp{
-		Code:    uint(http.StatusOK),
-		GroupID: group.ID,
+		Code:      uint(http.StatusOK),
+		GroupUUID: group.Uuid,
 	}, nil
 }

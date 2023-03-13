@@ -40,6 +40,7 @@ type (
         Name string `json:"name"`
         Email string `json:"email"`
         Avatar string `json:"avatar"`
+        Cover string `json:"cover"`
     }
 
     UpdateUserInfoReq {
@@ -61,7 +62,12 @@ type (
     }
     SearchUserResp {
         Code uint `json:"code"`
-        Results []CommonUserInfo `json:"results"`
+        Results []SearchUserResult `json:"results"`
+    }
+
+    SearchUserResult {
+        UserInfo CommonUserInfo `json:"user_info"`
+        IsFriend bool `json:"is_friend"`
     }
 )
 

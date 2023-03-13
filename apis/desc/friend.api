@@ -25,19 +25,11 @@ type (
 
     GetFriendListReq {}
     GetFriendListResp {
-        FriendList []FriendInfo `json:"friends"`
+        FriendList []CommonUserInfo `json:"friends"`
     }
 
 )
 
-type (
-    FriendInfo {
-        ID uint `json:"id"`
-        UUID string `json:"uuid"`
-        NickName string `json:"name"`
-        Avatar string `json:"avatar"`
-    }
-)
 
 
 @server (
