@@ -93,6 +93,7 @@ func (c *SocketClient) ReadLoop() {
 			continue
 		} else {
 			//normal message
+			logx.Info(string(message))
 			c.server.Broadcast <- message
 		}
 	}
