@@ -1,0 +1,49 @@
+syntax = "v1"
+
+info(
+    title: "type title here"
+    desc: "type desc here"
+    author: "type author here"
+    email: "type email here"
+    version: "type version here"
+)
+
+type (
+    UploadImageReq {
+        ImageType string `json:"image_type"`
+        Data string `json:"data"`
+    }
+    UploadImageResp {
+        Code uint `json:"code"`
+        Path string `json:"path"`
+    }
+
+    UploadImagesReq {
+
+    }
+    UploadImagesResp {}
+
+    UploadFildReq {
+        Data string `json:"data"`
+        FileName string `json:"file_name"`
+    }
+    UploadFileResp {
+        Code uint `json:"code"`
+        Path string `json:"path"`
+    }
+
+    UploadFilsReq {}
+    UploadFilesResp {}
+)
+
+@server (
+    group: file
+    prefix : /api/v1
+)
+service ChatApp {
+    @handler UploadImage
+    post  /file/image/upload (UploadImageReq) returns (UploadImageResp);
+
+    @handler UploadDocument
+    post  /file/document/upload (UploadFildReq) returns (UploadFileResp);
+}

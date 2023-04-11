@@ -1,11 +1,14 @@
 package uploadx
 
 import (
+	"encoding/base64"
+	"github.com/google/uuid"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path"
+	"strings"
 )
 
 const AvatarFileField = "avatar"
@@ -43,4 +46,34 @@ func UploadFile(f multipart.File, header *multipart.FileHeader, filePath string)
 
 	_, _ = io.Copy(tempFile, f)
 	return header.Filename, nil
+}
+
+func UploadImageByBase64(data string, format string, path string) (string, error) {
+	uri := uuid.New().String() + "." + format
+	index := strings.Index(data, "base64")
+	index += 7 //"data:image/$type};base64,(data stating here)xyz...."
+	fileData := data[index:]
+	bytes, err := base64.StdEncoding.DecodeString(fileData)
+	if err != nil {
+		return "", err
+	}
+
+	err = os.WriteFile(path+"/"+uri, bytes, 0666)
+	if err != nil {
+		return "", err
+	}
+	return "/" + uri, nil
+}
+
+func UploadFileByBase64(data string, fileName, path string) (string, error) {
+	bytes, err := base64.StdEncoding.DecodeString(data)
+	if err != nil {
+		return "", err
+	}
+
+	err = os.WriteFile(path+"/"+fileName, bytes, 0666)
+	if err != nil {
+		return "", err
+	}
+	return "/" + fileName, nil
 }

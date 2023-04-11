@@ -4,6 +4,7 @@ package handler
 import (
 	"net/http"
 
+	file "github.com/ryantokmanmok/chat-app-server/internal/handler/file"
 	friend "github.com/ryantokmanmok/chat-app-server/internal/handler/friend"
 	group "github.com/ryantokmanmok/chat-app-server/internal/handler/group"
 	health "github.com/ryantokmanmok/chat-app-server/internal/handler/health"
@@ -128,6 +129,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/group/update",
 				Handler: group.UpdateGroupInfoHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/group",
+				Handler: group.GetUserGroupsHandler(serverCtx),
+			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),
@@ -147,6 +153,22 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/file/image/upload",
+				Handler: file.UploadImageHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/file/document/upload",
+				Handler: file.UploadDocumentHandler(serverCtx),
+			},
+		},
 		rest.WithPrefix("/api/v1"),
 	)
 }

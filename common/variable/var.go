@@ -1,5 +1,7 @@
 package variable
 
+import "github.com/redis/go-redis/v9"
+
 const (
 	MESSAGE_TYPE_USERCHAT = iota + 1
 	MESSAGE_TYPE_GROUPCHAT
@@ -20,8 +22,8 @@ const (
 
 const (
 	TEXT = iota + 1
+	IMAGE
 	FILE
-	Image
 	AUDIO
 	VIDEO
 )
@@ -31,3 +33,5 @@ const (
 	WriteWait = 60
 	ReadLimit = 1024
 )
+
+var RedisConnection *redis.Client

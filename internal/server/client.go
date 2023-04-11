@@ -20,6 +20,8 @@ type SocketClient struct {
 	isClose     chan struct{}
 	server      *SocketServer
 	svcCtx      *svc.ServiceContext
+
+	//redisClient *redisClient.Client
 }
 
 func NewSocketClient(uuid string, name string, conn *websocket.Conn, server *SocketServer, svcCtx *svc.ServiceContext) *SocketClient {
@@ -40,12 +42,14 @@ func (c *SocketClient) ReadLoop() {
 	defer func() {
 		c.server.UnRegister <- c
 		c.conn.Close() //TODO: close the connection
+		//c.mqChannel.Close()
+		//c.mqConn.Close()
 	}()
 
 	//TODO: set read init time
 	c.conn.SetReadDeadline(time.Now().Add(time.Second * variable.ReadWait)) //TODO: Need to read any message before deadline
-	c.conn.SetReadLimit(variable.ReadLimit)                                 //TODO: Size of a message
-	c.conn.SetPongHandler(func(appData string) error {                      //TODO: Received a ping message from client, we need to handle it by setting a handle function
+	//c.conn.SetReadLimit(variable.ReadLimit)                                 //TODO: Size of a message
+	c.conn.SetPongHandler(func(appData string) error { //TODO: Received a ping message from client, we need to handle it by setting a handle function
 		logx.Info(appData)
 		return nil
 	})
@@ -55,7 +59,7 @@ func (c *SocketClient) ReadLoop() {
 		//client may send a ping signal
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
-			logx.Error("Read Client Message Error")
+			logx.Error("Read Client Message Error :", err.Error())
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				logx.Error(err)
 			}
@@ -70,8 +74,6 @@ func (c *SocketClient) ReadLoop() {
 			logx.Error(err)
 			continue
 		}
-
-		logx.Infof("%+v", socketMessage)
 
 		if socketMessage.Type == variable.HEAT_BEAT_PING {
 			//ping message -> send pong message
@@ -93,7 +95,7 @@ func (c *SocketClient) ReadLoop() {
 			continue
 		} else {
 			//normal message
-			logx.Info(string(message))
+
 			c.server.Broadcast <- message
 		}
 	}

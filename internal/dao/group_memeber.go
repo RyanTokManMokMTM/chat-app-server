@@ -30,7 +30,7 @@ func (d *DAO) FindOneGroupMembers(ctx context.Context, groupID uint) ([]*models.
 		GroupID: groupID,
 	}
 
-	return gm.FindAll(ctx, d.engine)
+	return gm.GetGroupMemberList(ctx, d.engine)
 }
 
 func (d *DAO) DeleteGroupMember(ctx context.Context, groupID, userID uint) error {
@@ -55,5 +55,13 @@ func (d *DAO) GetGroupMembers(ctx context.Context, groupID uint) ([]*models.Grou
 	}
 
 	return gm.GetGroupMemberList(ctx, d.engine)
+
+}
+
+func (d *DAO) GetUserGroups(ctx context.Context, userID uint) ([]*models.GroupMember, error) {
+	gm := &models.GroupMember{
+		UserID: userID,
+	}
+	return gm.FindUserGroup(ctx, d.engine)
 
 }

@@ -25,6 +25,7 @@ type DAOInterface interface {
 	DeleteOneGroup(ctx context.Context, groupID uint) error
 	UpdateOneGroup(ctx context.Context, groupID uint, groupName string) error
 	UpdateOneGroupAvatar(ctx context.Context, groupID uint, avatarName string) error
+	GetUserGroups(ctx context.Context, userID uint) ([]*models.GroupMember, error)
 
 	InsertOneGroupMember(ctx context.Context, groupID, userID uint) error
 	FindOneGroupMember(ctx context.Context, groupID, userID uint) (*models.GroupMember, error)

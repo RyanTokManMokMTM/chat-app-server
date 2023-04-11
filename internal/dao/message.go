@@ -76,6 +76,7 @@ func insertUserMessage(ctx context.Context, message *socket_message.Message, eng
 		Content:     message.Content,
 		MessageType: uint(message.MessageType),
 		ContentType: uint(message.ContentType),
+		URL:         message.UrlPath,
 	}
 
 }

@@ -4,7 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"github.com/ryantokmanmok/chat-app-server/common/errx"
+	"github.com/ryantokmanmok/chat-app-server/common/variable"
 	"github.com/ryantokmanmok/chat-app-server/internal/handler/ws"
+	"github.com/ryantokmanmok/chat-app-server/internal/redisClient"
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"net/http"
 
@@ -23,7 +25,7 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
-
+	//fmt.Println(c.MaxFileSize)
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
 
@@ -50,6 +52,13 @@ func main() {
 		Path:    "/resources/:file",
 		Handler: http.StripPrefix("/resources/", http.FileServer(http.Dir("./resources"))).ServeHTTP,
 	})
+
+	client, err := redisClient.ConnectToClient(c.Redis.Addr, c.Redis.Password)
+	if err != nil {
+		panic("failed to connect to redis")
+	}
+
+	variable.RedisConnection = client
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	server.Start()

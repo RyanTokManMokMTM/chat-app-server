@@ -19,4 +19,13 @@ type Config struct {
 	Salt          string
 	ResourcesPath string
 	MaxFileSize   int64
+
+	//RabbitMQ struct {
+	//	DataSource string
+	//}
+
+	Redis struct {
+		Addr     string
+		Password string
+	}
 }

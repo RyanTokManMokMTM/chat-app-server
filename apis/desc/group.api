@@ -61,12 +61,30 @@ type (
     UploadGroupAvatarResp {
         Code uint `json:"code"`
     }
+
+    GetUserGroupReq{}
+    GetUserGroupResp {
+        Code uint `json:"code"`
+        Groups []GroupInfo `json:"groups"`
+    }
 )
 
 type (
     GroupMemberInfo {
         CommonUserInfo
         IsGroupLead bool `json:"is_group_lead"`
+    }
+
+    GroupInfo {
+        ID uint `json:"id"`
+        Uuid string `json:"uuid"`
+        Name string `json:"name"`
+        Avatar string `json:"avatar"`
+    }
+
+    SearchGroupInfo {
+        Info GroupInfo `json:"group_info"`
+        IsJoined bool  `json:"is_joined"`
     }
 )
 
@@ -96,4 +114,7 @@ service  ChatApp {
 
     @handler UpdateGroupInfo
     patch /group/update(UpdateGroupInfoReq) returns ( UpdateGroupInfoResp)
+
+    @handler GetUserGroups
+    get /group(GetUserGroupReq) returns (GetUserGroupResp)
 }

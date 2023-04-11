@@ -31,6 +31,7 @@ type Message struct {
 	Content     string `gorm:"comment:'message content'"`
 	MessageType uint   `gorm:"comment;'sent message type: 1:single ,2: group'"`
 	ContentType uint   `gorm:"comment:'content type: 1: text, 2: file,3:audio,4:video'"`
+	URL         string `gorm:"comment:'image url path'"`
 	CommonField
 }
 

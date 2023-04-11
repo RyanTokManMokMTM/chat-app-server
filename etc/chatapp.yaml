@@ -1,6 +1,7 @@
 Name: ChatApp
 Host: 0.0.0.0
 Port: 8000
+MaxBytes: 52428800
 
 Log:
   Encoding: plain
@@ -18,5 +19,12 @@ MySQL:
 
 Salt: W4tiDEeWlwxlRPYYRRMhJ65piS1ochvMymwfVdumittPoSxhkHNnVLe6m12C4v15
 ResourcesPath : ./resources
-MaxFileSize : 1073741824
+MaxFileSize : 1048576
+
+#RabbitMQ:
+#    DataSource: amqp://guest:guest@localhost:5672/
+
+Redis:
+  Addr: localhost:6379
+  Password : admin
 

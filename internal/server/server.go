@@ -13,11 +13,12 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"net/http"
 	"sync"
+	"time"
 )
 
 var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+	//ReadBufferSize:  1024,
+	//WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
@@ -59,15 +60,12 @@ func (s *SocketServer) Start() {
 			s.Remove(client)
 
 		case message := <-s.Broadcast: //received protoBuffer message -> it need to be decoded
-			//decode back to protoBuffer type -Message
 			var socketMessage socket_message.Message
 			err := protojson.Unmarshal(message, &socketMessage)
 			if err != nil {
 				logx.Error(err)
 				continue
 			}
-
-			logx.Infof("A new message need to be broadcast : %+v ", socketMessage)
 
 			//TODO: Send To Who?
 			//TODO: Send To Nobody , it means broadcast to a specific user/group
@@ -80,15 +78,27 @@ func (s *SocketServer) Start() {
 						saveMessage(conn.svcCtx, &socketMessage)
 					}
 
+					bytes, err := protojson.Marshal(&socketMessage)
+					if err != nil {
+						logx.Error(err)
+						continue
+
+					}
+
 					if socketMessage.MessageType == variable.MESSAGE_TYPE_USERCHAT {
-						//TODO: Send Group Message
+
 						client, ok := s.Clients[socketMessage.ToUUID]
 						if ok {
-							logx.Infof("user %v is online", socketMessage.ToUUID)
-							client.sendChannel <- message
+							client.sendChannel <- bytes
+						} else {
+							ctx := context.Background()
+							_, err := variable.RedisConnection.RPush(ctx, socketMessage.ToUUID, string(bytes)).Result()
+							if err != nil {
+								logx.Error("offline message to redis err %s", err.Error())
+							}
 						}
+
 					} else if socketMessage.MessageType == variable.MESSAGE_TYPE_GROUPCHAT {
-						//TODO: Send Peer to Peer Message
 						sendGroupMessage(&socketMessage, s, conn.svcCtx)
 					}
 
@@ -153,19 +163,21 @@ func sendGroupMessage(message *socket_message.Message, server *SocketServer, svc
 		}
 
 		conn, ok := server.Clients[mem.MemberInfo.Uuid]
-		if !ok {
-			logx.Infof("Group %v 's member %v is offline", message.ToUUID, mem.MemberInfo.Uuid)
-			continue
-		}
 
 		socketMessage := socket_message.Message{
-			Avatar:       mem.MemberInfo.Avatar,
-			FromUserName: mem.MemberInfo.NickName,
+			Avatar:       message.Avatar,
+			FromUserName: message.FromUserName,
 			FromUUID:     message.ToUUID,   //From Group UUID
 			ToUUID:       message.FromUUID, //To Member UUID
 			Content:      message.Content,
 			ContentType:  message.ContentType,
 			MessageType:  message.MessageType,
+			Type:         message.Type,
+			UrlPath:      message.UrlPath,
+			GroupName:    group.GroupName,
+			GroupAvatar:  group.GroupAvatar,
+			FileName:     message.FileName,
+			FileSize:     message.FileSize,
 		}
 
 		messageBytes, err := json.MarshalIndent(socketMessage, "", "\t")
@@ -174,19 +186,22 @@ func sendGroupMessage(message *socket_message.Message, server *SocketServer, svc
 			continue
 		}
 
+		if !ok {
+			logx.Infof("Group %v 's member %v is offline", message.ToUUID, mem.MemberInfo.Uuid)
+			ctx := context.Background()
+			_, err := variable.RedisConnection.LPush(ctx, mem.MemberInfo.Uuid, messageBytes).Result()
+			if err != nil {
+				logx.Error("offline message to redis err %s", err.Error())
+			}
+			continue
+
+		}
 		conn.sendChannel <- messageBytes
 	}
 }
 
 // saveMessage, TEXT:Save directly and other types need to be store to FS
 func saveMessage(svcCtx *svc.ServiceContext, message *socket_message.Message) {
-	//Saved by different type
-	if message.ContentType == variable.FILE {
-		//TODO: Save File
-	} else if message.ContentType == variable.Image {
-		//TODO: Save Image
-	}
-
 	//TODO : Save Message into db
 	svcCtx.DAO.InsertOneMessage(context.Background(), message)
 }
@@ -214,4 +229,25 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 
 	go client.ReadLoop()
 	go client.WriteLoop()
+
+	go func() {
+		ctx := context.Background()
+		messages, err := variable.RedisConnection.LRange(ctx, u.Uuid, 0, 100).Result()
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			logx.Errorf("get offline messages error %s ", err.Error())
+			return
+		}
+
+		for _, msg := range messages {
+			client.sendChannel <- []byte(msg)
+			time.Sleep(time.Second / 50)
+		}
+
+		_, err = svcCtx.RedisClient.LTrim(ctx, u.Uuid, 100, -1).Result()
+		if err != nil {
+			logx.Error(err)
+		}
+	}()
+
 }

@@ -166,9 +166,29 @@ type UploadGroupAvatarResp struct {
 	Code uint `json:"code"`
 }
 
+type GetUserGroupReq struct {
+}
+
+type GetUserGroupResp struct {
+	Code   uint        `json:"code"`
+	Groups []GroupInfo `json:"groups"`
+}
+
 type GroupMemberInfo struct {
 	CommonUserInfo
 	IsGroupLead bool `json:"is_group_lead"`
+}
+
+type GroupInfo struct {
+	ID     uint   `json:"id"`
+	Uuid   string `json:"uuid"`
+	Name   string `json:"name"`
+	Avatar string `json:"avatar"`
+}
+
+type SearchGroupInfo struct {
+	Info     GroupInfo `json:"group_info"`
+	IsJoined bool      `json:"is_joined"`
 }
 
 type GetMessagesReq struct {
@@ -198,4 +218,36 @@ type MessageUser struct {
 	ContentType uint   `json:"content_type"`
 	MessageType uint   `json:"message_type"`
 	CreatedAt   uint   `json:"create_at"`
+}
+
+type UploadImageReq struct {
+	ImageType string `json:"image_type"`
+	Data      string `json:"data"`
+}
+
+type UploadImageResp struct {
+	Code uint   `json:"code"`
+	Path string `json:"path"`
+}
+
+type UploadImagesReq struct {
+}
+
+type UploadImagesResp struct {
+}
+
+type UploadFildReq struct {
+	Data     string `json:"data"`
+	FileName string `json:"file_name"`
+}
+
+type UploadFileResp struct {
+	Code uint   `json:"code"`
+	Path string `json:"path"`
+}
+
+type UploadFilsReq struct {
+}
+
+type UploadFilesResp struct {
 }
