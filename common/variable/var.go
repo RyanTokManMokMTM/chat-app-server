@@ -26,6 +26,9 @@ const (
 	FILE
 	AUDIO
 	VIDEO
+
+	//Story Reply?
+	STORY //with URL path and content and available time
 )
 
 const (

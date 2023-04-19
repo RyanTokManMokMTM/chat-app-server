@@ -68,4 +68,9 @@ func migration(db *gorm.DB) {
 	if err != nil {
 		panic(err)
 	}
+
+	err = db.AutoMigrate(StoryModel{})
+	if err != nil {
+		panic(err)
+	}
 }

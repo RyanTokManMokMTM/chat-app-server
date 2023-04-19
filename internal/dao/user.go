@@ -57,3 +57,10 @@ func (d *DAO) UpdateUserAvatar(ctx context.Context, id uint, avatarName string) 
 func (d *DAO) FindUsers(ctx context.Context, query string) ([]*models.UserModel, error) {
 	return (&models.UserModel{}).FindUsers(d.engine, ctx, query)
 }
+
+func (d *DAO) CountUserAvailableStory(ctx context.Context, userID uint) (int64, error) {
+	u := &models.UserModel{
+		ID: userID,
+	}
+	return u.CountUserStory(d.engine, ctx)
+}

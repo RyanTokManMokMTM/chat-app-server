@@ -37,3 +37,9 @@ const (
 	MESSAGE_NOT_EXIST           InternalCode = 500001
 	NO_MESSAGE_DELETE_AUTHORITY InternalCode = 500002
 )
+
+const (
+	STORY_NOT_EXIST      InternalCode = 600001
+	STORY_CREATED_FAILED InternalCode = 600002
+	STORY_NOT_AVAILABLE  InternalCode = 600003
+)

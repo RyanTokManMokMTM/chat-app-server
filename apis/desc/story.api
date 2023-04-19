@@ -1,0 +1,89 @@
+syntax = "v1"
+
+info(
+    title: "type title here"
+    desc: "type desc here"
+    author: "type author here"
+    email: "type email here"
+    version: "type version here"
+)
+
+type (
+    AddStoryReq {}
+    AddStoryResp {
+        Code uint `json:"code"`
+        StoryID uint `json:"story_id"`
+    }
+
+    GetUserStoryReq {
+       
+    }
+    GetUserStoryResp {
+        Code uint `json:"code"`
+        StoryIDs []uint `json:"story_ids"`
+    }
+
+    GetActiveStoryReq {}
+    GetActiveStoryResp {
+        Code uint `json:"code"`
+        FriendStroies []FriendStroy `json:"active_stories"`
+    }
+
+    DeleteStoryReq {
+        StoryID uint `json:"story_id"`
+    }
+    DeleteStoryResp {
+        Code uint `json:"code"`
+    }
+
+    GetStoryInfoByIdRep {
+        StoryID uint `path:"story_id"`
+    }
+    GetStoryInfoByIdResp {
+        Code uint `json:"code"`
+        StoryID uint `json:"story_id"`
+        StoryMediaURL string `json:"media_url"`
+        CreateAt uint `json:"create_at"`
+    }
+)
+
+type (
+    FriendStroy {
+        UserID uint `json:"id"`
+        Uuid string `json:"uuid"`
+        UserName string `json:"name"`
+        UserAvatar string `json:"avatar"`
+        IsSeen bool `json:"is_seen"`
+        StoriesIDs []uint `json:"stories_ids"`
+    }
+)
+
+@server (
+    group : story
+    prefix : /api/v1
+    jwt : Auth
+)
+service ChatApp{
+    @handler AddStory
+    post /story(AddStoryReq) returns (AddStoryResp)
+
+    @handler DeleteStory
+    delete /story(DeleteStoryReq) returns(DeleteStoryResp)
+
+    @handler GetUserStories
+    get /stories(GetUserStoryReq) returns (GetUserStoryResp)
+
+    @handler GetActiveStories
+    get /stories/active(GetActiveStoryReq) returns (GetActiveStoryResp)
+
+}
+
+
+@server (
+    group : story
+    prefix : /api/v1
+)
+service ChatApp {
+    @handler GetStoryInfo
+    get /story/:story_id (GetStoryInfoByIdRep) returns (GetStoryInfoByIdResp)
+}

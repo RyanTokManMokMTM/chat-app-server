@@ -1,0 +1,25 @@
+version: '3.5'
+services:
+  db:
+    image: mysql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_USER: admin
+      TZ: Asia/Taipei
+    restart: always
+#    privileged: true
+    command:
+      # setting mysql
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+#      --init-file ./data/init.sql
+#    volumes:
+#      - ./datas/databases:/var/lib/mysql
+
+networks:
+  app-network:
+      driver: bridge

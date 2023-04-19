@@ -13,6 +13,7 @@ type DAOInterface interface {
 	UpdateUserProfile(ctx context.Context, id uint, name string) error
 	UpdateUserAvatar(ctx context.Context, id uint, avatarName string) error
 	FindUsers(ctx context.Context, query string) ([]*models.UserModel, error)
+	CountUserAvailableStory(ctx context.Context, userID uint) (int64, error)
 
 	InsertOneFriend(ctx context.Context, userID, friendID uint) error
 	FindOneFriend(ctx context.Context, userID, friendID uint) error
@@ -38,4 +39,11 @@ type DAOInterface interface {
 	FindOneMessage(ctx context.Context, messageID uint) (*models.Message, error)
 	DeleteOneMessage(ctx context.Context, messageID uint) error
 	GetMessage(ctx context.Context, from, to, messageType uint) ([]*models.Message, error)
+
+	InsertOneStory(ctx context.Context, userID uint, mediaPath string) (uint, error)
+	FindOneStory(ctx context.Context, storyID uint) (*models.StoryModel, error)
+	FindOneUserStory(ctx context.Context, storyID, userID uint) (*models.StoryModel, error)
+	GetUserStories(ctx context.Context, userID uint) ([]uint, error)
+	GetActiveUsers(ctx context.Context, userID uint) ([]*models.UserModel, error)
+	DeleteStories(ctx context.Context, storyID uint) error
 }

@@ -9,6 +9,7 @@ import (
 	group "github.com/ryantokmanmok/chat-app-server/internal/handler/group"
 	health "github.com/ryantokmanmok/chat-app-server/internal/handler/health"
 	message "github.com/ryantokmanmok/chat-app-server/internal/handler/message"
+	story "github.com/ryantokmanmok/chat-app-server/internal/handler/story"
 	user "github.com/ryantokmanmok/chat-app-server/internal/handler/user"
 	"github.com/ryantokmanmok/chat-app-server/internal/svc"
 
@@ -167,6 +168,44 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/file/document/upload",
 				Handler: file.UploadDocumentHandler(serverCtx),
+			},
+		},
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/story",
+				Handler: story.AddStoryHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/story",
+				Handler: story.DeleteStoryHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/stories",
+				Handler: story.GetUserStoriesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/stories/active",
+				Handler: story.GetActiveStoriesHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/story/:story_id",
+				Handler: story.GetStoryInfoHandler(serverCtx),
 			},
 		},
 		rest.WithPrefix("/api/v1"),

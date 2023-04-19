@@ -251,3 +251,55 @@ type UploadFilsReq struct {
 
 type UploadFilesResp struct {
 }
+
+type AddStoryReq struct {
+}
+
+type AddStoryResp struct {
+	Code    uint `json:"code"`
+	StoryID uint `json:"story_id"`
+}
+
+type GetUserStoryReq struct {
+}
+
+type GetUserStoryResp struct {
+	Code     uint   `json:"code"`
+	StoryIDs []uint `json:"story_ids"`
+}
+
+type GetActiveStoryReq struct {
+}
+
+type GetActiveStoryResp struct {
+	Code          uint          `json:"code"`
+	FriendStroies []FriendStroy `json:"active_stories"`
+}
+
+type DeleteStoryReq struct {
+	StoryID uint `json:"story_id"`
+}
+
+type DeleteStoryResp struct {
+	Code uint `json:"code"`
+}
+
+type GetStoryInfoByIdRep struct {
+	StoryID uint `path:"story_id"`
+}
+
+type GetStoryInfoByIdResp struct {
+	Code          uint   `json:"code"`
+	StoryID       uint   `json:"story_id"`
+	StoryMediaURL string `json:"media_url"`
+	CreateAt      uint   `json:"create_at"`
+}
+
+type FriendStroy struct {
+	UserID     uint   `json:"id"`
+	Uuid       string `json:"uuid"`
+	UserName   string `json:"name"`
+	UserAvatar string `json:"avatar"`
+	IsSeen     bool   `json:"is_seen"`
+	StoriesIDs []uint `json:"stories_ids"`
+}

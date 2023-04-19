@@ -16,6 +16,8 @@ type UserModel struct {
 	Avatar   string `gorm:"type:varchar(64);null;comment:'user avatar'"`
 	Cover    string `gorm:"type:varchar(64);null;comment:'user cover'"`
 	CommonField
+
+	Stories []StoryModel `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 func (u *UserModel) BeforeCreate(tx *gorm.DB) error {
@@ -68,4 +70,14 @@ func (u *UserModel) FindUsers(db *gorm.DB, ctx context.Context, query string) ([
 		return nil, err
 	}
 	return results, nil
+}
+
+func (u *UserModel) CountUserStory(db *gorm.DB, ctx context.Context) (int64, error) {
+	now := time.Now().Unix()
+	availableTime := now - 86400
+	if err := db.WithContext(ctx).Debug().Preload("Stories", "created_at BETWEEN FROM_UINXTIME(?) AND FROM_UNIXTIME(?)", availableTime, now).Where("id = ?", u.ID).First(&u).Error; err != nil {
+		return 0, err
+	}
+
+	return int64(len(u.Stories)), nil
 }
