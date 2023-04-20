@@ -1,0 +1,3 @@
+./resources/*
+!./resources/default.jpg
+!./resources/defaultGroup.jpg
