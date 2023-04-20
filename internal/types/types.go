@@ -42,7 +42,8 @@ type SignInResp struct {
 }
 
 type GetUserInfoReq struct {
-	UserID uint `path:"user_id"`
+	UserID uint   `form:"id,optional"`
+	UUID   string `form:"uuid,optional"`
 }
 
 type GetUserInfoResp struct {

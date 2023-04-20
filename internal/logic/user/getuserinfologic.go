@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/ryantokmanmok/chat-app-server/common/errx"
+	"github.com/ryantokmanmok/chat-app-server/internal/models"
 	"github.com/ryantokmanmok/chat-app-server/internal/svc"
 	"github.com/ryantokmanmok/chat-app-server/internal/types"
 	"gorm.io/gorm"
@@ -28,13 +29,30 @@ func NewGetUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUs
 
 func (l *GetUserInfoLogic) GetUserInfo(req *types.GetUserInfoReq) (resp *types.GetUserInfoResp, err error) {
 	// todo: add your logic here and delete this line
-	u, err := l.svcCtx.DAO.FindOneUser(l.ctx, req.UserID)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
-		}
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+
+	if req.UUID == "" && req.UserID == 0 {
+		return nil, errx.NewCustomErrCode(errx.REQ_PARAM_ERROR)
 	}
+
+	var u *models.UserModel
+	if req.UserID != 0 {
+		u, err = l.svcCtx.DAO.FindOneUser(l.ctx, req.UserID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+			}
+			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		}
+	} else {
+		u, err = l.svcCtx.DAO.FindOneUserByUUID(l.ctx, req.UUID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+			}
+			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		}
+	}
+
 	return &types.GetUserInfoResp{
 		Code:   uint(http.StatusOK),
 		UUID:   u.Uuid,

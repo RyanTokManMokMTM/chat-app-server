@@ -42,7 +42,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodGet,
-				Path:    "/user/info/:user_id",
+				Path:    "/user/info",
 				Handler: user.GetUserInfoHandler(serverCtx),
 			},
 		},

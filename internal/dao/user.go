@@ -38,6 +38,17 @@ func (d *DAO) FindOneUserByEmail(ctx context.Context, email string) (*models.Use
 	return u, nil
 }
 
+func (d *DAO) FindOneUserByUUID(ctx context.Context, uuid string) (*models.UserModel, error) {
+	u := &models.UserModel{
+		Uuid: uuid,
+	}
+
+	if err := u.FindOneUserByUUID(d.engine, ctx); err != nil {
+		return nil, err
+	}
+	return u, nil
+}
+
 func (d *DAO) UpdateUserProfile(ctx context.Context, id uint, name string) error {
 	u := &models.UserModel{
 		ID: id,

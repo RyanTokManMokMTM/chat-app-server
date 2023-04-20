@@ -32,8 +32,10 @@ type (
     }
 
     GetUserInfoReq {
-        UserID uint `path:"user_id"`
+        UserID uint `form:"id,optional"`
+        UUID string `form:"uuid,optional"`
     }
+
     GetUserInfoResp {
         Code uint `json:"code"`
         UUID string `json:"uuid"`
@@ -85,7 +87,7 @@ service ChatApp{
     post /user/signin(SignInReq) returns (SignInResp)
 
     @handler GetUserInfo
-    get /user/info/:user_id(GetUserInfoReq) returns (GetUserInfoResp)
+    get /user/info(GetUserInfoReq) returns (GetUserInfoResp)
 
 }
 
