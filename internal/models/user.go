@@ -8,13 +8,14 @@ import (
 )
 
 type UserModel struct {
-	ID       uint   `gorm:"primaryKey;autoIncrement;not null"`
-	Uuid     string `gorm:"type:varchar(64);not null;unique_index:idx_uuid"`
-	NickName string `gorm:"type:varchar(32)"`
-	Email    string `gorm:"type:varchar(64)"`
-	Password string `gorm:"type:varchar(64)"`
-	Avatar   string `gorm:"type:varchar(64);null;comment:'user avatar'"`
-	Cover    string `gorm:"type:varchar(64);null;comment:'user cover'"`
+	ID            uint   `gorm:"primaryKey;autoIncrement;not null"`
+	Uuid          string `gorm:"type:varchar(64);not null;unique_index:idx_uuid"`
+	NickName      string `gorm:"type:varchar(32)"`
+	Email         string `gorm:"type:varchar(64)"`
+	Password      string `gorm:"type:varchar(64)"`
+	Avatar        string `gorm:"type:varchar(64);null;comment:'user avatar'"`
+	Cover         string `gorm:"type:varchar(64);null;comment:'user cover'"`
+	StatusMessage string `gorm:"type:varchar(64);null;comment:'user status message'"`
 	CommonField
 
 	Stories []StoryModel `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
@@ -60,8 +61,16 @@ func (u *UserModel) UpdateOneUser(db *gorm.DB, ctx context.Context, name string)
 	return db.Debug().WithContext(ctx).Model(u).Where("id = ?", u.ID).Update("NickName", name).Error
 }
 
-func (u *UserModel) UpdateOneUserAvatar(db *gorm.DB, ctx context.Context, avatarName string) error {
-	return db.Debug().WithContext(ctx).Model(u).Where("id = ?", u.ID).Update("Avatar", avatarName).Error
+func (u *UserModel) UpdateOneUserStatus(db *gorm.DB, ctx context.Context, message string) error {
+	return db.Debug().WithContext(ctx).Model(u).Where("id = ?", u.ID).Update("StatusMessage", message).Error
+}
+
+func (u *UserModel) UpdateOneUserAvatar(db *gorm.DB, ctx context.Context, avatarPath string) error {
+	return db.Debug().WithContext(ctx).Model(u).Where("id = ?", u.ID).Update("Avatar", avatarPath).Error
+}
+
+func (u *UserModel) UpdateOneUserCover(db *gorm.DB, ctx context.Context, coverPath string) error {
+	return db.Debug().WithContext(ctx).Model(u).Where("id = ?", u.ID).Update("Cover", coverPath).Error
 }
 
 func (u *UserModel) FindUsers(db *gorm.DB, ctx context.Context, query string) ([]*UserModel, error) {

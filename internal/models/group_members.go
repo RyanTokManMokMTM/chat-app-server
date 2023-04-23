@@ -58,3 +58,11 @@ func (gm *GroupMember) FindUserGroup(ctx context.Context, db *gorm.DB) ([]*Group
 	}
 	return groups, nil
 }
+
+func (gm *GroupMember) CountGroupMembers(ctx context.Context, db *gorm.DB) (int64, error) {
+	var count int64
+	if err := db.WithContext(ctx).Debug().Model(gm).Where("group_id = ?", gm.GroupID).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}

@@ -11,10 +11,13 @@ info(
 type (
     CreateGroupReq {
         GroupName string `json:"group_name"`
+        GroupMembers []uint `json:"members"`
+        GroupAvatar string `json:"avatar"`
     }
     CreateGroupResp {
         Code uint `json:"code"`
         GroupUUID string `json:"group_uuid"`
+        GroupAvatar string `json:"grou_avatar"`
     }
 
     JoinGroupReq {
@@ -67,6 +70,22 @@ type (
         Code uint `json:"code"`
         Groups []GroupInfo `json:"groups"`
     }
+
+    SearchGroupReq {
+        qurey string `form:"query"`
+    }
+    SearchGroupResp {
+        Code uint `json:"code"`
+        Results []FullGroupInfo `json:"results"`
+    }
+
+    GetGroupInfoByUUIDReq {
+        UUID string `path:"uuid"`
+    }
+    GetGroupInfoByUUIDResp {
+        Code uint `json:"code"`
+        Result FullGroupInfo `json:"result"`
+    }
 )
 
 type (
@@ -80,12 +99,16 @@ type (
         Uuid string `json:"uuid"`
         Name string `json:"name"`
         Avatar string `json:"avatar"`
+        CreatedAt uint `json:"created_at"`
     }
 
-    SearchGroupInfo {
-        Info GroupInfo `json:"group_info"`
-        IsJoined bool  `json:"is_joined"`
+    FullGroupInfo {
+        GroupInfo
+        Members uint `json:"members"`
+        IsJoined bool `json:"is_joined"`
     }
+
+
 )
 
 @server (
@@ -117,4 +140,10 @@ service  ChatApp {
 
     @handler GetUserGroups
     get /group(GetUserGroupReq) returns (GetUserGroupResp)
+
+    @handler SearchGroup
+    get /group/search(SearchGroupReq) returns (SearchGroupResp)
+
+    @handler GetGroupInfoByUUID
+    get /group/info/uuid/:uuid(GetGroupInfoByUUIDReq) returns (GetGroupInfoByUUIDResp)
 }

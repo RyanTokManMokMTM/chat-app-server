@@ -11,7 +11,7 @@ info(
 type (
     SignUpReq {
         Email string `json:"email" validate:"email,min=8,max=32"`
-        Name string `json:"name" validate:"min=8,max=16"`
+        Name string `json:"name" validate:"min=4,max=16"`
         Password string `json:"password" validate:"min=8,max=32"`
     }
     SignUpResp {
@@ -43,11 +43,30 @@ type (
         Email string `json:"email"`
         Avatar string `json:"avatar"`
         Cover string `json:"cover"`
+        StatusMessage string `json:"status"`
+    }
+
+    GetUserFriendProfileReq {
+        UserID uint `form:"id,optional"`
+        UUID string `form:"uuid,optional"`
+    }
+    GetUserFriendProfileResp {
+        Code uint `json:"code"`
+        UserInfo CommonUserInfo `json:"user_info"`
+        IsFriend bool `json:"is_friend"`
+    }
+
+    UpdateUserStatusReq {
+        Status string `json:"status" validate:"max=50"`
+    }
+
+    UpdateUserStatusResp {
+        Code uint `json:"code"`
     }
 
     UpdateUserInfoReq {
-        Name string `json:"name" validate:"min=8,max=32"`
-//        Password string `json:"password" validate:"min=8,max=32"`
+        Name string `json:"name" validate:"min=4,max=32"`
+        //        Password string `json:"password" validate:"min=8,max=32"`
     }
     UpdateUserInfoResp {
         Code uint `json:"code"`
@@ -59,9 +78,17 @@ type (
         Path string `json:"path"`
     }
 
+    UploadUserCoverReq {}
+    UploadUserCoverResp {
+        Code uint `json:"code"`
+        Path string `json:"path"`
+    }
+
+
     SearchUserReq {
          qurey string `form:"query"`
     }
+
     SearchUserResp {
         Code uint `json:"code"`
         Results []SearchUserResult `json:"results"`
@@ -71,6 +98,9 @@ type (
         UserInfo CommonUserInfo `json:"user_info"`
         IsFriend bool `json:"is_friend"`
     }
+
+
+
 )
 
 
@@ -98,11 +128,20 @@ service ChatApp{
 )
 service ChatApp{
 
+    @handler GetUserFriendProfile
+    get /user/profile(GetUserFriendProfileReq) returns (GetUserFriendProfileResp)
+
     @handler UpdateUserInfo
     patch /user/info(UpdateUserInfoReq) returns (UpdateUserInfoResp)
 
+    @handler UpdateUserStatus
+    patch /user/status(UpdateUserStatusReq) returns (UpdateUserStatusResp)
+
     @handler UploadUserAvatar
     post /user/avatar(UploadUserAvatarReq) returns (UploadUserAvatarResp)
+
+    @handler UploadUserCover
+    post /user/cover(UploadUserAvatarReq) returns (UploadUserAvatarResp)
 
     @handler SearchUser
     get /user/search(SearchUserReq) returns (SearchUserResp)

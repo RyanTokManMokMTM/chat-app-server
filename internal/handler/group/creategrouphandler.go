@@ -36,7 +36,7 @@ func CreateGroupHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := group.NewCreateGroupLogic(r.Context(), svcCtx)
+		l := group.NewCreateGroupLogic(r.Context(), svcCtx, r)
 		resp, err := l.CreateGroup(&req)
 		if err != nil {
 			//convert to customError

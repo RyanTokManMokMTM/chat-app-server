@@ -52,14 +52,29 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				Method:  http.MethodGet,
+				Path:    "/user/profile",
+				Handler: user.GetUserFriendProfileHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPatch,
 				Path:    "/user/info",
 				Handler: user.UpdateUserInfoHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodPatch,
+				Path:    "/user/status",
+				Handler: user.UpdateUserStatusHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPost,
 				Path:    "/user/avatar",
 				Handler: user.UploadUserAvatarHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/user/cover",
+				Handler: user.UploadUserCoverHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
@@ -134,6 +149,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodGet,
 				Path:    "/group",
 				Handler: group.GetUserGroupsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/group/search",
+				Handler: group.SearchGroupHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/group/info/uuid/:uuid",
+				Handler: group.GetGroupInfoByUUIDHandler(serverCtx),
 			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),

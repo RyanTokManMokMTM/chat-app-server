@@ -12,6 +12,7 @@ import (
 )
 
 const AvatarFileField = "avatar"
+const CoverFileField = "cover"
 
 func UploadFileFromRequest(r *http.Request, maxMemory int64, name, filePath string) (string, error) {
 	err := r.ParseMultipartForm(maxMemory) // a total of maxMemory bytes of its file parts are stored in memory

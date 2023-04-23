@@ -22,12 +22,13 @@ type (
 
 type (
 	CommonUserInfo {
-		ID       uint   `json:"id,omitempty"`
-		Uuid     string `json:"uuid,omitempty"`
-		NickName string `json:"name,omitempty"`
-		Avatar   string `json:"avatar,omitempty"`
-		Email    string `json:"email,omitempty"`
-		Cover    string `json:"cover,omitempty"`
+		ID            uint   `json:"id,omitempty"`
+		Uuid          string `json:"uuid,omitempty"`
+		NickName      string `json:"name,omitempty"`
+		Avatar        string `json:"avatar,omitempty"`
+		Email         string `json:"email,omitempty"`
+		Cover         string `json:"cover,omitempty"`
+		StatusMessage string `json:"status"`
 	}
 )
 

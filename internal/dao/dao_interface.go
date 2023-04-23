@@ -12,7 +12,9 @@ type DAOInterface interface {
 	FindOneUserByEmail(ctx context.Context, email string) (*models.UserModel, error)
 	FindOneUserByUUID(ctx context.Context, uuid string) (*models.UserModel, error)
 	UpdateUserProfile(ctx context.Context, id uint, name string) error
-	UpdateUserAvatar(ctx context.Context, id uint, avatarName string) error
+	UpdateUserStatusMessage(ctx context.Context, id uint, message string) error
+	UpdateUserAvatar(ctx context.Context, id uint, avatarPath string) error
+	UpdateUserCover(ctx context.Context, id uint, coverPath string) error
 	FindUsers(ctx context.Context, query string) ([]*models.UserModel, error)
 	CountUserAvailableStory(ctx context.Context, userID uint) (int64, error)
 
@@ -21,13 +23,14 @@ type DAOInterface interface {
 	DeleteOneFriend(ctx context.Context, userID, friendID uint) error
 	GetUserFriendList(ctx context.Context, userID uint) ([]*models.UserFriend, error)
 
-	InsertOneGroup(ctx context.Context, groupName string, userID uint) (*models.Group, error)
+	InsertOneGroup(ctx context.Context, groupName, avatar string, userID uint) (*models.Group, error)
 	FindOneGroup(ctx context.Context, groupID uint) (*models.Group, error)
 	FindOneGroupByUUID(ctx context.Context, groupUUID string) (*models.Group, error)
 	DeleteOneGroup(ctx context.Context, groupID uint) error
 	UpdateOneGroup(ctx context.Context, groupID uint, groupName string) error
 	UpdateOneGroupAvatar(ctx context.Context, groupID uint, avatarName string) error
 	GetUserGroups(ctx context.Context, userID uint) ([]*models.GroupMember, error)
+	SearchGroup(ctx context.Context, query string) ([]*models.Group, error)
 
 	InsertOneGroupMember(ctx context.Context, groupID, userID uint) error
 	FindOneGroupMember(ctx context.Context, groupID, userID uint) (*models.GroupMember, error)
@@ -35,6 +38,7 @@ type DAOInterface interface {
 	DeleteGroupMember(ctx context.Context, groupID, userID uint) error
 	DeleteAllGroupMembers(ctx context.Context, groupID uint) error
 	GetGroupMembers(ctx context.Context, groupID uint) ([]*models.GroupMember, error)
+	CountGroupMembers(ctx context.Context, groupID uint) (int64, error)
 
 	InsertOneMessage(ctx context.Context, message *socket_message.Message)
 	FindOneMessage(ctx context.Context, messageID uint) (*models.Message, error)

@@ -65,3 +65,11 @@ func (d *DAO) GetUserGroups(ctx context.Context, userID uint) ([]*models.GroupMe
 	return gm.FindUserGroup(ctx, d.engine)
 
 }
+
+func (d *DAO) CountGroupMembers(ctx context.Context, groupID uint) (int64, error) {
+	gm := &models.GroupMember{
+		GroupID: groupID,
+	}
+	return gm.CountGroupMembers(ctx, d.engine)
+
+}

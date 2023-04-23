@@ -57,12 +57,28 @@ func (d *DAO) UpdateUserProfile(ctx context.Context, id uint, name string) error
 	return u.UpdateOneUser(d.engine, ctx, name)
 }
 
-func (d *DAO) UpdateUserAvatar(ctx context.Context, id uint, avatarName string) error {
+func (d *DAO) UpdateUserStatusMessage(ctx context.Context, id uint, message string) error {
 	u := &models.UserModel{
 		ID: id,
 	}
 
-	return u.UpdateOneUserAvatar(d.engine, ctx, avatarName)
+	return u.UpdateOneUserStatus(d.engine, ctx, message)
+}
+
+func (d *DAO) UpdateUserAvatar(ctx context.Context, id uint, avatarPath string) error {
+	u := &models.UserModel{
+		ID: id,
+	}
+
+	return u.UpdateOneUserAvatar(d.engine, ctx, avatarPath)
+}
+
+func (d *DAO) UpdateUserCover(ctx context.Context, id uint, coverPath string) error {
+	u := &models.UserModel{
+		ID: id,
+	}
+
+	return u.UpdateOneUserCover(d.engine, ctx, coverPath)
 }
 
 func (d *DAO) FindUsers(ctx context.Context, query string) ([]*models.UserModel, error) {

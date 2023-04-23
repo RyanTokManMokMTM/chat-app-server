@@ -9,17 +9,18 @@ type HealthCheckResp struct {
 }
 
 type CommonUserInfo struct {
-	ID       uint   `json:"id,omitempty"`
-	Uuid     string `json:"uuid,omitempty"`
-	NickName string `json:"name,omitempty"`
-	Avatar   string `json:"avatar,omitempty"`
-	Email    string `json:"email,omitempty"`
-	Cover    string `json:"cover,omitempty"`
+	ID            uint   `json:"id,omitempty"`
+	Uuid          string `json:"uuid,omitempty"`
+	NickName      string `json:"name,omitempty"`
+	Avatar        string `json:"avatar,omitempty"`
+	Email         string `json:"email,omitempty"`
+	Cover         string `json:"cover,omitempty"`
+	StatusMessage string `json:"status"`
 }
 
 type SignUpReq struct {
 	Email    string `json:"email" validate:"email,min=8,max=32"`
-	Name     string `json:"name" validate:"min=8,max=16"`
+	Name     string `json:"name" validate:"min=4,max=16"`
 	Password string `json:"password" validate:"min=8,max=32"`
 }
 
@@ -47,16 +48,36 @@ type GetUserInfoReq struct {
 }
 
 type GetUserInfoResp struct {
-	Code   uint   `json:"code"`
-	UUID   string `json:"uuid"`
-	Name   string `json:"name"`
-	Email  string `json:"email"`
-	Avatar string `json:"avatar"`
-	Cover  string `json:"cover"`
+	Code          uint   `json:"code"`
+	UUID          string `json:"uuid"`
+	Name          string `json:"name"`
+	Email         string `json:"email"`
+	Avatar        string `json:"avatar"`
+	Cover         string `json:"cover"`
+	StatusMessage string `json:"status"`
+}
+
+type GetUserFriendProfileReq struct {
+	UserID uint   `form:"id,optional"`
+	UUID   string `form:"uuid,optional"`
+}
+
+type GetUserFriendProfileResp struct {
+	Code     uint           `json:"code"`
+	UserInfo CommonUserInfo `json:"user_info"`
+	IsFriend bool           `json:"is_friend"`
+}
+
+type UpdateUserStatusReq struct {
+	Status string `json:"status" validate:"max=50"`
+}
+
+type UpdateUserStatusResp struct {
+	Code uint `json:"code"`
 }
 
 type UpdateUserInfoReq struct {
-	Name string `json:"name" validate:"min=8,max=32"`
+	Name string `json:"name" validate:"min=4,max=32"`
 }
 
 type UpdateUserInfoResp struct {
@@ -67,6 +88,14 @@ type UploadUserAvatarReq struct {
 }
 
 type UploadUserAvatarResp struct {
+	Code uint   `json:"code"`
+	Path string `json:"path"`
+}
+
+type UploadUserCoverReq struct {
+}
+
+type UploadUserCoverResp struct {
 	Code uint   `json:"code"`
 	Path string `json:"path"`
 }
@@ -109,12 +138,15 @@ type GetFriendListResp struct {
 }
 
 type CreateGroupReq struct {
-	GroupName string `json:"group_name"`
+	GroupName    string `json:"group_name"`
+	GroupMembers []uint `json:"members"`
+	GroupAvatar  string `json:"avatar"`
 }
 
 type CreateGroupResp struct {
-	Code      uint   `json:"code"`
-	GroupUUID string `json:"group_uuid"`
+	Code        uint   `json:"code"`
+	GroupUUID   string `json:"group_uuid"`
+	GroupAvatar string `json:"grou_avatar"`
 }
 
 type JoinGroupReq struct {
@@ -175,21 +207,41 @@ type GetUserGroupResp struct {
 	Groups []GroupInfo `json:"groups"`
 }
 
+type SearchGroupReq struct {
+	Qurey string `form:"query"`
+}
+
+type SearchGroupResp struct {
+	Code    uint            `json:"code"`
+	Results []FullGroupInfo `json:"results"`
+}
+
+type GetGroupInfoByUUIDReq struct {
+	UUID string `path:"uuid"`
+}
+
+type GetGroupInfoByUUIDResp struct {
+	Code   uint          `json:"code"`
+	Result FullGroupInfo `json:"result"`
+}
+
 type GroupMemberInfo struct {
 	CommonUserInfo
 	IsGroupLead bool `json:"is_group_lead"`
 }
 
 type GroupInfo struct {
-	ID     uint   `json:"id"`
-	Uuid   string `json:"uuid"`
-	Name   string `json:"name"`
-	Avatar string `json:"avatar"`
+	ID        uint   `json:"id"`
+	Uuid      string `json:"uuid"`
+	Name      string `json:"name"`
+	Avatar    string `json:"avatar"`
+	CreatedAt uint   `json:"created_at"`
 }
 
-type SearchGroupInfo struct {
-	Info     GroupInfo `json:"group_info"`
-	IsJoined bool      `json:"is_joined"`
+type FullGroupInfo struct {
+	GroupInfo
+	Members  uint `json:"members"`
+	IsJoined bool `json:"is_joined"`
 }
 
 type GetMessagesReq struct {

@@ -34,8 +34,13 @@ func NewUserSignUpLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserSi
 func (l *UserSignUpLogic) UserSignUp(req *types.SignUpReq) (resp *types.SignUpResp, err error) {
 	// todo: add your logic here and delete this line
 	logx.Infof("Call User SignUp API with email : %v, name : %v", req.Email, req.Name)
-	_, err = l.svcCtx.DAO.FindOneUserByEmail(l.ctx, req.Email)
+	found, err := l.svcCtx.DAO.FindOneUserByEmail(l.ctx, req.Email)
+
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+	}
+
+	if found != nil {
 		return nil, errx.NewCustomErrCode(errx.EMAIL_HAS_BEEN_REGISTERED)
 	}
 

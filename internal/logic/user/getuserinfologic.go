@@ -54,11 +54,12 @@ func (l *GetUserInfoLogic) GetUserInfo(req *types.GetUserInfoReq) (resp *types.G
 	}
 
 	return &types.GetUserInfoResp{
-		Code:   uint(http.StatusOK),
-		UUID:   u.Uuid,
-		Email:  u.Email,
-		Name:   u.NickName,
-		Avatar: u.Avatar,
-		Cover:  u.Cover,
+		Code:          uint(http.StatusOK),
+		UUID:          u.Uuid,
+		Email:         u.Email,
+		Name:          u.NickName,
+		Avatar:        u.Avatar,
+		Cover:         u.Cover,
+		StatusMessage: u.StatusMessage,
 	}, nil
 }

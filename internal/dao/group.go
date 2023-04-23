@@ -5,11 +5,11 @@ import (
 	"github.com/ryantokmanmok/chat-app-server/internal/models"
 )
 
-func (d *DAO) InsertOneGroup(ctx context.Context, groupName string, userID uint) (*models.Group, error) {
+func (d *DAO) InsertOneGroup(ctx context.Context, groupName, avatar string, userID uint) (*models.Group, error) {
 	g := &models.Group{
 		GroupName:   groupName,
 		GroupLead:   userID,
-		GroupAvatar: "", // leave it empty now
+		GroupAvatar: avatar, // leave it empty now
 	}
 
 	if err := g.InsertOne(ctx, d.engine); err != nil {
@@ -66,4 +66,9 @@ func (d *DAO) UpdateOneGroupAvatar(ctx context.Context, groupID uint, avatarName
 	}
 
 	return g.UpdateOne(ctx, d.engine)
+}
+
+func (d *DAO) SearchGroup(ctx context.Context, query string) ([]*models.Group, error) {
+	g := &models.Group{}
+	return g.SearchGroup(ctx, d.engine, query)
 }

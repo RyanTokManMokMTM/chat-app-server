@@ -20,7 +20,7 @@ type Group struct {
 
 func (g *Group) BeforeCreate(tx *gorm.DB) error {
 	g.Uuid = uuid.New().String()
-	g.GroupAvatar = "/defaultGroup.jpg"
+	//g.GroupAvatar = "/defaultGroup.jpg"
 	return nil
 }
 
@@ -62,4 +62,12 @@ func (g *Group) UpdateOne(ctx context.Context, db *gorm.DB) error {
 
 func (g *Group) UpdateOneAvatar(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().Model(g).Where("id = ?", g.ID).Update("GroupAvatar", g.GroupAvatar).Error
+}
+
+func (g *Group) SearchGroup(ctx context.Context, db *gorm.DB, query string) ([]*Group, error) {
+	var groups []*Group
+	if err := db.WithContext(ctx).Debug().Model(g).Where("group_name like ?", "%"+query+"%").Find(&groups).Error; err != nil {
+		return nil, err
+	}
+	return groups, nil
 }

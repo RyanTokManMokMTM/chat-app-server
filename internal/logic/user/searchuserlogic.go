@@ -71,12 +71,13 @@ func (l *SearchUserLogic) SearchUser(req *types.SearchUserReq) (resp *types.Sear
 
 		users = append(users, types.SearchUserResult{
 			UserInfo: types.CommonUserInfo{
-				ID:       info.ID,
-				Uuid:     info.Uuid,
-				NickName: info.NickName,
-				Email:    info.Email,
-				Avatar:   info.Avatar,
-				Cover:    info.Cover,
+				ID:            info.ID,
+				Uuid:          info.Uuid,
+				NickName:      info.NickName,
+				Email:         info.Email,
+				Avatar:        info.Avatar,
+				Cover:         info.Cover,
+				StatusMessage: info.StatusMessage,
 			}, IsFriend: isFriend,
 		})
 	}

@@ -48,10 +48,11 @@ func (l *GetUserGroupsLogic) GetUserGroups(req *types.GetUserGroupReq) (resp *ty
 	var userGroups = make([]types.GroupInfo, 0)
 	for _, g := range groups {
 		userGroups = append(userGroups, types.GroupInfo{
-			ID:     g.GroupInfo.ID,
-			Uuid:   g.GroupInfo.Uuid,
-			Name:   g.GroupInfo.GroupName,
-			Avatar: g.GroupInfo.GroupAvatar,
+			ID:        g.GroupInfo.ID,
+			Uuid:      g.GroupInfo.Uuid,
+			Name:      g.GroupInfo.GroupName,
+			Avatar:    g.GroupInfo.GroupAvatar,
+			CreatedAt: uint(g.GroupInfo.CreatedAt.Unix()),
 		})
 	}
 	return &types.GetUserGroupResp{
