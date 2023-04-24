@@ -65,7 +65,7 @@ func (d *DAO) UpdateOneGroupAvatar(ctx context.Context, groupID uint, avatarName
 		GroupAvatar: avatarName,
 	}
 
-	return g.UpdateOne(ctx, d.engine)
+	return g.UpdateOneAvatar(ctx, d.engine)
 }
 
 func (d *DAO) SearchGroup(ctx context.Context, query string) ([]*models.Group, error) {

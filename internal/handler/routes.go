@@ -137,7 +137,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPost,
-				Path:    "/group/avatar/:grou_id",
+				Path:    "/group/avatar/:group_id",
 				Handler: group.UploadGroupAvatarHandler(serverCtx),
 			},
 			{

@@ -192,11 +192,12 @@ type UpdateGroupInfoResp struct {
 }
 
 type UploadGroupAvatarReq struct {
-	GroupID uint `path:"grou_id"`
+	GroupID uint `path:"group_id"`
 }
 
 type UploadGroupAvatarResp struct {
-	Code uint `json:"code"`
+	Code uint   `json:"code"`
+	Path string `json:"path"`
 }
 
 type GetUserGroupReq struct {
@@ -242,6 +243,7 @@ type FullGroupInfo struct {
 	GroupInfo
 	Members  uint `json:"members"`
 	IsJoined bool `json:"is_joined"`
+	IsOwner  bool `json:"is_owner"`
 }
 
 type GetMessagesReq struct {

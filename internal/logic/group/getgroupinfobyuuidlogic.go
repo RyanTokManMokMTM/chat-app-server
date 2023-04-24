@@ -72,6 +72,7 @@ func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUU
 			},
 			Members:  uint(count),
 			IsJoined: isJoined,
+			IsOwner:  group.GroupLead == userID,
 		},
 	}, nil
 }

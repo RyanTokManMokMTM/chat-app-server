@@ -59,10 +59,11 @@ type (
     }
 
     UploadGroupAvatarReq {
-        GroupID uint `path:"grou_id"`
+        GroupID uint `path:"group_id"`
     }
     UploadGroupAvatarResp {
         Code uint `json:"code"`
+        Path string `json:"path"`
     }
 
     GetUserGroupReq{}
@@ -106,6 +107,7 @@ type (
         GroupInfo
         Members uint `json:"members"`
         IsJoined bool `json:"is_joined"`
+        IsOwner bool `json:"is_owner"`
     }
 
 
@@ -133,7 +135,7 @@ service  ChatApp {
     get   /group/members/:group_id(GetGroupMembersReq) returns (GetGroupMembersResp)
 
     @handler UploadGroupAvatar
-    post /group/avatar/:grou_id(UploadGroupAvatarReq) returns ( UploadGroupAvatarResp)
+    post /group/avatar/:group_id(UploadGroupAvatarReq) returns ( UploadGroupAvatarResp)
 
     @handler UpdateGroupInfo
     patch /group/update(UpdateGroupInfoReq) returns ( UpdateGroupInfoResp)

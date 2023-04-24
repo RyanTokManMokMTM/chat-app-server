@@ -67,5 +67,6 @@ func (l *UploadGroupAvatarLogic) UploadGroupAvatar(req *types.UploadGroupAvatarR
 	}
 	return &types.UploadGroupAvatarResp{
 		Code: uint(http.StatusOK),
+		Path: path,
 	}, nil
 }

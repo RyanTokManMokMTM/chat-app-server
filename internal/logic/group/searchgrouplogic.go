@@ -75,6 +75,7 @@ func (l *SearchGroupLogic) SearchGroup(req *types.SearchGroupReq) (resp *types.S
 			},
 			Members:  uint(count),
 			IsJoined: isJoined,
+			IsOwner:  group.GroupLead == userID,
 		})
 	}
 	return &types.SearchGroupResp{
