@@ -1,7 +1,7 @@
 Name: ChatApp
 Host: 0.0.0.0
 Port: 8000
-MaxBytes: 52428800
+MaxBytes: 524288000 # 500MB
 
 Log:
   Encoding: plain

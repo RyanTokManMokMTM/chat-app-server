@@ -291,20 +291,12 @@ type UploadImagesReq struct {
 type UploadImagesResp struct {
 }
 
-type UploadFildReq struct {
-	Data     string `json:"data"`
-	FileName string `json:"file_name"`
+type UploadFileReq struct {
 }
 
 type UploadFileResp struct {
 	Code uint   `json:"code"`
 	Path string `json:"path"`
-}
-
-type UploadFilsReq struct {
-}
-
-type UploadFilesResp struct {
 }
 
 type AddStoryReq struct {

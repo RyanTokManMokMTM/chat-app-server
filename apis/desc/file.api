@@ -23,17 +23,20 @@ type (
     }
     UploadImagesResp {}
 
-    UploadFildReq {
-        Data string `json:"data"`
-        FileName string `json:"file_name"`
-    }
+//    UploadFildReq {
+//        Data string `json:"data"`
+//        FileName string `json:"file_name"`
+//    }
+//    UploadFileResp {
+//        Code uint `json:"code"`
+//        Path string `json:"path"`
+//    }
+
+    UploadFileReq {}
     UploadFileResp {
         Code uint `json:"code"`
         Path string `json:"path"`
     }
-
-    UploadFilsReq {}
-    UploadFilesResp {}
 )
 
 @server (
@@ -44,6 +47,9 @@ service ChatApp {
     @handler UploadImage
     post  /file/image/upload (UploadImageReq) returns (UploadImageResp);
 
-    @handler UploadDocument
-    post  /file/document/upload (UploadFildReq) returns (UploadFileResp);
+    @handler UploadFile
+    post  /file/upload (UploadFileReq) returns (UploadFileResp);
+//
+//    @handler UploadDocument
+//    post  /file/document/upload (UploadFildReq) returns (UploadFileResp);
 }

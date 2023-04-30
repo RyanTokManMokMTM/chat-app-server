@@ -29,6 +29,7 @@ const (
 
 	//Story Reply?
 	STORY //with URL path and content and available time
+	SYS
 )
 
 const (

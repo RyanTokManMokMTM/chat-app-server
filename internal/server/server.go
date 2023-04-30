@@ -71,10 +71,11 @@ func (s *SocketServer) Start() {
 			//TODO: Send To Nobody , it means broadcast to a specific user/group
 			if socketMessage.ToUUID != "" {
 				//TODO: Send it to someone with a specific Uuid
-				if socketMessage.ContentType >= variable.TEXT && socketMessage.ContentType <= variable.STORY {
+				if socketMessage.ContentType >= variable.TEXT && socketMessage.ContentType <= variable.SYS {
 					//TODO: save message
 					conn, ok := s.Clients[socketMessage.FromUUID]
-					if ok {
+					if ok && socketMessage.ContentType != variable.SYS {
+						//TODO: No need to save system message
 						saveMessage(conn.svcCtx, &socketMessage)
 					}
 
@@ -82,7 +83,6 @@ func (s *SocketServer) Start() {
 					if err != nil {
 						logx.Error(err)
 						continue
-
 					}
 
 					if socketMessage.MessageType == variable.MESSAGE_TYPE_USERCHAT {
@@ -99,6 +99,7 @@ func (s *SocketServer) Start() {
 						}
 
 					} else if socketMessage.MessageType == variable.MESSAGE_TYPE_GROUPCHAT {
+						logx.Info("Sending Group Message")
 						sendGroupMessage(&socketMessage, s, conn.svcCtx)
 					}
 
@@ -158,7 +159,7 @@ func sendGroupMessage(message *socket_message.Message, server *SocketServer, svc
 
 	}
 	for _, mem := range members {
-		if mem.MemberInfo.Uuid == message.FromUUID {
+		if mem.MemberInfo.Uuid == message.FromUUID && message.ContentType != variable.SYS {
 			continue
 		}
 
@@ -189,7 +190,7 @@ func sendGroupMessage(message *socket_message.Message, server *SocketServer, svc
 		if !ok {
 			logx.Infof("Group %v 's member %v is offline", message.ToUUID, mem.MemberInfo.Uuid)
 			ctx := context.Background()
-			_, err := variable.RedisConnection.LPush(ctx, mem.MemberInfo.Uuid, messageBytes).Result()
+			_, err := variable.RedisConnection.RPush(ctx, mem.MemberInfo.Uuid, messageBytes).Result()
 			if err != nil {
 				logx.Error("offline message to redis err %s", err.Error())
 			}
@@ -232,7 +233,14 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 
 	go func() {
 		ctx := context.Background()
-		messages, err := variable.RedisConnection.LRange(ctx, u.Uuid, 0, 100).Result()
+
+		//we need to create a connection for each user?
+		len, err := variable.RedisConnection.LLen(ctx, u.Uuid).Result()
+		if err != nil {
+			logx.Error("getting Redis length err ", err)
+			return
+		}
+		messages, err := variable.RedisConnection.LRange(ctx, u.Uuid, 0, len).Result()
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			logx.Errorf("get offline messages error %s ", err.Error())

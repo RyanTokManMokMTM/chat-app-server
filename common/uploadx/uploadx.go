@@ -33,7 +33,7 @@ func UploadFileFromRequest(r *http.Request, maxMemory int64, name, filePath stri
 	defer tempFile.Close()
 
 	io.Copy(tempFile, f)
-	return header.Filename, nil
+	return "/" + header.Filename, nil
 }
 
 func UploadFile(f multipart.File, header *multipart.FileHeader, filePath string) (string, error) {
@@ -46,7 +46,7 @@ func UploadFile(f multipart.File, header *multipart.FileHeader, filePath string)
 	defer tempFile.Close()
 
 	_, _ = io.Copy(tempFile, f)
-	return header.Filename, nil
+	return "/" + header.Filename, nil
 }
 
 func UploadImageByBase64(data string, format string, path string) (string, error) {

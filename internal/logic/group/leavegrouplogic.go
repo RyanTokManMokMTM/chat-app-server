@@ -3,8 +3,10 @@ package group
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/ryantokmanmok/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmok/chat-app-server/common/errx"
+	"github.com/ryantokmanmok/chat-app-server/internal/handler/ws"
 	"gorm.io/gorm"
 	"net/http"
 
@@ -31,15 +33,14 @@ func NewLeaveGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LeaveG
 func (l *LeaveGroupLogic) LeaveGroup(req *types.LeaveGroupReq) (resp *types.LeaveGroupResp, err error) {
 	// todo: add your logic here and delete this line
 	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	u, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
 		}
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
-
-	_, err = l.svcCtx.DAO.FindOneGroup(l.ctx, req.GroupID)
+	g, err := l.svcCtx.DAO.FindOneGroup(l.ctx, req.GroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.GROUP_NOT_EXIST)
@@ -58,6 +59,13 @@ func (l *LeaveGroupLogic) LeaveGroup(req *types.LeaveGroupReq) (resp *types.Leav
 	if err := l.svcCtx.DAO.DeleteGroupMember(l.ctx, req.GroupID, userID); err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
+
+	go func() {
+		logx.Info("sending a system message")
+		sysMessage := fmt.Sprintf("%s left the group", u.NickName)
+		ws.SendGroupSystemNotification(u.Uuid, g.Uuid, sysMessage)
+	}()
+
 	return &types.LeaveGroupResp{
 		Code: uint(http.StatusOK),
 	}, nil

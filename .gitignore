@@ -1,3 +1,4 @@
 ./resources/*
 !./resources/default.jpg
 !./resources/defaultGroup.jpg
+!./resources/cover.jpg

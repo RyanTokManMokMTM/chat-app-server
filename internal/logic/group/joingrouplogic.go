@@ -3,8 +3,10 @@ package group
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/ryantokmanmok/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmok/chat-app-server/common/errx"
+	"github.com/ryantokmanmok/chat-app-server/internal/handler/ws"
 	"github.com/ryantokmanmok/chat-app-server/internal/svc"
 	"github.com/ryantokmanmok/chat-app-server/internal/types"
 	"gorm.io/gorm"
@@ -30,14 +32,14 @@ func NewJoinGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *JoinGro
 func (l *JoinGroupLogic) JoinGroup(req *types.JoinGroupReq) (resp *types.JoinGroupResp, err error) {
 	// todo: add your logic here and delete this line
 	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	u, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
 		}
 	}
 
-	_, err = l.svcCtx.DAO.FindOneGroup(l.ctx, req.GroupID)
+	g, err := l.svcCtx.DAO.FindOneGroup(l.ctx, req.GroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.GROUP_NOT_EXIST)
@@ -59,6 +61,11 @@ func (l *JoinGroupLogic) JoinGroup(req *types.JoinGroupReq) (resp *types.JoinGro
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
+	go func() {
+		logx.Info("sending a system message")
+		sysMessage := fmt.Sprintf("%s joined the group", u.NickName)
+		ws.SendGroupSystemNotification(u.Uuid, g.Uuid, sysMessage)
+	}()
 	return &types.JoinGroupResp{
 		Code: uint(http.StatusOK),
 	}, nil

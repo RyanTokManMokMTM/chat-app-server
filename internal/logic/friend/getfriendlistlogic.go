@@ -46,7 +46,7 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 	var respList = make([]types.CommonUserInfo, 0)
 	for _, info := range list {
 		respList = append(respList, types.CommonUserInfo{
-			ID:       info.ID,
+			ID:       info.FriendInfo.ID,
 			Uuid:     info.FriendInfo.Uuid,
 			NickName: info.FriendInfo.NickName,
 			Avatar:   info.FriendInfo.Avatar,

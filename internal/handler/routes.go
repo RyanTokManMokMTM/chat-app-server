@@ -191,8 +191,8 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPost,
-				Path:    "/file/document/upload",
-				Handler: file.UploadDocumentHandler(serverCtx),
+				Path:    "/file/upload",
+				Handler: file.UploadFileHandler(serverCtx),
 			},
 		},
 		rest.WithPrefix("/api/v1"),
