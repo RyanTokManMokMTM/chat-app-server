@@ -45,9 +45,15 @@ type (
     jwt: Auth
 )
 service ChatApp {
+    @doc(
+        summary : "get room messages by roomID"
+    )
     @handler GetMessages
     get /message(GetMessagesReq) returns (GetMessagesResp);
 
+    @doc(
+        summary : "Delete one message"
+    )
     @handler DeleteMessage
     delete /message(DeleteMessageReq) returns (DeleteMessageResp);
 }

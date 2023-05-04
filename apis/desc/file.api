@@ -44,9 +44,15 @@ type (
     prefix : /api/v1
 )
 service ChatApp {
+    @doc (
+        summary  : "Upload only image"
+    )
     @handler UploadImage
     post  /file/image/upload (UploadImageReq) returns (UploadImageResp);
 
+    @doc (
+        summary  : "Upload any file"
+    )
     @handler UploadFile
     post  /file/upload (UploadFileReq) returns (UploadFileResp);
 //

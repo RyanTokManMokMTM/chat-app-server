@@ -1,10 +1,11 @@
 syntax = "v1"
-import "./desc/user.api"
-import  "./desc/friend.api"
-import  "./desc/group.api"
-import  "./desc/message.api"
-import 	"./desc/file.api"
-import 	"./desc/story.api"
+import "desc/user.api"
+import "desc/friend.api"
+import "desc/group.api"
+import "desc/message.api"
+import "desc/file.api"
+import "desc/story.api"
+
 info(
 	title: "chat-app-server"
 	desc: "A server for a chat-app"
@@ -37,6 +38,9 @@ type (
 	prefix: /api/v1
 )
 service  ChatApp {
+	@doc (
+		summary : "Server Health check - get a poing message if the server is alive.'"
+	)
 	@handler HealthCheck
 	get /ping(HealthCheckReq) returns (HealthCheckResp)
 }

@@ -38,12 +38,21 @@ type (
     jwt : Auth
 )
 service  ChatApp {
+    @doc (
+        summary  : "Add a new friend"
+    )
     @handler AddFriend
     post /user/friend(AddFriendReq) returns (AddFriendResp);
 
+    @doc (
+        summary  : "Delete a friend"
+    )
     @handler DeleteFriend
     delete /user/friend(DeleteFriendReq) returns (DeleteFriendResp);
 
+    @doc (
+        summary  : "Get all user friends"
+    )
     @handler GetFriendList
     get /user/friends(GetFriendListReq) returns (GetFriendListResp)
 }

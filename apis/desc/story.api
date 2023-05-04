@@ -64,15 +64,27 @@ type (
     jwt : Auth
 )
 service ChatApp{
+    @doc(
+        summary : "Create a new instance story"
+    )
     @handler AddStory
     post /story(AddStoryReq) returns (AddStoryResp)
 
+    @doc(
+        summary : "Delete an existing story"
+    )
     @handler DeleteStory
     delete /story(DeleteStoryReq) returns(DeleteStoryResp)
 
+    @doc(
+        summary : "Get owner stories"
+    )
     @handler GetUserStories
     get /stories(GetUserStoryReq) returns (GetUserStoryResp)
 
+    @doc(
+        summary : "Get friends active story"
+    )
     @handler GetActiveStories
     get /stories/active(GetActiveStoryReq) returns (GetActiveStoryResp)
 
@@ -84,6 +96,9 @@ service ChatApp{
     prefix : /api/v1
 )
 service ChatApp {
+    @doc(
+        summary : "Get an instance story by storyID"
+    )
     @handler GetStoryInfo
     get /story/:story_id (GetStoryInfoByIdRep) returns (GetStoryInfoByIdResp)
 }

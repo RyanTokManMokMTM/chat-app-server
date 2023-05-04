@@ -1,0 +1,2000 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "chat-app-server",
+    "description": "A server for a chat-app",
+    "version": "v1"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/file/image/upload": {
+      "post": {
+        "summary": "Upload only image",
+        "operationId": "UploadImage",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UploadImageResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UploadImageReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "file"
+        ]
+      }
+    },
+    "/api/v1/file/upload": {
+      "post": {
+        "summary": "Upload any file",
+        "operationId": "UploadFile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UploadFileResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "    UploadFildReq {,        Data string `json:\"data\"`,        FileName string `json:\"file_name\"`,    },    UploadFileResp {,        Code uint `json:\"code\"`,        Path string `json:\"path\"`,    }",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UploadFileReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "file"
+        ]
+      }
+    },
+    "/api/v1/group": {
+      "get": {
+        "summary": "Get user joined group",
+        "operationId": "GetUserGroups",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetUserGroupResp"
+            }
+          }
+        },
+        "requestBody": {},
+        "tags": [
+          "group"
+        ]
+      },
+      "delete": {
+        "summary": "Delete an existing group",
+        "operationId": "DeleteGroup",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/DeleteGroupResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeleteGroupReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "group"
+        ]
+      },
+      "post": {
+        "summary": "Create a new group with group members",
+        "operationId": "CreateGroup",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/CreateGroupResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateGroupReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "group"
+        ]
+      }
+    },
+    "/api/v1/group/avatar/{group_id}": {
+      "post": {
+        "summary": "Update and update group avatar",
+        "operationId": "UploadGroupAvatar",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UploadGroupAvatarResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UploadGroupAvatarReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "group"
+        ]
+      }
+    },
+    "/api/v1/group/info/uuid/{uuid}": {
+      "get": {
+        "summary": "Get group info by UUID",
+        "operationId": "GetGroupInfoByUUID",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetGroupInfoByUUIDResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "group"
+        ]
+      }
+    },
+    "/api/v1/group/join/{group_id}": {
+      "post": {
+        "summary": "Join a new group by groupID",
+        "operationId": "JoinGroup",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/JoinGroupResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JoinGroupReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "group"
+        ]
+      }
+    },
+    "/api/v1/group/leave/{group_id}": {
+      "delete": {
+        "summary": "Leave a joined group by groupID",
+        "operationId": "LeaveGroup",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/LeaveGroupResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LeaveGroupReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "group"
+        ]
+      }
+    },
+    "/api/v1/group/members/{group_id}": {
+      "get": {
+        "summary": "Get an group members",
+        "operationId": "GetGroupMembers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetGroupMembersResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "group"
+        ]
+      }
+    },
+    "/api/v1/group/search": {
+      "get": {
+        "summary": "Search group by name",
+        "operationId": "SearchGroup",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/SearchGroupResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "group"
+        ]
+      }
+    },
+    "/api/v1/group/update": {
+      "patch": {
+        "summary": "Update and update group info",
+        "operationId": "UpdateGroupInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UpdateGroupInfoResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateGroupInfoReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "group"
+        ]
+      }
+    },
+    "/api/v1/message": {
+      "get": {
+        "summary": "get room messages by roomID",
+        "operationId": "GetMessages",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetMessagesResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "can be a user id or a group id",
+            "in": "query",
+            "required": true,
+            "type": "invalid",
+            "format": "UNKNOWN"
+          },
+          {
+            "name": "message_type",
+            "in": "query",
+            "required": true,
+            "type": "invalid",
+            "format": "UNKNOWN"
+          },
+          {
+            "name": "friend_id",
+            "description": "only for message type = 1",
+            "in": "query",
+            "required": true,
+            "type": "invalid",
+            "format": "UNKNOWN"
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "message"
+        ]
+      },
+      "delete": {
+        "summary": "Delete one message",
+        "operationId": "DeleteMessage",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/DeleteMessageResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeleteMessageReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "message"
+        ]
+      }
+    },
+    "/api/v1/ping": {
+      "get": {
+        "summary": "Server Health check - get a poing message if the server is alive.'",
+        "operationId": "HealthCheck",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/HealthCheckResp"
+            }
+          }
+        },
+        "requestBody": {},
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/stories": {
+      "get": {
+        "summary": "Get owner stories",
+        "operationId": "GetUserStories",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetUserStoryResp"
+            }
+          }
+        },
+        "requestBody": {},
+        "tags": [
+          "story"
+        ]
+      }
+    },
+    "/api/v1/stories/active": {
+      "get": {
+        "summary": "Get friends active story",
+        "operationId": "GetActiveStories",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetActiveStoryResp"
+            }
+          }
+        },
+        "requestBody": {},
+        "tags": [
+          "story"
+        ]
+      }
+    },
+    "/api/v1/story": {
+      "delete": {
+        "summary": "Delete an existing story",
+        "operationId": "DeleteStory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/DeleteStoryResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeleteStoryReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "story"
+        ]
+      },
+      "post": {
+        "summary": "Create a new instance story",
+        "operationId": "AddStory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AddStoryResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddStoryReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "story"
+        ]
+      }
+    },
+    "/api/v1/story/{story_id}": {
+      "get": {
+        "summary": "Get an instance story by storyID",
+        "operationId": "GetStoryInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetStoryInfoByIdResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "story_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "story"
+        ]
+      }
+    },
+    "/api/v1/user/avatar": {
+      "post": {
+        "summary": "Upload and update user avatar",
+        "operationId": "UploadUserAvatar",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UploadUserAvatarResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UploadUserAvatarReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/api/v1/user/cover": {
+      "post": {
+        "summary": "Upload and update user cover",
+        "operationId": "UploadUserCover",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UploadUserAvatarResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UploadUserAvatarReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/api/v1/user/friend": {
+      "delete": {
+        "summary": "Delete a friend",
+        "operationId": "DeleteFriend",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/DeleteFriendResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeleteFriendReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "friend"
+        ]
+      },
+      "post": {
+        "summary": "Add a new friend",
+        "operationId": "AddFriend",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AddFriendResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddFriendReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "friend"
+        ]
+      }
+    },
+    "/api/v1/user/friends": {
+      "get": {
+        "summary": "Get all user friends",
+        "operationId": "GetFriendList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetFriendListResp"
+            }
+          }
+        },
+        "requestBody": {},
+        "tags": [
+          "friend"
+        ]
+      }
+    },
+    "/api/v1/user/info": {
+      "get": {
+        "summary": "Get User Profile - Other/Own",
+        "operationId": "GetUserInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetUserInfoResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "type": "invalid",
+            "format": "UNKNOWN"
+          },
+          {
+            "name": "uuid",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "user"
+        ]
+      },
+      "patch": {
+        "summary": "Update user profile",
+        "operationId": "UpdateUserInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UpdateUserInfoResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateUserInfoReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/api/v1/user/profile": {
+      "get": {
+        "summary": "Get User Friend Profile - with `isFriend` data",
+        "operationId": "GetUserFriendProfile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetUserFriendProfileResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "type": "invalid",
+            "format": "UNKNOWN"
+          },
+          {
+            "name": "uuid",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/api/v1/user/search": {
+      "get": {
+        "summary": "Search user by name",
+        "operationId": "SearchUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/SearchUserResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/api/v1/user/signin": {
+      "post": {
+        "summary": "User account sign in",
+        "operationId": "UserSignIn",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/SignInResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SignInReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/api/v1/user/signup": {
+      "post": {
+        "summary": "User accout sign up",
+        "operationId": "UserSignUp",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/SignUpResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SignUpReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/api/v1/user/status": {
+      "patch": {
+        "summary": "Update user message status",
+        "operationId": "UpdateUserStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UpdateUserStatusResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateUserStatusReq"
+            }
+          }
+        ],
+        "requestBody": {},
+        "tags": [
+          "user"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "AddFriendReq": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "AddFriendReq",
+      "required": [
+        "user_id"
+      ]
+    },
+    "AddFriendResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "AddFriendResp",
+      "required": [
+        "code"
+      ]
+    },
+    "AddStoryReq": {
+      "type": "object",
+      "title": "AddStoryReq"
+    },
+    "AddStoryResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "story_id": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "AddStoryResp",
+      "required": [
+        "code",
+        "story_id"
+      ]
+    },
+    "CommonUserInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uint"
+        },
+        "uuid": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "cover": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "title": "CommonUserInfo",
+      "required": [
+        "id",
+        "uuid",
+        "name",
+        "avatar",
+        "email",
+        "cover",
+        "status"
+      ]
+    },
+    "CreateGroupReq": {
+      "type": "object",
+      "properties": {
+        "group_name": {
+          "type": "string"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/uint"
+          }
+        },
+        "avatar": {
+          "type": "string"
+        }
+      },
+      "title": "CreateGroupReq",
+      "required": [
+        "group_name",
+        "members",
+        "avatar"
+      ]
+    },
+    "CreateGroupResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "group_uuid": {
+          "type": "string"
+        },
+        "grou_avatar": {
+          "type": "string"
+        }
+      },
+      "title": "CreateGroupResp",
+      "required": [
+        "code",
+        "group_uuid",
+        "grou_avatar"
+      ]
+    },
+    "DeleteFriendReq": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "DeleteFriendReq",
+      "required": [
+        "user_id"
+      ]
+    },
+    "DeleteFriendResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "DeleteFriendResp",
+      "required": [
+        "code"
+      ]
+    },
+    "DeleteGroupReq": {
+      "type": "object",
+      "properties": {
+        "group_id": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "DeleteGroupReq",
+      "required": [
+        "group_id"
+      ]
+    },
+    "DeleteGroupResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "DeleteGroupResp",
+      "required": [
+        "code"
+      ]
+    },
+    "DeleteMessageReq": {
+      "type": "object",
+      "properties": {
+        "msg_id": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "DeleteMessageReq",
+      "required": [
+        "msg_id"
+      ]
+    },
+    "DeleteMessageResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "DeleteMessageResp",
+      "required": [
+        "code"
+      ]
+    },
+    "DeleteStoryReq": {
+      "type": "object",
+      "properties": {
+        "story_id": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "DeleteStoryReq",
+      "required": [
+        "story_id"
+      ]
+    },
+    "DeleteStoryResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "DeleteStoryResp",
+      "required": [
+        "code"
+      ]
+    },
+    "FriendStroy": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uint"
+        },
+        "uuid": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "is_seen": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "stories_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/uint"
+          }
+        }
+      },
+      "title": "FriendStroy",
+      "required": [
+        "id",
+        "uuid",
+        "name",
+        "avatar",
+        "is_seen",
+        "stories_ids"
+      ]
+    },
+    "FullGroupInfo": {
+      "type": "object",
+      "properties": {
+        "": {
+          "$ref": "#/definitions/GroupInfo"
+        },
+        "members": {
+          "$ref": "#/definitions/uint"
+        },
+        "is_joined": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "is_owner": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "FullGroupInfo",
+      "required": [
+        "members",
+        "is_joined",
+        "is_owner"
+      ]
+    },
+    "GetActiveStoryReq": {
+      "type": "object",
+      "title": "GetActiveStoryReq"
+    },
+    "GetActiveStoryResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "active_stories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FriendStroy"
+          }
+        }
+      },
+      "title": "GetActiveStoryResp",
+      "required": [
+        "code",
+        "active_stories"
+      ]
+    },
+    "GetFriendListReq": {
+      "type": "object",
+      "title": "GetFriendListReq"
+    },
+    "GetFriendListResp": {
+      "type": "object",
+      "properties": {
+        "friends": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonUserInfo"
+          }
+        }
+      },
+      "title": "GetFriendListResp",
+      "required": [
+        "friends"
+      ]
+    },
+    "GetGroupInfoByUUIDReq": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "title": "GetGroupInfoByUUIDReq",
+      "required": [
+        "uuid"
+      ]
+    },
+    "GetGroupInfoByUUIDResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "result": {
+          "$ref": "#/definitions/FullGroupInfo"
+        }
+      },
+      "title": "GetGroupInfoByUUIDResp",
+      "required": [
+        "code",
+        "result"
+      ]
+    },
+    "GetGroupMembersReq": {
+      "type": "object",
+      "properties": {
+        "group_id": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "GetGroupMembersReq",
+      "required": [
+        "group_id"
+      ]
+    },
+    "GetGroupMembersResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "member_list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GroupMemberInfo"
+          }
+        }
+      },
+      "title": "GetGroupMembersResp",
+      "required": [
+        "code",
+        "member_list"
+      ]
+    },
+    "GetMessagesReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uint",
+          "description": "can be a user id or a group id"
+        },
+        "message_type": {
+          "$ref": "#/definitions/uint"
+        },
+        "friend_id": {
+          "$ref": "#/definitions/uint",
+          "description": "only for message type = 1"
+        }
+      },
+      "title": "GetMessagesReq",
+      "required": [
+        "id",
+        "message_type",
+        "friend_id"
+      ]
+    },
+    "GetMessagesResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "message": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MessageUser"
+          }
+        }
+      },
+      "title": "GetMessagesResp",
+      "required": [
+        "code",
+        "message"
+      ]
+    },
+    "GetStoryInfoByIdRep": {
+      "type": "object",
+      "properties": {
+        "story_id": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "GetStoryInfoByIdRep",
+      "required": [
+        "story_id"
+      ]
+    },
+    "GetStoryInfoByIdResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "story_id": {
+          "$ref": "#/definitions/uint"
+        },
+        "media_url": {
+          "type": "string"
+        },
+        "create_at": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "GetStoryInfoByIdResp",
+      "required": [
+        "code",
+        "story_id",
+        "media_url",
+        "create_at"
+      ]
+    },
+    "GetUserFriendProfileReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uint"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "title": "GetUserFriendProfileReq"
+    },
+    "GetUserFriendProfileResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "user_info": {
+          "$ref": "#/definitions/CommonUserInfo"
+        },
+        "is_friend": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "GetUserFriendProfileResp",
+      "required": [
+        "code",
+        "user_info",
+        "is_friend"
+      ]
+    },
+    "GetUserGroupReq": {
+      "type": "object",
+      "title": "GetUserGroupReq"
+    },
+    "GetUserGroupResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GroupInfo"
+          }
+        }
+      },
+      "title": "GetUserGroupResp",
+      "required": [
+        "code",
+        "groups"
+      ]
+    },
+    "GetUserInfoReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uint"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "title": "GetUserInfoReq"
+    },
+    "GetUserInfoResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "uuid": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "cover": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "title": "GetUserInfoResp",
+      "required": [
+        "code",
+        "uuid",
+        "name",
+        "email",
+        "avatar",
+        "cover",
+        "status"
+      ]
+    },
+    "GetUserStoryReq": {
+      "type": "object",
+      "title": "GetUserStoryReq"
+    },
+    "GetUserStoryResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "story_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/uint"
+          }
+        }
+      },
+      "title": "GetUserStoryResp",
+      "required": [
+        "code",
+        "story_ids"
+      ]
+    },
+    "GroupInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uint"
+        },
+        "uuid": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "created_at": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "GroupInfo",
+      "required": [
+        "id",
+        "uuid",
+        "name",
+        "avatar",
+        "created_at"
+      ]
+    },
+    "GroupMemberInfo": {
+      "type": "object",
+      "properties": {
+        "": {
+          "$ref": "#/definitions/CommonUserInfo"
+        },
+        "is_group_lead": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "GroupMemberInfo",
+      "required": [
+        "is_group_lead"
+      ]
+    },
+    "HealthCheckReq": {
+      "type": "object",
+      "title": "HealthCheckReq"
+    },
+    "HealthCheckResp": {
+      "type": "object",
+      "properties": {
+        "resp": {
+          "type": "string"
+        }
+      },
+      "title": "HealthCheckResp",
+      "required": [
+        "resp"
+      ]
+    },
+    "JoinGroupReq": {
+      "type": "object",
+      "properties": {
+        "group_id": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "JoinGroupReq",
+      "required": [
+        "group_id"
+      ]
+    },
+    "JoinGroupResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "JoinGroupResp",
+      "required": [
+        "code"
+      ]
+    },
+    "LeaveGroupReq": {
+      "type": "object",
+      "properties": {
+        "group_id": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "LeaveGroupReq",
+      "required": [
+        "group_id"
+      ]
+    },
+    "LeaveGroupResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "LeaveGroupResp",
+      "required": [
+        "code"
+      ]
+    },
+    "MessageUser": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uint"
+        },
+        "from_id": {
+          "$ref": "#/definitions/uint"
+        },
+        "to_id": {
+          "$ref": "#/definitions/uint"
+        },
+        "content": {
+          "type": "string"
+        },
+        "content_type": {
+          "$ref": "#/definitions/uint"
+        },
+        "message_type": {
+          "$ref": "#/definitions/uint"
+        },
+        "create_at": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "MessageUser",
+      "required": [
+        "id",
+        "from_id",
+        "to_id",
+        "content",
+        "content_type",
+        "message_type",
+        "create_at"
+      ]
+    },
+    "SearchGroupReq": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        }
+      },
+      "title": "SearchGroupReq",
+      "required": [
+        "query"
+      ]
+    },
+    "SearchGroupResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FullGroupInfo"
+          }
+        }
+      },
+      "title": "SearchGroupResp",
+      "required": [
+        "code",
+        "results"
+      ]
+    },
+    "SearchUserReq": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        }
+      },
+      "title": "SearchUserReq",
+      "required": [
+        "query"
+      ]
+    },
+    "SearchUserResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SearchUserResult"
+          }
+        }
+      },
+      "title": "SearchUserResp",
+      "required": [
+        "code",
+        "results"
+      ]
+    },
+    "SearchUserResult": {
+      "type": "object",
+      "properties": {
+        "user_info": {
+          "$ref": "#/definitions/CommonUserInfo"
+        },
+        "is_friend": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "SearchUserResult",
+      "required": [
+        "user_info",
+        "is_friend"
+      ]
+    },
+    "SignInReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "title": "SignInReq",
+      "required": [
+        "email",
+        "password",
+        "min=8"
+      ]
+    },
+    "SignInResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "token": {
+          "type": "string"
+        },
+        "expired_time": {
+          "$ref": "#/definitions/uint"
+        },
+        "user_info": {
+          "$ref": "#/definitions/CommonUserInfo"
+        }
+      },
+      "title": "SignInResp",
+      "required": [
+        "code",
+        "token",
+        "expired_time",
+        "user_info"
+      ]
+    },
+    "SignUpReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "title": "SignUpReq",
+      "required": [
+        "email",
+        "name",
+        "min=4",
+        "password",
+        "min=8"
+      ]
+    },
+    "SignUpResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "token": {
+          "type": "string"
+        },
+        "expired_time": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "SignUpResp",
+      "required": [
+        "code",
+        "token",
+        "expired_time"
+      ]
+    },
+    "UpdateGroupInfoReq": {
+      "type": "object",
+      "properties": {
+        "group_id": {
+          "$ref": "#/definitions/uint"
+        },
+        "group_name": {
+          "type": "string"
+        }
+      },
+      "title": "UpdateGroupInfoReq",
+      "required": [
+        "group_id",
+        "group_name"
+      ]
+    },
+    "UpdateGroupInfoResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "UpdateGroupInfoResp",
+      "required": [
+        "code"
+      ]
+    },
+    "UpdateUserInfoReq": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "title": "UpdateUserInfoReq",
+      "required": [
+        "name",
+        "min=4"
+      ]
+    },
+    "UpdateUserInfoResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "UpdateUserInfoResp",
+      "required": [
+        "code"
+      ]
+    },
+    "UpdateUserStatusReq": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        }
+      },
+      "title": "UpdateUserStatusReq",
+      "required": [
+        "status",
+        "max=50"
+      ]
+    },
+    "UpdateUserStatusResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "UpdateUserStatusResp",
+      "required": [
+        "code"
+      ]
+    },
+    "UploadFileReq": {
+      "type": "object",
+      "title": "UploadFileReq"
+    },
+    "UploadFileResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "title": "UploadFileResp",
+      "required": [
+        "code",
+        "path"
+      ]
+    },
+    "UploadGroupAvatarReq": {
+      "type": "object",
+      "properties": {
+        "group_id": {
+          "$ref": "#/definitions/uint"
+        }
+      },
+      "title": "UploadGroupAvatarReq",
+      "required": [
+        "group_id"
+      ]
+    },
+    "UploadGroupAvatarResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "title": "UploadGroupAvatarResp",
+      "required": [
+        "code",
+        "path"
+      ]
+    },
+    "UploadImageReq": {
+      "type": "object",
+      "properties": {
+        "image_type": {
+          "type": "string"
+        },
+        "data": {
+          "type": "string"
+        }
+      },
+      "title": "UploadImageReq",
+      "required": [
+        "image_type",
+        "data"
+      ]
+    },
+    "UploadImageResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "title": "UploadImageResp",
+      "required": [
+        "code",
+        "path"
+      ]
+    },
+    "UploadImagesReq": {
+      "type": "object",
+      "title": "UploadImagesReq"
+    },
+    "UploadImagesResp": {
+      "type": "object",
+      "title": "UploadImagesResp"
+    },
+    "UploadUserAvatarReq": {
+      "type": "object",
+      "title": "UploadUserAvatarReq"
+    },
+    "UploadUserAvatarResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "title": "UploadUserAvatarResp",
+      "required": [
+        "code",
+        "path"
+      ]
+    },
+    "UploadUserCoverReq": {
+      "type": "object",
+      "title": "UploadUserCoverReq"
+    },
+    "UploadUserCoverResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/uint"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "title": "UploadUserCoverResp",
+      "required": [
+        "code",
+        "path"
+      ]
+    }
+  },
+  "securityDefinitions": {
+    "apiKey": {
+      "type": "apiKey",
+      "description": "Enter JWT Bearer token **_only_**",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "apiKey": []
+    }
+  ]
+}

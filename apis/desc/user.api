@@ -110,12 +110,21 @@ type (
     prefix : /api/v1
 )
 service ChatApp{
+    @doc(
+        summary : "User accout sign up"
+    )
     @handler UserSignUp
     post /user/signup(SignUpReq) returns (SignUpResp)
 
+    @doc(
+        summary : "User account sign in"
+    )
     @handler UserSignIn
     post /user/signin(SignInReq) returns (SignInResp)
 
+    @doc(
+        summary : "Get User Profile - Other/Own"
+    )
     @handler GetUserInfo
     get /user/info(GetUserInfoReq) returns (GetUserInfoResp)
 
@@ -127,22 +136,39 @@ service ChatApp{
     jwt : Auth
 )
 service ChatApp{
-
+    @doc(
+        summary : "Get User Friend Profile - with `isFriend` data"
+    )
     @handler GetUserFriendProfile
     get /user/profile(GetUserFriendProfileReq) returns (GetUserFriendProfileResp)
 
+    @doc(
+        summary : "Update user profile"
+    )
     @handler UpdateUserInfo
     patch /user/info(UpdateUserInfoReq) returns (UpdateUserInfoResp)
 
+    @doc(
+        summary : "Update user message status"
+    )
     @handler UpdateUserStatus
     patch /user/status(UpdateUserStatusReq) returns (UpdateUserStatusResp)
 
+    @doc(
+        summary : "Upload and update user avatar"
+    )
     @handler UploadUserAvatar
     post /user/avatar(UploadUserAvatarReq) returns (UploadUserAvatarResp)
 
+    @doc(
+        summary : "Upload and update user cover"
+    )
     @handler UploadUserCover
     post /user/cover(UploadUserAvatarReq) returns (UploadUserAvatarResp)
 
+    @doc(
+        summary : "Search user by name"
+    )
     @handler SearchUser
     get /user/search(SearchUserReq) returns (SearchUserResp)
 }

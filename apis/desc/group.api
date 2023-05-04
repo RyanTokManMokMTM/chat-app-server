@@ -119,33 +119,63 @@ type (
     jwt: Auth
 )
 service  ChatApp {
+    @doc(
+        summary : "Create a new group with group members"
+    )
     @handler CreateGroup
     post /group(CreateGroupReq) returns (CreateGroupResp);
 
+    @doc(
+        summary : "Join a new group by groupID"
+    )
     @handler JoinGroup
     post /group/join/:group_id(JoinGroupReq) returns (JoinGroupResp);
 
+    @doc(
+        summary : "Leave a joined group by groupID"
+    )
     @handler LeaveGroup
     delete /group/leave/:group_id(LeaveGroupReq) returns (LeaveGroupResp);
 
+    @doc(
+        summary : "Delete an existing group"
+    )
     @handler DeleteGroup
     delete /group(DeleteGroupReq) returns (DeleteGroupResp);
 
+    @doc(
+        summary : "Get an group members"
+    )
     @handler GetGroupMembers
     get   /group/members/:group_id(GetGroupMembersReq) returns (GetGroupMembersResp)
 
+    @doc(
+        summary : "Update and update group avatar"
+    )
     @handler UploadGroupAvatar
     post /group/avatar/:group_id(UploadGroupAvatarReq) returns ( UploadGroupAvatarResp)
 
+    @doc(
+        summary : "Update and update group info"
+    )
     @handler UpdateGroupInfo
     patch /group/update(UpdateGroupInfoReq) returns ( UpdateGroupInfoResp)
 
+    @doc(
+        summary : "Get user joined group"
+    )
     @handler GetUserGroups
     get /group(GetUserGroupReq) returns (GetUserGroupResp)
 
+    @doc(
+        summary : "Search group by name"
+    )
     @handler SearchGroup
     get /group/search(SearchGroupReq) returns (SearchGroupResp)
 
+    @doc(
+        summary : "Get group info by UUID"
+    )
     @handler GetGroupInfoByUUID
     get /group/info/uuid/:uuid(GetGroupInfoByUUIDReq) returns (GetGroupInfoByUUIDResp)
 }
