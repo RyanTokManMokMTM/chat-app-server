@@ -4,7 +4,7 @@ import (
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
-	"github.com/ryantokmanmok/chat-app-server/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 
 	"net/http"

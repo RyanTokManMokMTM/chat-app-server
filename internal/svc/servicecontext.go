@@ -1,11 +1,10 @@
 package svc
 
 import (
-	"github.com/redis/go-redis/v9"
-	"github.com/ryantokmanmok/chat-app-server/internal/config"
-	"github.com/ryantokmanmok/chat-app-server/internal/dao"
-	"github.com/ryantokmanmok/chat-app-server/internal/models"
-	"github.com/ryantokmanmok/chat-app-server/internal/redisClient"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/config"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/dao"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/redisClient"
 )
 
 type ServiceContext struct {

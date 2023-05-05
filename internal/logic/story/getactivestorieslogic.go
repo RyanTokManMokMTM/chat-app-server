@@ -3,10 +3,10 @@ package story
 import (
 	"context"
 	"errors"
-	"github.com/ryantokmanmok/chat-app-server/common/ctxtool"
-	"github.com/ryantokmanmok/chat-app-server/common/errx"
-	"github.com/ryantokmanmok/chat-app-server/internal/svc"
-	"github.com/ryantokmanmok/chat-app-server/internal/types"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 	"gorm.io/gorm"
 	"net/http"
 

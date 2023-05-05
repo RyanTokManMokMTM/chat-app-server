@@ -4,14 +4,14 @@ package handler
 import (
 	"net/http"
 
-	file "github.com/ryantokmanmok/chat-app-server/internal/handler/file"
-	friend "github.com/ryantokmanmok/chat-app-server/internal/handler/friend"
-	group "github.com/ryantokmanmok/chat-app-server/internal/handler/group"
-	health "github.com/ryantokmanmok/chat-app-server/internal/handler/health"
-	message "github.com/ryantokmanmok/chat-app-server/internal/handler/message"
-	story "github.com/ryantokmanmok/chat-app-server/internal/handler/story"
-	user "github.com/ryantokmanmok/chat-app-server/internal/handler/user"
-	"github.com/ryantokmanmok/chat-app-server/internal/svc"
+	file "github.com/ryantokmanmokmtm/chat-app-server/internal/handler/file"
+	friend "github.com/ryantokmanmokmtm/chat-app-server/internal/handler/friend"
+	group "github.com/ryantokmanmokmtm/chat-app-server/internal/handler/group"
+	health "github.com/ryantokmanmokmtm/chat-app-server/internal/handler/health"
+	message "github.com/ryantokmanmokmtm/chat-app-server/internal/handler/message"
+	story "github.com/ryantokmanmokmtm/chat-app-server/internal/handler/story"
+	user "github.com/ryantokmanmokmtm/chat-app-server/internal/handler/user"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
 )

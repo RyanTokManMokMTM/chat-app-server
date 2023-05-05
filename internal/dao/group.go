@@ -2,7 +2,7 @@ package dao
 
 import (
 	"context"
-	"github.com/ryantokmanmok/chat-app-server/internal/models"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 )
 
 func (d *DAO) InsertOneGroup(ctx context.Context, groupName, avatar string, userID uint) (*models.Group, error) {

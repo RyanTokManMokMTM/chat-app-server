@@ -3,16 +3,16 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/ryantokmanmok/chat-app-server/common/errx"
-	"github.com/ryantokmanmok/chat-app-server/common/variable"
-	"github.com/ryantokmanmok/chat-app-server/internal/handler/ws"
-	"github.com/ryantokmanmok/chat-app-server/internal/redisClient"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/handler/ws"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/redisClient"
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"net/http"
 
-	"github.com/ryantokmanmok/chat-app-server/internal/config"
-	"github.com/ryantokmanmok/chat-app-server/internal/handler"
-	"github.com/ryantokmanmok/chat-app-server/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/config"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/handler"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"

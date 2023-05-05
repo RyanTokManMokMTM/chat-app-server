@@ -4,14 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/ryantokmanmok/chat-app-server/common/ctxtool"
-	"github.com/ryantokmanmok/chat-app-server/common/errx"
-	"github.com/ryantokmanmok/chat-app-server/common/uploadx"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/uploadx"
 	"gorm.io/gorm"
 	"net/http"
 
-	"github.com/ryantokmanmok/chat-app-server/internal/svc"
-	"github.com/ryantokmanmok/chat-app-server/internal/types"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

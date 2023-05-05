@@ -2,7 +2,7 @@ package dao
 
 import (
 	"context"
-	"github.com/ryantokmanmok/chat-app-server/internal/models"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 )
 
 func (d *DAO) InsertOneUser(ctx context.Context, name, email, password string) (*models.UserModel, error) {

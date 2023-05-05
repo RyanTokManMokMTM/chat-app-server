@@ -2,9 +2,9 @@ package server
 
 import (
 	"github.com/gorilla/websocket"
-	"github.com/ryantokmanmok/chat-app-server/common/variable"
-	"github.com/ryantokmanmok/chat-app-server/internal/svc"
-	socket_message "github.com/ryantokmanmok/chat-app-server/socket-proto"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
+	socket_message "github.com/ryantokmanmokmtm/chat-app-server/socket-proto"
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/protobuf/encoding/protojson"
 	"sync"

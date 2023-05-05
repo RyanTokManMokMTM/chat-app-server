@@ -5,14 +5,14 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
-	"github.com/ryantokmanmok/chat-app-server/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/zeromicro/go-zero/core/logx"
 
 	"net/http"
 
-	"github.com/ryantokmanmok/chat-app-server/internal/logic/friend"
-	"github.com/ryantokmanmok/chat-app-server/internal/svc"
-	"github.com/ryantokmanmok/chat-app-server/internal/types"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/logic/friend"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 

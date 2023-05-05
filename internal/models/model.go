@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/ryantokmanmok/chat-app-server/internal/config"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"

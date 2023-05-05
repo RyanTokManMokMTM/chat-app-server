@@ -2,10 +2,10 @@ package server
 
 import (
 	"context"
-	"github.com/ryantokmanmok/chat-app-server/common/ctxtool"
-	"github.com/ryantokmanmok/chat-app-server/common/errx"
-	"github.com/ryantokmanmok/chat-app-server/common/variable"
-	"github.com/ryantokmanmok/chat-app-server/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
 	"time"

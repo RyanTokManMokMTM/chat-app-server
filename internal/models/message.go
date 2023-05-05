@@ -3,7 +3,7 @@ package models
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/ryantokmanmok/chat-app-server/common/variable"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
 	"gorm.io/gorm"
 )
 
