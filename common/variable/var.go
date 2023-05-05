@@ -18,6 +18,7 @@ const (
 	SYSTEM
 	MESSAGE
 	WEB_RTC
+	MSG_ACK
 )
 
 const (

@@ -1,14 +1,15 @@
 # ChatApp Server TODO List
----
 
-### Techs
-#### FrontEnd Tech - IOS Only
-* SwiftUI - IOS
+#### FrontEnd Tech
+* SwiftUI
+* CoreData
 
 #### Backend Tech
 * GoZero - Web Server
 * Websocket
 * MySQL
+* Gorm
+* Redis
 
 #### Deploy
 * Github Action for CI/CD
@@ -17,18 +18,17 @@
 * AWS
 
 ### TODO List
-* User API 
-  * Login/Register
-  * Get/Update UserInfo
-* Websocket
-  * Upgrade to websocket from HTTP
-  * Send/Receive Message
-* Friend API
-  * Add/Remove Friend
-  * Search User by UserID
-  * Get Friends list
-* ChatRoomAPI
-  * Get Room's latest message
-  * Add new message
-  * Set Room State
+| Apis | Status      |
+|------|-------------|
+| User APIs | ✅           |
+| File APIs | ✅           |
+| Group APIs | ✅           |
+| Friend APIs | ✅           |
+| Friend APIs | ✅           |
+| Instance Story APIs | ✅           |
+|  Websocket Logic | In Progress |
+
+
+### Demo
+<video src="demo/chat-app-final.mp4" controls="controls" width="500"></video> 
 

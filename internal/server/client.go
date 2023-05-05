@@ -48,8 +48,8 @@ func (c *SocketClient) ReadLoop() {
 
 	//TODO: set read init time
 	c.conn.SetReadDeadline(time.Now().Add(time.Second * variable.ReadWait)) //TODO: Need to read any message before deadline
-	//c.conn.SetReadLimit(variable.ReadLimit)                                 //TODO: Size of a message
-	c.conn.SetPongHandler(func(appData string) error { //TODO: Received a ping message from client, we need to handle it by setting a handle function
+	c.conn.SetReadLimit(variable.ReadLimit)                                 //TODO: Size of a message
+	c.conn.SetPongHandler(func(appData string) error {                      //TODO: Received a ping message from client, we need to handle it by setting a handle function
 		logx.Info(appData)
 		return nil
 	})
@@ -94,8 +94,6 @@ func (c *SocketClient) ReadLoop() {
 			logx.Info("received pong message from client")
 			continue
 		} else {
-			//normal message
-
 			c.server.Broadcast <- message
 		}
 	}
