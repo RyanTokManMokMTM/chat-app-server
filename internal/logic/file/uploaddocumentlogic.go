@@ -3,12 +3,12 @@ package file
 //
 //import (
 //	"context"
-//	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
-//	"github.com/ryantokmanmokmtm/chat-app-server/common/uploadx"
+//	"github.com/ryantokmanmokmtm/chat-app-router/common/errx"
+//	"github.com/ryantokmanmokmtm/chat-app-router/common/uploadx"
 //	"net/http"
 //
-//	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
-//	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
+//	"github.com/ryantokmanmokmtm/chat-app-router/internal/svc"
+//	"github.com/ryantokmanmokmtm/chat-app-router/internal/types"
 //
 //	"github.com/zeromicro/go-zero/core/logx"
 //)

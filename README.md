@@ -1,5 +1,5 @@
-# ChatApp Server TODO List
-
+# ChatApp Server
+![UI](./demo/full-app.png)
 #### FrontEnd Tech
 * SwiftUI
 * CoreData
@@ -30,5 +30,5 @@
 
 
 ### Demo
-<video src="demo/chat-app-final.mp4" controls="controls" width="500"></video> 
+[Demo Video](https://www.youtube.com/watch?v=bo7lJhMwsc0)
 

@@ -39,7 +39,7 @@ func NewSocketServer() *SocketServer {
 }
 
 func (s *SocketServer) Start() {
-	logx.Info("Starting ws server")
+	logx.Info("Starting ws router")
 	for {
 		select {
 		case client := <-s.Register:

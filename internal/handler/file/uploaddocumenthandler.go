@@ -6,13 +6,13 @@ package file
 //	ut "github.com/go-playground/universal-translator"
 //	"github.com/go-playground/validator/v10"
 //	en_translations "github.com/go-playground/validator/v10/translations/en"
-//	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+//	"github.com/ryantokmanmokmtm/chat-app-router/common/errx"
 //
 //	"net/http"
 //
-//	"github.com/ryantokmanmokmtm/chat-app-server/internal/logic/file"
-//	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
-//	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
+//	"github.com/ryantokmanmokmtm/chat-app-router/internal/logic/file"
+//	"github.com/ryantokmanmokmtm/chat-app-router/internal/svc"
+//	"github.com/ryantokmanmokmtm/chat-app-router/internal/types"
 //	"github.com/zeromicro/go-zero/rest/httpx"
 //)
 //

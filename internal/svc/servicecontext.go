@@ -1,6 +1,7 @@
 package svc
 
 import (
+	"github.com/redis/go-redis/v9"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/config"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/dao"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
@@ -9,7 +10,7 @@ import (
 
 type ServiceContext struct {
 	Config      config.Config
-	DAO         dao.DAOInterface
+	DAO         dao.Store
 	RedisClient *redis.Client
 }
 

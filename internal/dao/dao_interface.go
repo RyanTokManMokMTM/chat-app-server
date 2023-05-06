@@ -6,7 +6,7 @@ import (
 	socket_message "github.com/ryantokmanmokmtm/chat-app-server/socket-proto"
 )
 
-type DAOInterface interface {
+type Store interface {
 	InsertOneUser(ctx context.Context, name, email, password string) (*models.UserModel, error)
 	FindOneUser(ctx context.Context, id uint) (*models.UserModel, error)
 	FindOneUserByEmail(ctx context.Context, email string) (*models.UserModel, error)

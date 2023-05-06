@@ -9,9 +9,9 @@ type DAO struct {
 }
 
 // CHECK DAO IMPLEMENTED DAO_INTERFACE
-var _ DAOInterface = (*DAO)(nil)
+var _ Store = (*DAO)(nil)
 
-func NewDao(engine *gorm.DB) DAOInterface {
+func NewDao(engine *gorm.DB) Store {
 	return &DAO{
 		engine: engine,
 	}
