@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
 	"gorm.io/gorm"
 )
@@ -35,10 +34,10 @@ type Message struct {
 	CommonField
 }
 
-func (m *Message) BeforeCreate(tx *gorm.DB) error {
-	m.Uuid = uuid.New().String()
-	return nil
-}
+//func (m *Message) BeforeCreate(tx *gorm.DB) error {
+//	m.Uuid = uuid.New().String()
+//	return nil
+//}
 
 func (m *Message) TableName() string {
 	return "messages"

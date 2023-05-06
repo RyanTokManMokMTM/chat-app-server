@@ -3,19 +3,20 @@ package message;
 option go_package = "./socket_message";
 
 message Message {
-  string avatar = 1; //user avatar path
-  string fromUserName = 2; //sender user name
-  string fromUUID = 3; //sender uuid
-  string toUUID = 4; //receiver uuid
-  string content = 5; //sending content
-  int32 contentType = 6; //sending content type. For example 1: text, 2: file, 3: audio, 4: video....
-  int32 type = 7; //For example: "heatbeat" for checking server/client health , video call/audio call ->"webrtc"
-  int32 messageType = 8; //1: single 2: group
-  string groupName = 9; // will have data iff messageType = 2
-  string groupAvatar = 10; //will have data iff messageType = 2
+  string messageID = 1; // messageID / packageID
+  string avatar = 2; //user avatar path
+  string fromUserName = 3; //sender user name
+  string fromUUID = 4; //sender uuid
+  string toUUID = 5; //receiver uuid
+  string content = 6; //sending content
+  int32 contentType = 7; //sending content type. For example 1: text, 2: file, 3: audio, 4: video....
+  int32 type = 8; //For example: "heatbeat" for checking server/client health , video call/audio call ->"webrtc"
+  int32 messageType = 9; //1: single 2: group
+  string groupName = 10; // will have data iff messageType = 2
+  string groupAvatar = 11; //will have data iff messageType = 2
   //more....
-  string urlPath = 11; //file url path or other path
-  string fileName = 12;
-  int32 fileSize = 13;
-  int32 storyAvailableTime = 14;
+  string urlPath = 12; //file url path or other path
+  string fileName = 13;
+  int32 fileSize = 14;
+  int32 storyAvailableTime = 15;
 }

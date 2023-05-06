@@ -71,6 +71,7 @@ func insertUserMessage(ctx context.Context, message *socket_message.Message, eng
 	}
 
 	return &models.Message{
+		Uuid:        message.MessageID,
 		FromUserID:  fromUser.ID,
 		ToUserID:    toUser.ID,
 		Content:     message.Content,
@@ -99,6 +100,7 @@ func insertOneGroupMessage(ctx context.Context, message *socket_message.Message,
 	}
 
 	return &models.Message{
+		Uuid:        message.MessageID,
 		FromUserID:  fromUser.ID,
 		ToUserID:    groupInfo.ID,
 		Content:     message.Content,

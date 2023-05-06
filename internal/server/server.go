@@ -100,6 +100,10 @@ func (s *SocketServer) Start() {
 						sendGroupMessage(&socketMessage, s, conn.svcCtx)
 					}
 
+					if socketMessage.ContentType != variable.SYS {
+						//MARK: system message no need to ack??
+						sendAcknowledgement(socketMessage.MessageID, s, socketMessage.FromUUID)
+					}
 				}
 			} else {
 				//TODO: Send To All User that are online
@@ -110,7 +114,6 @@ func (s *SocketServer) Start() {
 						close(client.sendChannel)
 						s.Remove(client)
 					}
-
 				}
 			}
 
@@ -202,4 +205,26 @@ func sendGroupMessage(message *socket_message.Message, server *SocketServer, svc
 func saveMessage(svcCtx *svc.ServiceContext, message *socket_message.Message) {
 	//TODO : Save Message into db
 	svcCtx.DAO.InsertOneMessage(context.Background(), message)
+}
+
+func sendAcknowledgement(seqID string, server *SocketServer, toUUID string) {
+	logx.Infof("Sending ack message with SeqID : %s", seqID)
+	acknowledgement := socket_message.Message{
+		MessageID: seqID,
+		ToUUID:    toUUID,
+		Type:      variable.MSG_ACK,
+	}
+	ackMessage, err := json.MarshalIndent(acknowledgement, "", "\t")
+	if err != nil {
+		logx.Error(err)
+		return
+	}
+
+	client, ok := server.Clients[toUUID]
+	if ok {
+		client.sendChannel <- ackMessage
+	} else {
+		//TODO: Offline
+		logx.Info("user is offline -> ack failed")
+	}
 }

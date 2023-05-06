@@ -8,6 +8,7 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/handler/ws"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/redisClient"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
+	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"net/http"
@@ -41,11 +42,13 @@ func ConfigRouter(c config.Config) *rest.Server {
 		Handler: http.StripPrefix("/resources/", http.FileServer(http.Dir("./resources"))).ServeHTTP,
 	})
 
-	client, err := redisClient.ConnectToClient(c.Redis.Addr, c.Redis.Password) //connect to redis for using in websocket
-	if err != nil {
-		panic("failed to connect to redis")
+	if c.Mode != service.TestMode {
+		client, err := redisClient.ConnectToClient(c.Redis.Addr, c.Redis.Password) //connect to redis for using in websocket
+		if err != nil {
+			panic("failed to connect to redis")
+		}
+		variable.RedisConnection = client
 	}
 
-	variable.RedisConnection = client
 	return server
 }
