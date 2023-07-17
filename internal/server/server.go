@@ -166,6 +166,7 @@ func sendGroupMessage(message *socket_message.Message, server *SocketServer, svc
 		conn, ok := server.Clients[mem.MemberInfo.Uuid]
 
 		socketMessage := socket_message.Message{
+			MessageID:    message.MessageID,
 			Avatar:       message.Avatar,
 			FromUserName: message.FromUserName,
 			FromUUID:     message.ToUUID,   //From Group UUID
