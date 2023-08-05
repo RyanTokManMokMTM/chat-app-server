@@ -21,7 +21,8 @@ type Store interface {
 	InsertOneFriend(ctx context.Context, userID, friendID uint) error
 	FindOneFriend(ctx context.Context, userID, friendID uint) error
 	DeleteOneFriend(ctx context.Context, userID, friendID uint) error
-	GetUserFriendList(ctx context.Context, userID uint) ([]*models.UserFriend, error)
+	GetUserFriendListByPageSize(ctx context.Context, userID, page, pageSize uint) ([]*models.UserFriend, error)
+	CountUserFriend(ctx context.Context, userID uint) (int64, error)
 
 	InsertOneGroup(ctx context.Context, groupName, avatar string, userID uint) (*models.Group, error)
 	FindOneGroup(ctx context.Context, groupID uint) (*models.Group, error)
@@ -49,6 +50,6 @@ type Store interface {
 	FindOneStory(ctx context.Context, storyID uint) (*models.StoryModel, error)
 	FindOneUserStory(ctx context.Context, storyID, userID uint) (*models.StoryModel, error)
 	GetUserStories(ctx context.Context, userID uint) ([]uint, error)
-	GetActiveUsers(ctx context.Context, userID uint) ([]*models.UserModel, error)
+	//GetActiveUsers(ctx context.Context, userID uint) ([]*models.UserModel, error)
 	DeleteStories(ctx context.Context, storyID uint) error
 }

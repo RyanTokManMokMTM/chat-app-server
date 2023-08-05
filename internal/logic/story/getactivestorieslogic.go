@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/pagerx"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 	"gorm.io/gorm"
@@ -39,28 +40,35 @@ func (l *GetActiveStoriesLogic) GetActiveStories(req *types.GetActiveStoryReq) (
 	}
 
 	//friend
-	list, err := l.svcCtx.DAO.GetUserFriendList(l.ctx, userID)
+	total, err := l.svcCtx.DAO.CountUserFriend(l.ctx, userID)
+	if err != nil {
+		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+	}
+
+	pageLimit := pagerx.GetLimit(req.Limit)                            //page limit
+	totalPage := pagerx.GetTotalPageByPageSize(uint(total), pageLimit) //HOW MANY PAGE
+	pageOffset := pagerx.PageOffset(totalPage, req.Page)               //TO WHICH PAGE
+	list, err := l.svcCtx.DAO.GetUserFriendListByPageSize(l.ctx, userID, pageOffset, pageLimit)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
 	activeStories := make([]types.FriendStroy, 0)
 	for _, fd := range list {
-		stories, err := l.svcCtx.DAO.GetUserStories(l.ctx, fd.FriendID)
-		if err != nil {
-			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
-		}
-		if len(stories) == 0 {
+		if len(fd.FriendInfo.Stories) == 0 {
 			continue
 		}
-
+		var storiesIds []uint
+		for _, story := range fd.FriendInfo.Stories {
+			storiesIds = append(storiesIds, story.Id)
+		}
 		activeStories = append(activeStories, types.FriendStroy{
 			UserID:     fd.FriendInfo.ID,
 			Uuid:       fd.FriendInfo.Uuid,
 			UserName:   fd.FriendInfo.NickName,
 			UserAvatar: fd.FriendInfo.Avatar,
 			IsSeen:     false, //TODO: set as false for testing
-			StoriesIDs: stories,
+			StoriesIDs: storiesIds,
 		})
 
 	}

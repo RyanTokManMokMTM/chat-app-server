@@ -316,6 +316,8 @@ type GetUserStoryResp struct {
 }
 
 type GetActiveStoryReq struct {
+	Page  uint `form:"page,default=0"`
+	Limit uint `form:"limit,default=20"`
 }
 
 type GetActiveStoryResp struct {

@@ -23,7 +23,10 @@ type (
         StoryIDs []uint `json:"story_ids"`
     }
 
-    GetActiveStoryReq {}
+    GetActiveStoryReq {
+        Page uint `form:"page,default=0"`
+        Limit uint `form:"limit,default=20"`
+    }
     GetActiveStoryResp {
         Code uint `json:"code"`
         FriendStroies []FriendStroy `json:"active_stories"`

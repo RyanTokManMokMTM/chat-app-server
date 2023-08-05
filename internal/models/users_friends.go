@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"gorm.io/gorm"
+	"time"
 )
 
 type UserFriend struct {
@@ -13,6 +14,8 @@ type UserFriend struct {
 
 	//UserInfo   UserModel `gorm:"foreignKey:UserID"`
 	FriendInfo UserModel `gorm:"foreignKey:FriendID"`
+
+	//All stories
 	CommonField
 }
 
@@ -29,12 +32,27 @@ func (uf *UserFriend) FindOne(ctx context.Context, db *gorm.DB, userID, friendID
 func (uf *UserFriend) DeleteOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().Where("user_id = ? AND friend_id = ?", uf.UserID, uf.FriendID).Delete(&uf).Error
 }
-func (uf *UserFriend) GetFriendList(ctx context.Context, db *gorm.DB) ([]*UserFriend, error) {
+func (uf *UserFriend) GetFriendList(ctx context.Context, db *gorm.DB, page, pageSize int) ([]*UserFriend, error) {
 	var list []*UserFriend
-	
-	if err := db.WithContext(ctx).Debug().Model(&uf).Where("user_id = ?", uf.UserID).Preload("FriendInfo").Find(&list).Error; err != nil {
+	now := time.Now().Unix()
+	beforeOneDay := now - (86400)
+
+	if err := db.WithContext(ctx).Debug().Model(&uf).
+		Preload("FriendInfo").Preload("FriendInfo.Stories", "created_at BETWEEN FROM_UNIXTIME(?) AND FROM_UNIXTIME(?)", beforeOneDay, now).Where("user_id = ?", uf.UserID).
+		Offset(page).
+		Limit(pageSize).
+		Find(&list).Error; err != nil {
 		return nil, err
 	}
 
 	return list, nil
+}
+
+func (uf *UserFriend) CountUserFriends(ctx context.Context, db *gorm.DB) (int64, error) {
+	var count int64 = 0
+	if err := db.Debug().WithContext(ctx).Model(uf).Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }

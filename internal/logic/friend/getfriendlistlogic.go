@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/pagerx"
 	"gorm.io/gorm"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
@@ -38,7 +39,7 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	list, err := l.svcCtx.DAO.GetUserFriendList(l.ctx, userID)
+	list, err := l.svcCtx.DAO.GetUserFriendListByPageSize(l.ctx, userID, 0, pagerx.DEFAULT_MAX_LIMIT)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}

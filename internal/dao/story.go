@@ -47,11 +47,19 @@ func (d *DAO) GetUserStories(ctx context.Context, userID uint) ([]uint, error) {
 	return s.FindAllUserStories(ctx, d.engine)
 }
 
-func (d *DAO) GetActiveUsers(ctx context.Context, userID uint) ([]*models.UserModel, error) {
-	//find all friend
+//func (d *DAO) GetUserStoriesByPage(ctx context.Context, userID, page, limit uint) ([]uint, error) {
+//	s := &models.StoryModel{
+//		UserId: userID,
+//	}
+//	return s.FindAllUserStoriesByPageSize(ctx, d.engine, int(page), int(limit))
+//}
 
-	return nil, nil
-}
+//func (d *DAO) GetActiveUsers(ctx context.Context, userID uint) ([]*models.UserModel, error) {
+//	//find all friend
+//
+//	return nil, nil
+//}
+
 func (d *DAO) DeleteStories(ctx context.Context, storyID uint) error {
 	s := &models.StoryModel{
 		Id: storyID,
