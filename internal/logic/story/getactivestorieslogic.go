@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/helper/toolx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/pagerx"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -40,35 +41,34 @@ func (l *GetActiveStoriesLogic) GetActiveStories(req *types.GetActiveStoryReq) (
 	}
 
 	//friend
-	total, err := l.svcCtx.DAO.CountUserFriend(l.ctx, userID)
+	total, err := l.svcCtx.DAO.CountActiveStory(l.ctx, userID)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
-
+	logx.Info(total)
 	pageLimit := pagerx.GetLimit(req.Limit)                            //page limit
 	totalPage := pagerx.GetTotalPageByPageSize(uint(total), pageLimit) //HOW MANY PAGE
-	pageOffset := pagerx.PageOffset(totalPage, req.Page)               //TO WHICH PAGE
-	list, err := l.svcCtx.DAO.GetUserFriendListByPageSize(l.ctx, userID, pageOffset, pageLimit)
+	pageOffset := pagerx.PageOffset(pageLimit, req.Page)               //TO WHICH PAGE
+	logx.Info(pageLimit, totalPage, pageOffset)
+
+	stories, err := l.svcCtx.DAO.GetFriendActiveStories(l.ctx, userID, int(pageOffset), int(pageLimit))
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
 	activeStories := make([]types.FriendStroy, 0)
-	for _, fd := range list {
-		if len(fd.FriendInfo.Stories) == 0 {
-			continue
-		}
-		var storiesIds []uint
-		for _, story := range fd.FriendInfo.Stories {
-			storiesIds = append(storiesIds, story.Id)
+	for _, fd := range stories {
+		ids, err := toolx.StringTouIntArray(fd.Ids)
+		if err != nil {
+			return nil, errx.NewCustomErrCode(errx.DB_ERROR)
 		}
 		activeStories = append(activeStories, types.FriendStroy{
-			UserID:     fd.FriendInfo.ID,
-			Uuid:       fd.FriendInfo.Uuid,
-			UserName:   fd.FriendInfo.NickName,
-			UserAvatar: fd.FriendInfo.Avatar,
-			IsSeen:     false, //TODO: set as false for testing
-			StoriesIDs: storiesIds,
+			UserID:     fd.UserInfo.Id,
+			Uuid:       fd.UserInfo.Uuid,
+			UserName:   fd.UserInfo.NickName,
+			UserAvatar: fd.UserInfo.Avatar,
+			IsSeen:     false, //for testing...
+			StoriesIDs: ids,
 		})
 
 	}
@@ -76,5 +76,9 @@ func (l *GetActiveStoriesLogic) GetActiveStories(req *types.GetActiveStoryReq) (
 	return &types.GetActiveStoryResp{
 		Code:          uint(http.StatusOK),
 		FriendStroies: activeStories,
+		PageableInfo: types.PageableInfo{
+			TotalPage: totalPage,
+			Page:      req.Page,
+		},
 	}, nil
 }

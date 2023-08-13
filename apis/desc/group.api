@@ -44,9 +44,12 @@ type (
 
     GetGroupMembersReq {
         GroupID uint `path:"group_id"`
+        Page uint `form:"page,default=1"`
+        Limit uint `form:"limit,default=20"`
     }
     GetGroupMembersResp {
         Code uint `json:"code"`
+        PageableInfo
         MemberList []GroupMemberInfo `json:"member_list"`
     }
 
@@ -66,9 +69,13 @@ type (
         Path string `json:"path"`
     }
 
-    GetUserGroupReq{}
+    GetUserGroupReq{
+        Page uint `form:"page,default=1"`
+        Limit uint `form:"limit,default=20"`
+    }
     GetUserGroupResp {
         Code uint `json:"code"`
+        PageableInfo
         Groups []GroupInfo `json:"groups"`
     }
 
@@ -86,6 +93,12 @@ type (
     GetGroupInfoByUUIDResp {
         Code uint `json:"code"`
         Result FullGroupInfo `json:"result"`
+    }
+
+    CountUserGroupReq{}
+    CountUserGroupResp{
+        Code uint `json:"code"`
+        Total uint `json:"total"`
     }
 )
 
@@ -178,4 +191,11 @@ service  ChatApp {
     )
     @handler GetGroupInfoByUUID
     get /group/info/uuid/:uuid(GetGroupInfoByUUIDReq) returns (GetGroupInfoByUUIDResp)
+
+
+    @doc(
+        summary : "Count user group"
+    )
+    @handler CountUserGroup
+    get /group/count(CountUserGroupReq) returns (CountUserGroupResp)
 }

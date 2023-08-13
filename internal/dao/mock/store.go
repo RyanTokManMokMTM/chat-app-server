@@ -195,10 +195,10 @@ func (mr *MockStoreMockRecorder) FindOneGroupByUUID(arg0, arg1 interface{}) *gom
 }
 
 // FindOneGroupMember mocks base method.
-func (m *MockStore) FindOneGroupMember(arg0 context.Context, arg1, arg2 uint) (*models.GroupMember, error) {
+func (m *MockStore) FindOneGroupMember(arg0 context.Context, arg1, arg2 uint) (*models.UserGroup, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindOneGroupMember", arg0, arg1, arg2)
-	ret0, _ := ret[0].(*models.GroupMember)
+	ret0, _ := ret[0].(*models.UserGroup)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -210,10 +210,10 @@ func (mr *MockStoreMockRecorder) FindOneGroupMember(arg0, arg1, arg2 interface{}
 }
 
 // FindOneGroupMembers mocks base method.
-func (m *MockStore) FindOneGroupMembers(arg0 context.Context, arg1 uint) ([]*models.GroupMember, error) {
+func (m *MockStore) FindOneGroupMembers(arg0 context.Context, arg1 uint) ([]*models.UserGroup, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindOneGroupMembers", arg0, arg1)
-	ret0, _ := ret[0].([]*models.GroupMember)
+	ret0, _ := ret[0].([]*models.UserGroup)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -255,10 +255,10 @@ func (mr *MockStoreMockRecorder) FindOneStory(arg0, arg1 interface{}) *gomock.Ca
 }
 
 // FindOneUser mocks base method.
-func (m *MockStore) FindOneUser(arg0 context.Context, arg1 uint) (*models.UserModel, error) {
+func (m *MockStore) FindOneUser(arg0 context.Context, arg1 uint) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindOneUser", arg0, arg1)
-	ret0, _ := ret[0].(*models.UserModel)
+	ret0, _ := ret[0].(*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -270,10 +270,10 @@ func (mr *MockStoreMockRecorder) FindOneUser(arg0, arg1 interface{}) *gomock.Cal
 }
 
 // FindOneUserByEmail mocks base method.
-func (m *MockStore) FindOneUserByEmail(arg0 context.Context, arg1 string) (*models.UserModel, error) {
+func (m *MockStore) FindOneUserByEmail(arg0 context.Context, arg1 string) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindOneUserByEmail", arg0, arg1)
-	ret0, _ := ret[0].(*models.UserModel)
+	ret0, _ := ret[0].(*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -285,10 +285,10 @@ func (mr *MockStoreMockRecorder) FindOneUserByEmail(arg0, arg1 interface{}) *gom
 }
 
 // FindOneUserByUUID mocks base method.
-func (m *MockStore) FindOneUserByUUID(arg0 context.Context, arg1 string) (*models.UserModel, error) {
+func (m *MockStore) FindOneUserByUUID(arg0 context.Context, arg1 string) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindOneUserByUUID", arg0, arg1)
-	ret0, _ := ret[0].(*models.UserModel)
+	ret0, _ := ret[0].(*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -315,10 +315,10 @@ func (mr *MockStoreMockRecorder) FindOneUserStory(arg0, arg1, arg2 interface{}) 
 }
 
 // FindUsers mocks base method.
-func (m *MockStore) FindUsers(arg0 context.Context, arg1 string) ([]*models.UserModel, error) {
+func (m *MockStore) FindUsers(arg0 context.Context, arg1 string) ([]*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindUsers", arg0, arg1)
-	ret0, _ := ret[0].([]*models.UserModel)
+	ret0, _ := ret[0].([]*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -330,10 +330,10 @@ func (mr *MockStoreMockRecorder) FindUsers(arg0, arg1 interface{}) *gomock.Call 
 }
 
 // GetActiveUsers mocks base method.
-func (m *MockStore) GetActiveUsers(arg0 context.Context, arg1 uint) ([]*models.UserModel, error) {
+func (m *MockStore) GetActiveUsers(arg0 context.Context, arg1 uint) ([]*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetActiveUsers", arg0, arg1)
-	ret0, _ := ret[0].([]*models.UserModel)
+	ret0, _ := ret[0].([]*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -345,10 +345,10 @@ func (mr *MockStoreMockRecorder) GetActiveUsers(arg0, arg1 interface{}) *gomock.
 }
 
 // GetGroupMembers mocks base method.
-func (m *MockStore) GetGroupMembers(arg0 context.Context, arg1 uint) ([]*models.GroupMember, error) {
+func (m *MockStore) GetGroupMembers(arg0 context.Context, arg1 uint) ([]*models.UserGroup, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetGroupMembers", arg0, arg1)
-	ret0, _ := ret[0].([]*models.GroupMember)
+	ret0, _ := ret[0].([]*models.UserGroup)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -390,10 +390,10 @@ func (mr *MockStoreMockRecorder) GetUserFriendList(arg0, arg1 interface{}) *gomo
 }
 
 // GetUserGroups mocks base method.
-func (m *MockStore) GetUserGroups(arg0 context.Context, arg1 uint) ([]*models.GroupMember, error) {
+func (m *MockStore) GetUserGroups(arg0 context.Context, arg1 uint) ([]*models.UserGroup, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserGroups", arg0, arg1)
-	ret0, _ := ret[0].([]*models.GroupMember)
+	ret0, _ := ret[0].([]*models.UserGroup)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -490,10 +490,10 @@ func (mr *MockStoreMockRecorder) InsertOneStory(arg0, arg1, arg2 interface{}) *g
 }
 
 // InsertOneUser mocks base method.
-func (m *MockStore) InsertOneUser(arg0 context.Context, arg1, arg2, arg3 string) (*models.UserModel, error) {
+func (m *MockStore) InsertOneUser(arg0 context.Context, arg1, arg2, arg3 string) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertOneUser", arg0, arg1, arg2, arg3)
-	ret0, _ := ret[0].(*models.UserModel)
+	ret0, _ := ret[0].(*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

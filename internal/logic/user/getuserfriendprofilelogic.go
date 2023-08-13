@@ -45,7 +45,7 @@ func (l *GetUserFriendProfileLogic) GetUserFriendProfile(req *types.GetUserFrien
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	var u *models.UserModel
+	var u *models.User
 	if req.UserID != 0 {
 		u, err = l.svcCtx.DAO.FindOneUser(l.ctx, req.UserID)
 		if err != nil {
@@ -65,7 +65,7 @@ func (l *GetUserFriendProfileLogic) GetUserFriendProfile(req *types.GetUserFrien
 	}
 
 	isFriend := true
-	if err := l.svcCtx.DAO.FindOneFriend(l.ctx, userID, u.ID); err != nil {
+	if err := l.svcCtx.DAO.FindOneFriend(l.ctx, userID, u.Id); err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
@@ -74,7 +74,7 @@ func (l *GetUserFriendProfileLogic) GetUserFriendProfile(req *types.GetUserFrien
 	return &types.GetUserFriendProfileResp{
 		Code: uint(http.StatusOK),
 		UserInfo: types.CommonUserInfo{
-			ID:            u.ID,
+			ID:            u.Id,
 			Uuid:          u.Uuid,
 			NickName:      u.NickName,
 			Email:         u.Email,

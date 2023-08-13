@@ -51,13 +51,13 @@ func (l *SearchGroupLogic) SearchGroup(req *types.SearchGroupReq) (resp *types.S
 	groupInfo := make([]types.FullGroupInfo, 0)
 	for _, group := range groups {
 
-		count, err := l.svcCtx.DAO.CountGroupMembers(l.ctx, group.ID)
+		count, err := l.svcCtx.DAO.CountGroupMembers(l.ctx, group.Id)
 		if err != nil {
 			logx.Error(err.Error())
 			continue
 		}
 
-		u, err := l.svcCtx.DAO.FindOneGroupMember(l.ctx, group.ID, userID)
+		u, err := l.svcCtx.DAO.FindOneGroupMember(l.ctx, group.Id, userID)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			logx.Error(err.Error())
 			continue
@@ -67,7 +67,7 @@ func (l *SearchGroupLogic) SearchGroup(req *types.SearchGroupReq) (resp *types.S
 
 		groupInfo = append(groupInfo, types.FullGroupInfo{
 			GroupInfo: types.GroupInfo{
-				ID:        group.ID,
+				ID:        group.Id,
 				Uuid:      group.Uuid,
 				Name:      group.GroupName,
 				Avatar:    group.GroupAvatar,

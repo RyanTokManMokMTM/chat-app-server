@@ -21,7 +21,7 @@ func (d *DAO) InsertOneGroup(ctx context.Context, groupName, avatar string, user
 
 func (d *DAO) FindOneGroup(ctx context.Context, groupID uint) (*models.Group, error) {
 	g := &models.Group{
-		ID: groupID,
+		Id: groupID,
 	}
 
 	if err := g.FindOne(ctx, d.engine); err != nil {
@@ -45,7 +45,7 @@ func (d *DAO) FindOneGroupByUUID(ctx context.Context, groupUUID string) (*models
 
 func (d *DAO) DeleteOneGroup(ctx context.Context, groupID uint) error {
 	g := &models.Group{
-		ID: groupID,
+		Id: groupID,
 	}
 
 	return g.DeleteOne(ctx, d.engine)
@@ -53,7 +53,7 @@ func (d *DAO) DeleteOneGroup(ctx context.Context, groupID uint) error {
 
 func (d *DAO) UpdateOneGroup(ctx context.Context, groupID uint, groupName string) error {
 	group := &models.Group{
-		ID:        groupID,
+		Id:        groupID,
 		GroupName: groupName,
 	}
 	return group.UpdateOne(ctx, d.engine)
@@ -61,7 +61,7 @@ func (d *DAO) UpdateOneGroup(ctx context.Context, groupID uint, groupName string
 
 func (d *DAO) UpdateOneGroupAvatar(ctx context.Context, groupID uint, avatarName string) error {
 	g := &models.Group{
-		ID:          groupID,
+		Id:          groupID,
 		GroupAvatar: avatarName,
 	}
 

@@ -39,7 +39,15 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	list, err := l.svcCtx.DAO.GetUserFriendListByPageSize(l.ctx, userID, 0, pagerx.DEFAULT_MAX_LIMIT)
+	total, err := l.svcCtx.DAO.CountUserFriend(l.ctx, userID)
+	if err != nil {
+		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+	}
+
+	pageLimit := pagerx.GetLimit(req.Limit)
+	pageSize := pagerx.GetTotalPageByPageSize(uint(total), pageLimit)
+	pageOffset := pagerx.PageOffset(pageSize, req.Page)
+	list, err := l.svcCtx.DAO.GetUserFriendListByPageSize(l.ctx, userID, int(pageOffset), int(pageLimit))
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -47,7 +55,7 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 	var respList = make([]types.CommonUserInfo, 0)
 	for _, info := range list {
 		respList = append(respList, types.CommonUserInfo{
-			ID:       info.FriendInfo.ID,
+			ID:       info.FriendInfo.Id,
 			Uuid:     info.FriendInfo.Uuid,
 			NickName: info.FriendInfo.NickName,
 			Avatar:   info.FriendInfo.Avatar,

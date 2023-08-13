@@ -64,7 +64,7 @@ func (l *CreateGroupLogic) CreateGroup(req *types.CreateGroupReq) (resp *types.C
 	if len(req.GroupMembers) > 0 {
 		var members []string
 		for _, memberID := range req.GroupMembers {
-			err := l.svcCtx.DAO.InsertOneGroupMember(l.ctx, group.ID, memberID)
+			err := l.svcCtx.DAO.InsertOneGroupMember(l.ctx, group.Id, memberID)
 			if err != nil {
 				logx.Error(err.Error())
 				continue

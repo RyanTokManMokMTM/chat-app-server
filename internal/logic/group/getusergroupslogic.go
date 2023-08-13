@@ -39,7 +39,13 @@ func (l *GetUserGroupsLogic) GetUserGroups(req *types.GetUserGroupReq) (resp *ty
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	groups, err := l.svcCtx.DAO.GetUserGroups(l.ctx, userID)
+	//total, err := l.svcCtx.DAO.CountUser
+	//
+	//pageLimit := pagerx.GetLimit(req.Limit)
+	//pageSize := pagerx.GetTotalPageByPageSize(uint(total), pageLimit)
+	//pageOffset := pagerx.PageOffset(pageSize, req.Page)
+
+	groups, err := l.svcCtx.DAO.GetUserGroups(l.ctx, userID, 0, 0)
 	if err != nil {
 		logx.Infof(err.Error())
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
@@ -48,7 +54,7 @@ func (l *GetUserGroupsLogic) GetUserGroups(req *types.GetUserGroupReq) (resp *ty
 	var userGroups = make([]types.GroupInfo, 0)
 	for _, g := range groups {
 		userGroups = append(userGroups, types.GroupInfo{
-			ID:        g.GroupInfo.ID,
+			ID:        g.GroupInfo.Id,
 			Uuid:      g.GroupInfo.Uuid,
 			Name:      g.GroupInfo.GroupName,
 			Avatar:    g.GroupInfo.GroupAvatar,

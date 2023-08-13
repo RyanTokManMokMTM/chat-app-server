@@ -27,14 +27,14 @@ func (d *DAO) DeleteOneMessage(ctx context.Context, messageID uint) error {
 	return msg.DeleteOne(ctx, d.engine)
 }
 
-func (d *DAO) GetMessage(ctx context.Context, from, to, messageType uint) ([]*models.Message, error) {
+func (d *DAO) GetMessage(ctx context.Context, from, to, messageType uint, pageOffset, pageLimit int) ([]*models.Message, error) {
 	msg := &models.Message{
 		FromUserID:  from,
 		ToUserID:    to,
 		MessageType: messageType,
 	}
 
-	return msg.GetMessages(ctx, d.engine)
+	return msg.GetMessages(ctx, d.engine, pageOffset, pageLimit)
 }
 
 func (d *DAO) InsertOneMessage(ctx context.Context, message *socket_message.Message) {
@@ -54,7 +54,7 @@ func (d *DAO) InsertOneMessage(ctx context.Context, message *socket_message.Mess
 }
 
 func insertUserMessage(ctx context.Context, message *socket_message.Message, engine *gorm.DB) *models.Message {
-	fromUser := &models.UserModel{
+	fromUser := &models.User{
 		Uuid: message.FromUUID,
 	}
 	if err := fromUser.FindOneUserByUUID(engine, ctx); err != nil {
@@ -62,7 +62,7 @@ func insertUserMessage(ctx context.Context, message *socket_message.Message, eng
 		return nil
 	}
 
-	toUser := &models.UserModel{
+	toUser := &models.User{
 		Uuid: message.ToUUID,
 	}
 	if err := toUser.FindOneUserByUUID(engine, ctx); err != nil {
@@ -72,8 +72,8 @@ func insertUserMessage(ctx context.Context, message *socket_message.Message, eng
 
 	return &models.Message{
 		Uuid:        message.MessageID,
-		FromUserID:  fromUser.ID,
-		ToUserID:    toUser.ID,
+		FromUserID:  fromUser.Id,
+		ToUserID:    toUser.Id,
 		Content:     message.Content,
 		MessageType: uint(message.MessageType),
 		ContentType: uint(message.ContentType),
@@ -83,7 +83,7 @@ func insertUserMessage(ctx context.Context, message *socket_message.Message, eng
 }
 
 func insertOneGroupMessage(ctx context.Context, message *socket_message.Message, engine *gorm.DB) *models.Message {
-	fromUser := models.UserModel{
+	fromUser := models.User{
 		Uuid: message.FromUUID,
 	}
 	if err := fromUser.FindOneUserByUUID(engine, ctx); err != nil {
@@ -101,8 +101,8 @@ func insertOneGroupMessage(ctx context.Context, message *socket_message.Message,
 
 	return &models.Message{
 		Uuid:        message.MessageID,
-		FromUserID:  fromUser.ID,
-		ToUserID:    groupInfo.ID,
+		FromUserID:  fromUser.Id,
+		ToUserID:    groupInfo.Id,
 		Content:     message.Content,
 		ContentType: uint(message.ContentType),
 		MessageType: uint(message.MessageType),

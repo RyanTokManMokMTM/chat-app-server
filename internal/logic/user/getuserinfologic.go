@@ -34,7 +34,7 @@ func (l *GetUserInfoLogic) GetUserInfo(req *types.GetUserInfoReq) (resp *types.G
 		return nil, errx.NewCustomErrCode(errx.REQ_PARAM_ERROR)
 	}
 
-	var u *models.UserModel
+	var u *models.User
 	if req.UserID != 0 {
 		u, err = l.svcCtx.DAO.FindOneUser(l.ctx, req.UserID)
 		if err != nil {

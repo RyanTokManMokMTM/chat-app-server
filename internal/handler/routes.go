@@ -160,6 +160,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/group/info/uuid/:uuid",
 				Handler: group.GetGroupInfoByUUIDHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/group/count",
+				Handler: group.CountUserGroupHandler(serverCtx),
+			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),

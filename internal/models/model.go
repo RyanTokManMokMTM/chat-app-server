@@ -44,22 +44,23 @@ func NewEngine(c *config.Config) *gorm.DB {
 }
 
 func migration(db *gorm.DB) {
-	err := db.AutoMigrate(UserModel{})
+
+	err := db.AutoMigrate(&User{}, &Group{}, &UserGroup{})
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.AutoMigrate(&UserGroup{})
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.SetupJoinTable(&User{}, "Groups", &UserGroup{})
 	if err != nil {
 		panic(err)
 	}
 
 	err = db.AutoMigrate(UserFriend{})
-	if err != nil {
-		panic(err)
-	}
-
-	err = db.AutoMigrate(Group{})
-	if err != nil {
-		panic(err)
-	}
-
-	err = db.AutoMigrate(GroupMember{})
 	if err != nil {
 		panic(err)
 	}
@@ -73,4 +74,5 @@ func migration(db *gorm.DB) {
 	if err != nil {
 		panic(err)
 	}
+
 }

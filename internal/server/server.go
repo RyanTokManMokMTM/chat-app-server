@@ -152,7 +152,7 @@ func sendGroupMessage(message *socket_message.Message, server *SocketServer, svc
 	}
 
 	//TODO: Get All Group Members
-	members, err := svcCtx.DAO.FindOneGroupMembers(ctx, group.ID)
+	members, err := svcCtx.DAO.FindOneGroupMembers(ctx, group.Id, 0, 0)
 	if err != nil {
 		logx.Error(err.Error())
 		return

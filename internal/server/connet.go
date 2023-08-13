@@ -19,7 +19,7 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 		w.Write([]byte("Websocket upgrade error"))
 		return
 	}
-	//TODO : Get UserID from Context
+	//TODO : Get UserId from Context
 	userID := ctxtool.GetUserIDFromCTX(r.Context())
 	//TODO : Find User Info from DB
 	u, err := svcCtx.DAO.FindOneUser(r.Context(), userID)

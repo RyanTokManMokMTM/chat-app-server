@@ -23,8 +23,12 @@ type (
         Code uint `json:"code"`
     }
 
-    GetFriendListReq {}
+    GetFriendListReq {
+        Page uint `form:"page,default=1"`
+        Limit uint `form:"limit,default=20"`
+    }
     GetFriendListResp {
+        PageableInfo
         FriendList []CommonUserInfo `json:"friends"`
     }
 

@@ -26,12 +26,12 @@ func (d *DAO) DeleteOneFriend(ctx context.Context, userID, friendID uint) error 
 	return uf.DeleteOne(ctx, d.engine)
 }
 
-func (d *DAO) GetUserFriendListByPageSize(ctx context.Context, userID, page, pageSize uint) ([]*models.UserFriend, error) {
+func (d *DAO) GetUserFriendListByPageSize(ctx context.Context, userID uint, pageOffset, PageLimit int) ([]*models.UserFriend, error) {
 	uf := &models.UserFriend{
 		UserID: userID,
 	}
 
-	return uf.GetFriendList(ctx, d.engine, int(page), int(pageSize))
+	return uf.GetFriendList(ctx, d.engine, pageOffset, PageLimit)
 }
 
 func (d *DAO) CountUserFriend(ctx context.Context, userID uint) (int64, error) {

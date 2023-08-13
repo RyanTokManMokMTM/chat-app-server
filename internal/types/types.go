@@ -8,6 +8,11 @@ type HealthCheckResp struct {
 	Resp string `json:"resp"`
 }
 
+type PageableInfo struct {
+	TotalPage uint `json:"total_page"`
+	Page      uint `json:"current_page"`
+}
+
 type CommonUserInfo struct {
 	ID            uint   `json:"id,omitempty"`
 	Uuid          string `json:"uuid,omitempty"`
@@ -131,9 +136,12 @@ type DeleteFriendResp struct {
 }
 
 type GetFriendListReq struct {
+	Page  uint `form:"page,default=1"`
+	Limit uint `form:"limit,default=20"`
 }
 
 type GetFriendListResp struct {
+	PageableInfo
 	FriendList []CommonUserInfo `json:"friends"`
 }
 
@@ -175,10 +183,13 @@ type DeleteGroupResp struct {
 
 type GetGroupMembersReq struct {
 	GroupID uint `path:"group_id"`
+	Page    uint `form:"page,default=1"`
+	Limit   uint `form:"limit,default=20"`
 }
 
 type GetGroupMembersResp struct {
-	Code       uint              `json:"code"`
+	Code uint `json:"code"`
+	PageableInfo
 	MemberList []GroupMemberInfo `json:"member_list"`
 }
 
@@ -201,10 +212,13 @@ type UploadGroupAvatarResp struct {
 }
 
 type GetUserGroupReq struct {
+	Page  uint `form:"page,default=1"`
+	Limit uint `form:"limit,default=20"`
 }
 
 type GetUserGroupResp struct {
-	Code   uint        `json:"code"`
+	Code uint `json:"code"`
+	PageableInfo
 	Groups []GroupInfo `json:"groups"`
 }
 
@@ -224,6 +238,14 @@ type GetGroupInfoByUUIDReq struct {
 type GetGroupInfoByUUIDResp struct {
 	Code   uint          `json:"code"`
 	Result FullGroupInfo `json:"result"`
+}
+
+type CountUserGroupReq struct {
+}
+
+type CountUserGroupResp struct {
+	Code  uint `json:"code"`
+	Total uint `json:"total"`
 }
 
 type GroupMemberInfo struct {
@@ -250,10 +272,13 @@ type GetMessagesReq struct {
 	ID          uint `json:"id"` //can be a user id or a group id
 	MessageType uint `json:"message_type"`
 	FriendID    uint `json:"friend_id"` //only for message type = 1
+	Page        uint `form:"page,default=1"`
+	Limit       uint `form:"limit,default=20"`
 }
 
 type GetMessagesResp struct {
-	Code     uint          `json:"code"`
+	Code uint `json:"code"`
+	PageableInfo
 	Messages []MessageUser `json:"message"`
 }
 
@@ -321,7 +346,8 @@ type GetActiveStoryReq struct {
 }
 
 type GetActiveStoryResp struct {
-	Code          uint          `json:"code"`
+	Code uint `json:"code"`
+	PageableInfo
 	FriendStroies []FriendStroy `json:"active_stories"`
 }
 

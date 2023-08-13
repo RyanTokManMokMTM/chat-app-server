@@ -3,7 +3,6 @@ package models
 import (
 	"context"
 	"gorm.io/gorm"
-	"time"
 )
 
 type UserFriend struct {
@@ -12,8 +11,8 @@ type UserFriend struct {
 	UserID   uint `gorm:"not null;index"`
 	FriendID uint `gorm:"not null;index"`
 
-	//UserInfo   UserModel `gorm:"foreignKey:UserID"`
-	FriendInfo UserModel `gorm:"foreignKey:FriendID"`
+	//UserInfo   User `gorm:"foreignKey:UserId"`
+	FriendInfo User `gorm:"foreignKey:FriendID"`
 
 	//All stories
 	CommonField
@@ -32,14 +31,13 @@ func (uf *UserFriend) FindOne(ctx context.Context, db *gorm.DB, userID, friendID
 func (uf *UserFriend) DeleteOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().Where("user_id = ? AND friend_id = ?", uf.UserID, uf.FriendID).Delete(&uf).Error
 }
-func (uf *UserFriend) GetFriendList(ctx context.Context, db *gorm.DB, page, pageSize int) ([]*UserFriend, error) {
-	var list []*UserFriend
-	now := time.Now().Unix()
-	beforeOneDay := now - (86400)
 
+func (uf *UserFriend) GetFriendList(ctx context.Context, db *gorm.DB, pageOffset, pageSize int) ([]*UserFriend, error) {
+	var list []*UserFriend
 	if err := db.WithContext(ctx).Debug().Model(&uf).
-		Preload("FriendInfo").Preload("FriendInfo.Stories", "created_at BETWEEN FROM_UNIXTIME(?) AND FROM_UNIXTIME(?)", beforeOneDay, now).Where("user_id = ?", uf.UserID).
-		Offset(page).
+		Preload("FriendInfo").
+		Where("user_id = ?", uf.UserID).
+		Offset(pageOffset).
 		Limit(pageSize).
 		Find(&list).Error; err != nil {
 		return nil, err

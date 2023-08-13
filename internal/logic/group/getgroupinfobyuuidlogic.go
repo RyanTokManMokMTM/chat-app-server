@@ -48,7 +48,7 @@ func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUU
 	}
 
 	isJoined := true
-	_, err = l.svcCtx.DAO.FindOneGroupMember(l.ctx, group.ID, userID)
+	_, err = l.svcCtx.DAO.FindOneGroupMember(l.ctx, group.Id, userID)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
@@ -56,7 +56,7 @@ func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUU
 		isJoined = false
 	}
 
-	count, err := l.svcCtx.DAO.CountGroupMembers(l.ctx, group.ID)
+	count, err := l.svcCtx.DAO.CountGroupMembers(l.ctx, group.Id)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -64,7 +64,7 @@ func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUU
 		Code: uint(http.StatusOK),
 		Result: types.FullGroupInfo{
 			GroupInfo: types.GroupInfo{
-				ID:        group.ID,
+				ID:        group.Id,
 				Uuid:      group.Uuid,
 				Name:      group.GroupName,
 				Avatar:    group.GroupAvatar,

@@ -13,9 +13,13 @@ type (
         ID uint `json:"id"` //can be a user id or a group id
         MessageType uint `json:"message_type"`
         FriendID uint `json:"friend_id"` //only for message type = 1
+
+        Page uint `form:"page,default=1"`
+        Limit uint `form:"limit,default=20"`
     }
     GetMessagesResp {
         Code uint `json:"code"`
+        PageableInfo
         Messages []MessageUser `json:"message"`
     }
 

@@ -8,13 +8,14 @@ import (
 )
 
 type Group struct {
-	ID          uint   `gorm:"primaryKey;autoIncrement"`
+	Id          uint   `gorm:"primaryKey;autoIncrement"`
 	Uuid        string `gorm:"type:varchar(64);not null;unique_index:idx_uuid"`
 	GroupName   string `gorm:"type:varchar(64);not null"`
 	GroupAvatar string
 	GroupLead   uint `gorm:"not null;index"`
 
-	LeadInfo UserModel `gorm:"foreignKey:GroupLead;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	LeadInfo  User   `gorm:"foreignKey:GroupLead;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	UsersInfo []User `gorm:"many2many:users_groups;foreignKey:Id;joinForeignKey:GroupId"`
 	CommonField
 }
 
@@ -41,7 +42,7 @@ func (g *Group) InsertOne(ctx context.Context, db *gorm.DB) error {
 			return errors.New("db row affected 0")
 		}
 
-		return tx.WithContext(ctx).Debug().Create(&GroupMember{GroupID: g.ID, UserID: g.GroupLead}).Error
+		return tx.WithContext(ctx).Debug().Create(&UserGroup{GroupId: g.Id, UserId: g.GroupLead}).Error
 	})
 }
 
@@ -53,15 +54,15 @@ func (g *Group) FindOneByUUID(ctx context.Context, db *gorm.DB) error {
 }
 
 func (g *Group) DeleteOne(ctx context.Context, db *gorm.DB) error {
-	return db.WithContext(ctx).Debug().Where("id = ?", g.ID).Delete(&g).Error
+	return db.WithContext(ctx).Debug().Where("id = ?", g.Id).Delete(&g).Error
 }
 
 func (g *Group) UpdateOne(ctx context.Context, db *gorm.DB) error {
-	return db.WithContext(ctx).Debug().Model(g).Where("id = ?", g.ID).Update("GroupName", g.GroupName).Error
+	return db.WithContext(ctx).Debug().Model(g).Where("id = ?", g.Id).Update("GroupName", g.GroupName).Error
 }
 
 func (g *Group) UpdateOneAvatar(ctx context.Context, db *gorm.DB) error {
-	return db.WithContext(ctx).Debug().Model(g).Where("id = ?", g.ID).Update("GroupAvatar", g.GroupAvatar).Error
+	return db.WithContext(ctx).Debug().Model(g).Where("id = ?", g.Id).Update("GroupAvatar", g.GroupAvatar).Error
 }
 
 func (g *Group) SearchGroup(ctx context.Context, db *gorm.DB, query string) ([]*Group, error) {

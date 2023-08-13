@@ -62,7 +62,7 @@ func (l *UploadGroupAvatarLogic) UploadGroupAvatar(req *types.UploadGroupAvatarR
 	}
 
 	path := fmt.Sprintf("/%s", name)
-	if err := l.svcCtx.DAO.UpdateOneGroupAvatar(l.ctx, group.ID, path); err != nil {
+	if err := l.svcCtx.DAO.UpdateOneGroupAvatar(l.ctx, group.Id, path); err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 	return &types.UploadGroupAvatarResp{

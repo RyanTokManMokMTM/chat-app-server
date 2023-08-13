@@ -56,12 +56,12 @@ func (l *SearchUserLogic) SearchUser(req *types.SearchUserReq) (resp *types.Sear
 
 	var users = make([]types.SearchUserResult, 0)
 	for _, info := range results {
-		if info.ID == userID {
+		if info.Id == userID {
 			continue
 		}
 
 		var isFriend = true
-		err := l.svcCtx.DAO.FindOneFriend(l.ctx, userID, info.ID)
+		err := l.svcCtx.DAO.FindOneFriend(l.ctx, userID, info.Id)
 		if err != nil {
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
 				continue
@@ -71,7 +71,7 @@ func (l *SearchUserLogic) SearchUser(req *types.SearchUserReq) (resp *types.Sear
 
 		users = append(users, types.SearchUserResult{
 			UserInfo: types.CommonUserInfo{
-				ID:            info.ID,
+				ID:            info.Id,
 				Uuid:          info.Uuid,
 				NickName:      info.NickName,
 				Email:         info.Email,

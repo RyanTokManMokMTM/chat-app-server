@@ -59,7 +59,7 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 		}
 	}
 
-	messages, err := l.svcCtx.DAO.GetMessage(l.ctx, userID, req.FriendID, req.MessageType)
+	messages, err := l.svcCtx.DAO.GetMessage(l.ctx, userID, req.FriendID, req.MessageType, 0, 0)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}

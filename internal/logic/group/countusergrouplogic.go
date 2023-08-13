@@ -14,21 +14,21 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type UpdateGroupInfoLogic struct {
+type CountUserGroupLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewUpdateGroupInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateGroupInfoLogic {
-	return &UpdateGroupInfoLogic{
+func NewCountUserGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CountUserGroupLogic {
+	return &CountUserGroupLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (resp *types.UpdateGroupInfoResp, err error) {
+func (l *CountUserGroupLogic) CountUserGroup(req *types.CountUserGroupReq) (resp *types.CountUserGroupResp, err error) {
 	// todo: add your logic here and delete this line
 	userID := ctxtool.GetUserIDFromCTX(l.ctx)
 	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
@@ -38,24 +38,12 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 		}
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
-
-	group, err := l.svcCtx.DAO.FindOneGroup(l.ctx, req.GroupID)
+	total, err := l.svcCtx.DAO.CountUserGroups(l.ctx, userID)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errx.NewCustomErrCode(errx.GROUP_NOT_EXIST)
-		}
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
-
-	if group.GroupLead != userID {
-		return nil, errx.NewCustomErrCode(errx.NO_GROUP_AUTHORITY)
-	}
-
-	if err := l.svcCtx.DAO.UpdateOneGroup(l.ctx, group.Id, req.GroupName); err != nil {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
-	}
-
-	return &types.UpdateGroupInfoResp{
-		Code: uint(http.StatusOK),
+	return &types.CountUserGroupResp{
+		Code:  uint(http.StatusOK),
+		Total: uint(total),
 	}, nil
 }

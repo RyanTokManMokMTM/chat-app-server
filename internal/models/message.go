@@ -55,17 +55,24 @@ func (m *Message) DeleteOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().Delete(&m).Error
 }
 
-func (m *Message) GetMessages(ctx context.Context, db *gorm.DB) ([]*Message, error) {
-	var message []*Message = make([]*Message, 0)
+func (m *Message) GetMessages(ctx context.Context, db *gorm.DB, pageOffset, pageLimit int) ([]*Message, error) {
+	var message = make([]*Message, 0)
 	if m.ContentType == variable.MESSAGE_TYPE_USERCHAT {
 		//TODO: User chat will exactly have 2 user in the chat, so from -> to || to -> form are mean the same chat room
-		if err := db.WithContext(ctx).Debug().Where("message_type = ? and (from_user_id in (?,?) or to_user_id in (?,?))", m.MessageType, m.FromUserID, m.ToUserID, m.ToUserID, m.FromUserID).Find(&message).Error; err != nil {
+		if err := db.WithContext(ctx).Debug().
+			Where("message_type = ? and (from_user_id in (?,?) or to_user_id in (?,?))", m.MessageType, m.FromUserID, m.ToUserID, m.ToUserID, m.FromUserID).
+			Offset(pageOffset).
+			Limit(pageLimit).
+			Find(&message).Error; err != nil {
 			return nil, err
 		}
 	} else if m.ContentType == variable.MESSAGE_TYPE_GROUPCHAT {
 		//TODO: for group chat message
-		//TODO: GROUP ID is to user id
-		if err := db.WithContext(ctx).Debug().Where("message_type = ? AND to_user_id = ?", m.MessageType, m.ToUserID).Find(&message).Error; err != nil {
+		//TODO: GROUP Id is to user id
+		if err := db.WithContext(ctx).Debug().
+			Where("message_type = ? AND to_user_id = ?", m.MessageType, m.ToUserID).
+			Offset(pageOffset).
+			Limit(pageLimit).Find(&message).Error; err != nil {
 			return nil, err
 		}
 	}
