@@ -269,9 +269,8 @@ type FullGroupInfo struct {
 }
 
 type GetMessagesReq struct {
-	ID          uint `json:"id"` //can be a user id or a group id
 	MessageType uint `json:"message_type"`
-	FriendID    uint `json:"friend_id"` //only for message type = 1
+	SouceId     uint `json:"id"` //can be a groupId or friendId
 	Page        uint `form:"page,default=1"`
 	Limit       uint `form:"limit,default=20"`
 }
@@ -297,6 +296,10 @@ type MessageUser struct {
 	Content     string `json:"content"`
 	ContentType uint   `json:"content_type"`
 	MessageType uint   `json:"message_type"`
+	Url         string `json:"url"`
+	FileName    string `json:"file_name"`
+	FileSize    uint   `json:"file_size"`
+	StoryTime   uint   `json:"story_available_time"`
 	CreatedAt   uint   `json:"create_at"`
 }
 

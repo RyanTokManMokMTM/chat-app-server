@@ -31,12 +31,13 @@ type Store interface {
 	UpdateOneGroup(ctx context.Context, groupID uint, groupName string) error
 	UpdateOneGroupAvatar(ctx context.Context, groupID uint, avatarName string) error
 	GetUserGroups(ctx context.Context, userID uint, pageOffset, pageLimit int) ([]*models.UserGroup, error)
-	CountUserGroups(ctx context.Context, userID uint) (int64, error)
+	CountUserGroups(ctx context.Context, userID uint) int64
 	SearchGroup(ctx context.Context, query string) ([]*models.Group, error)
 
 	InsertOneGroupMember(ctx context.Context, groupID, userID uint) error
 	FindOneGroupMember(ctx context.Context, groupID, userID uint) (*models.UserGroup, error)
-	FindOneGroupMembers(ctx context.Context, groupID uint, pageOffset, pageLimit int) ([]*models.UserGroup, error)
+	FindOneGroupMembers(ctx context.Context, groupID uint) ([]*models.UserGroup, error)
+	FindOneGroupMembersByPage(ctx context.Context, groupID uint, pageOffset, pageLimit int) ([]*models.UserGroup, error)
 	DeleteGroupMember(ctx context.Context, groupID, userID uint) error
 	DeleteAllGroupMembers(ctx context.Context, groupID uint) error
 	GetGroupMembers(ctx context.Context, groupID uint, pageOffset, pageLimit int) ([]*models.UserGroup, error)
@@ -45,6 +46,7 @@ type Store interface {
 	InsertOneMessage(ctx context.Context, message *socket_message.Message)
 	FindOneMessage(ctx context.Context, messageID uint) (*models.Message, error)
 	DeleteOneMessage(ctx context.Context, messageID uint) error
+	CountMessage(ctx context.Context, messageType, id uint) (int64, error)
 	GetMessage(ctx context.Context, from, to, messageType uint, pageOffset, pageLimit int) ([]*models.Message, error)
 
 	InsertOneStory(ctx context.Context, userID uint, mediaPath string) (uint, error)

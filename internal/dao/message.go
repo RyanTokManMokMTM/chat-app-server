@@ -77,9 +77,22 @@ func insertUserMessage(ctx context.Context, message *socket_message.Message, eng
 		Content:     message.Content,
 		MessageType: uint(message.MessageType),
 		ContentType: uint(message.ContentType),
-		URL:         message.UrlPath,
+		Url:         message.UrlPath,
+		FileName:    message.FileName,
+		FileSize:    uint(message.FileSize),
+		StoryTime:   uint(message.StoryAvailableTime),
 	}
 
+}
+
+func (d *DAO) CountMessage(ctx context.Context, messageType, id uint) (int64, error) {
+	m := &models.Message{
+		FromUserID:  id,
+		ToUserID:    id,
+		MessageType: messageType,
+	}
+
+	return m.CountMessage(ctx, d.engine)
 }
 
 func insertOneGroupMessage(ctx context.Context, message *socket_message.Message, engine *gorm.DB) *models.Message {
@@ -106,6 +119,10 @@ func insertOneGroupMessage(ctx context.Context, message *socket_message.Message,
 		Content:     message.Content,
 		ContentType: uint(message.ContentType),
 		MessageType: uint(message.MessageType),
+		Url:         message.UrlPath,
+		FileName:    message.FileName,
+		FileSize:    uint(message.FileSize),
+		StoryTime:   uint(message.StoryAvailableTime),
 	}
 
 }

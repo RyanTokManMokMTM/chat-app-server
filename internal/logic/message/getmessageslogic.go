@@ -5,8 +5,10 @@ import (
 	"errors"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/pagerx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
 	"gorm.io/gorm"
+	"net/http"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -42,15 +44,15 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 
 	if req.MessageType == variable.MESSAGE_TYPE_USERCHAT {
 		//TODO: Check User is friend
-		if err := l.svcCtx.DAO.FindOneFriend(l.ctx, userID, req.FriendID); err != nil {
+		if err := l.svcCtx.DAO.FindOneFriend(l.ctx, userID, req.SouceId); err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errx.NewCustomErrCode(errx.NOT_YET_FRIEND)
 			}
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
-	} else if req.MessageType == variable.MESSAGE_TYPE_USERCHAT {
+	} else if req.MessageType == variable.MESSAGE_TYPE_GROUPCHAT {
 		//TODO: Check User is group member
-		_, err := l.svcCtx.DAO.FindOneGroupMember(l.ctx, req.ID, userID)
+		_, err := l.svcCtx.DAO.FindOneGroupMember(l.ctx, req.SouceId, userID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errx.NewCustomErrCode(errx.NOT_JOIN_GROUP_YET)
@@ -58,8 +60,15 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
 	}
-
-	messages, err := l.svcCtx.DAO.GetMessage(l.ctx, userID, req.FriendID, req.MessageType, 0, 0)
+	//
+	total, err := l.svcCtx.DAO.CountMessage(l.ctx, req.MessageType, req.SouceId)
+	if err != nil {
+		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+	}
+	pageLimit := pagerx.GetLimit(req.Limit)
+	pageSize := pagerx.GetTotalPageByPageSize(uint(total), pageLimit)
+	pageOffset := pagerx.PageOffset(pageLimit, req.Page)
+	messages, err := l.svcCtx.DAO.GetMessage(l.ctx, userID, req.SouceId, req.MessageType, int(pageOffset), int(pageLimit))
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -72,8 +81,19 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 			Content:     msg.Content,
 			ContentType: msg.ContentType,
 			MessageType: msg.MessageType,
+			Url:         msg.Url,
+			FileName:    msg.FileName,
+			FileSize:    msg.FileSize,
+			StoryTime:   msg.StoryTime,
 			CreatedAt:   uint(msg.CreatedAt.Unix()),
 		})
 	}
-	return
+	return &types.GetMessagesResp{
+		Code:     http.StatusOK,
+		Messages: respMessages,
+		PageableInfo: types.PageableInfo{
+			TotalPage: pageSize,
+			Page:      req.Page,
+		},
+	}, nil
 }

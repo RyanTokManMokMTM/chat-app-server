@@ -29,7 +29,7 @@ const (
 	VIDEO
 
 	//Story Reply?
-	STORY //with URL path and content and available time
+	STORY //with Url path and content and available time
 	SYS
 )
 

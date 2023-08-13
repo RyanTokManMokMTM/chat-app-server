@@ -25,8 +25,8 @@ func (uf *UserFriend) TableName() string {
 func (uf *UserFriend) InsertOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().Create(&uf).Error
 }
-func (uf *UserFriend) FindOne(ctx context.Context, db *gorm.DB, userID, friendID uint) error {
-	return db.WithContext(ctx).Debug().Where("user_id = ? AND friend_id = ? ", userID, friendID).First(&uf).Error
+func (uf *UserFriend) FindOne(ctx context.Context, db *gorm.DB) error {
+	return db.WithContext(ctx).Debug().Model(&uf).Where("user_id = ? AND friend_id = ? ", uf.UserID, uf.FriendID).First(&uf).Error
 }
 func (uf *UserFriend) DeleteOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().Where("user_id = ? AND friend_id = ?", uf.UserID, uf.FriendID).Delete(&uf).Error

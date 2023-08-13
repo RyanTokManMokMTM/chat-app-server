@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/pagerx"
 	"gorm.io/gorm"
 	"net/http"
 
@@ -39,13 +40,13 @@ func (l *GetUserGroupsLogic) GetUserGroups(req *types.GetUserGroupReq) (resp *ty
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	//total, err := l.svcCtx.DAO.CountUser
+	total := l.svcCtx.DAO.CountUserGroups(l.ctx, userID)
 	//
-	//pageLimit := pagerx.GetLimit(req.Limit)
-	//pageSize := pagerx.GetTotalPageByPageSize(uint(total), pageLimit)
-	//pageOffset := pagerx.PageOffset(pageSize, req.Page)
+	pageLimit := pagerx.GetLimit(req.Limit)
+	pageSize := pagerx.GetTotalPageByPageSize(uint(total), pageLimit)
+	pageOffset := pagerx.PageOffset(pageSize, req.Page)
 
-	groups, err := l.svcCtx.DAO.GetUserGroups(l.ctx, userID, 0, 0)
+	groups, err := l.svcCtx.DAO.GetUserGroups(l.ctx, userID, int(pageOffset), int(pageLimit))
 	if err != nil {
 		logx.Infof(err.Error())
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())

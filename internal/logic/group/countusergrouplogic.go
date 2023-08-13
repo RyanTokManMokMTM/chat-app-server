@@ -38,10 +38,7 @@ func (l *CountUserGroupLogic) CountUserGroup(req *types.CountUserGroupReq) (resp
 		}
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
-	total, err := l.svcCtx.DAO.CountUserGroups(l.ctx, userID)
-	if err != nil {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
-	}
+	total := l.svcCtx.DAO.CountUserGroups(l.ctx, userID)
 	return &types.CountUserGroupResp{
 		Code:  uint(http.StatusOK),
 		Total: uint(total),

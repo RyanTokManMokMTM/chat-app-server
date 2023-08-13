@@ -152,7 +152,7 @@ func sendGroupMessage(message *socket_message.Message, server *SocketServer, svc
 	}
 
 	//TODO: Get All Group Members
-	members, err := svcCtx.DAO.FindOneGroupMembers(ctx, group.Id, 0, 0)
+	members, err := svcCtx.DAO.FindOneGroupMembers(ctx, group.Id)
 	if err != nil {
 		logx.Error(err.Error())
 		return
@@ -204,7 +204,6 @@ func sendGroupMessage(message *socket_message.Message, server *SocketServer, svc
 
 // saveMessage, TEXT:Save directly and other types need to be store to FS
 func saveMessage(svcCtx *svc.ServiceContext, message *socket_message.Message) {
-	//TODO : Save Message into db
 	svcCtx.DAO.InsertOneMessage(context.Background(), message)
 }
 
