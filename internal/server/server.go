@@ -64,6 +64,8 @@ func (s *SocketServer) Start() {
 				continue
 			}
 
+			logx.Infof("%+v", socketMessage)
+
 			//TODO: Send To Who?
 			//TODO: Send To Nobody , it means broadcast to a specific user/group
 			if socketMessage.ToUUID != "" {

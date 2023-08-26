@@ -65,7 +65,8 @@ func (l *GetUserFriendProfileLogic) GetUserFriendProfile(req *types.GetUserFrien
 	}
 
 	isFriend := true
-	if err := l.svcCtx.DAO.FindOneFriend(l.ctx, userID, u.Id); err != nil {
+	_, err = l.svcCtx.DAO.FindOneFriend(l.ctx, userID, u.Id)
+	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}

@@ -61,7 +61,7 @@ func (l *SearchUserLogic) SearchUser(req *types.SearchUserReq) (resp *types.Sear
 		}
 
 		var isFriend = true
-		err := l.svcCtx.DAO.FindOneFriend(l.ctx, userID, info.Id)
+		_, err := l.svcCtx.DAO.FindOneFriend(l.ctx, userID, info.Id)
 		if err != nil {
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
 				continue

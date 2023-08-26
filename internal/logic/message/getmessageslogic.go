@@ -44,7 +44,8 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 
 	if req.MessageType == variable.MESSAGE_TYPE_USERCHAT {
 		//TODO: Check User is friend
-		if err := l.svcCtx.DAO.FindOneFriend(l.ctx, userID, req.SouceId); err != nil {
+		_, err = l.svcCtx.DAO.FindOneFriend(l.ctx, userID, req.SouceId)
+		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errx.NewCustomErrCode(errx.NOT_YET_FRIEND)
 			}

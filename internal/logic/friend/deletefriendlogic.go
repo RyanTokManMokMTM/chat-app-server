@@ -40,7 +40,7 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 	}
 
 	//TODO: Find Friend
-	err = l.svcCtx.DAO.FindOneFriend(l.ctx, userID, req.UserID)
+	_, err = l.svcCtx.DAO.FindOneFriend(l.ctx, userID, req.UserID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.NOT_YET_FRIEND)

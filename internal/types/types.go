@@ -146,6 +146,22 @@ type GetFriendListResp struct {
 	FriendList []CommonUserInfo `json:"friends"`
 }
 
+type GetFriendInfoReq struct {
+	Uuid string `path:"uuid"`
+}
+
+type GetFriendInfoResp struct {
+	Code       uint       `json:"code"`
+	FriendInfo FriendInfo `json:"friend_info"`
+}
+
+type FriendInfo struct {
+	ID       uint   `json:"id,omitempty"`
+	Uuid     string `json:"uuid,omitempty"`
+	NickName string `json:"name,omitempty"`
+	Avatar   string `json:"avatar,omitempty"`
+}
+
 type CreateGroupReq struct {
 	GroupName    string `json:"group_name"`
 	GroupMembers []uint `json:"members"`

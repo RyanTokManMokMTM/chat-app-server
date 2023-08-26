@@ -103,6 +103,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/user/friends",
 				Handler: friend.GetFriendListHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/user/friend/:uuid",
+				Handler: friend.GetFriendInformationHandler(serverCtx),
+			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),

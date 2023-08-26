@@ -33,6 +33,7 @@ type Message struct {
 	FileName    string `gorm:"comment:'file name'"`
 	FileSize    uint   `gorm:"comment:'file size'"`
 	StoryTime   uint   `gorm:"comment:'reply story available time'"`
+	StoryId     uint   `gorm:"comment:'reply story id'"`
 	CommonField
 }
 

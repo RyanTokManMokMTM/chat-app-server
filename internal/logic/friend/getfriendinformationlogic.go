@@ -14,21 +14,21 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type AddFriendLogic struct {
+type GetFriendInformationLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewAddFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddFriendLogic {
-	return &AddFriendLogic{
+func NewGetFriendInformationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFriendInformationLogic {
+	return &GetFriendInformationLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFriendResp, err error) {
+func (l *GetFriendInformationLogic) GetFriendInformation(req *types.GetFriendInfoReq) (resp *types.GetFriendInfoResp, err error) {
 	// todo: add your logic here and delete this line
 	userID := ctxtool.GetUserIDFromCTX(l.ctx)
 	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
@@ -39,7 +39,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, req.UserID)
+	friend, err := l.svcCtx.DAO.FindOneUserByUUID(l.ctx, req.Uuid)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -47,23 +47,13 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	//TODO: Check is friend
-	_, err = l.svcCtx.DAO.FindOneFriend(l.ctx, userID, req.UserID)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			//TODO: Create FriendID Relationship
-			logx.Infof("create")
-			err = l.svcCtx.DAO.InsertOneFriend(l.ctx, userID, req.UserID)
-			if err != nil {
-				return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
-			}
-			return &types.AddFriendResp{
-				Code: uint(http.StatusOK),
-			}, nil
-		} else {
-			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
-		}
-	}
-
-	return nil, errx.NewCustomErrCode(errx.IS_FRIEND_ALREADY)
+	return &types.GetFriendInfoResp{
+		Code: uint(http.StatusOK),
+		FriendInfo: types.FriendInfo{
+			ID:       friend.Id,
+			Uuid:     friend.Uuid,
+			NickName: friend.NickName,
+			Avatar:   friend.Avatar,
+		},
+	}, nil
 }

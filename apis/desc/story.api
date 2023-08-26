@@ -53,6 +53,7 @@ type (
         StoryMediaURL string `json:"media_url"`
         CreateAt uint `json:"create_at"`
     }
+
 )
 
 type (

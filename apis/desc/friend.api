@@ -33,6 +33,23 @@ type (
         FriendList []CommonUserInfo `json:"friends"`
     }
 
+    GetFriendInfoReq{
+        uuid string `path:"uuid"`
+    }
+    GetFriendInfoResp{
+        Code uint `json:"code"`
+        FriendInfo FriendInfo `json:"friend_info"`
+    }
+
+)
+
+type (
+    FriendInfo {
+        ID            uint   `json:"id,omitempty"`
+        Uuid          string `json:"uuid,omitempty"`
+        NickName      string `json:"name,omitempty"`
+        Avatar        string `json:"avatar,omitempty"`
+    }
 )
 
 
@@ -60,4 +77,10 @@ service  ChatApp {
     )
     @handler GetFriendList
     get /user/friends(GetFriendListReq) returns (GetFriendListResp)
+
+    @doc (
+        summary  : "Get one friend information"
+    )
+    @handler GetFriendInformation
+    get /user/friend/:uuid(GetFriendInfoReq) returns (GetFriendInfoResp)
 }

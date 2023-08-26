@@ -19,4 +19,5 @@ message Message {
   string fileName = 13;
   int32 fileSize = 14;
   int32 storyAvailableTime = 15;
+  int32 storyId = 16;
 }

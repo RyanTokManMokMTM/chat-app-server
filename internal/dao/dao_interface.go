@@ -19,7 +19,7 @@ type Store interface {
 	CountUserAvailableStory(ctx context.Context, userID uint) (int64, error)
 
 	InsertOneFriend(ctx context.Context, userID, friendID uint) error
-	FindOneFriend(ctx context.Context, userID, friendID uint) error
+	FindOneFriend(ctx context.Context, userID, friendID uint) (*models.User, error)
 	DeleteOneFriend(ctx context.Context, userID, friendID uint) error
 	GetUserFriendListByPageSize(ctx context.Context, userID uint, pageOffset, PageLimit int) ([]*models.UserFriend, error)
 	CountUserFriend(ctx context.Context, userID uint) (int64, error)

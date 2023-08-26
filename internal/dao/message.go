@@ -86,6 +86,7 @@ func insertUserMessage(ctx context.Context, message *socket_message.Message, eng
 		FileName:    message.FileName,
 		FileSize:    uint(message.FileSize),
 		StoryTime:   uint(message.StoryAvailableTime),
+		StoryId:     uint(message.StoryId),
 	}
 
 }
