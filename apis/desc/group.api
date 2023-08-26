@@ -46,6 +46,7 @@ type (
         GroupID uint `path:"group_id"`
         Page uint `form:"page,default=1"`
         Limit uint `form:"limit,default=20"`
+        LatestID uint `form:"lastestId,default=0"`
     }
     GetGroupMembersResp {
         Code uint `json:"code"`
@@ -72,6 +73,7 @@ type (
     GetUserGroupReq{
         Page uint `form:"page,default=1"`
         Limit uint `form:"limit,default=20"`
+        LatestID uint `form:"lastestId,default=0"`
     }
     GetUserGroupResp {
         Code uint `json:"code"`

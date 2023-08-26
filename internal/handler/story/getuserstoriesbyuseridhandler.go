@@ -15,7 +15,7 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func GetUserStoriesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func GetUserStoriesByUserIdHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.GetUserStoryReq
 		if err := httpx.Parse(r, &req); err != nil {
@@ -36,8 +36,8 @@ func GetUserStoriesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := story.NewGetUserStoriesLogic(r.Context(), svcCtx)
-		resp, err := l.GetUserStories(&req)
+		l := story.NewGetUserStoriesByUserIdLogic(r.Context(), svcCtx)
+		resp, err := l.GetUserStoriesByUserId(&req)
 		if err != nil {
 			//convert to customError
 			if e, ok := err.(*errx.CustomError); ok {

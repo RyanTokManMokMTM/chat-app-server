@@ -5,12 +5,12 @@ import (
 	"errors"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
-	"github.com/ryantokmanmokmtm/chat-app-server/common/helper/toolx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/pagerx"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 	"gorm.io/gorm"
 	"net/http"
+	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -40,8 +40,13 @@ func (l *GetActiveStoriesLogic) GetActiveStories(req *types.GetActiveStoryReq) (
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
+	var storyTimeStamp = int64(req.StoryCreatedTime)
+	if storyTimeStamp == 0 {
+		storyTimeStamp = time.Now().Unix()
+	}
+
 	//friend
-	total, err := l.svcCtx.DAO.CountActiveStory(l.ctx, userID)
+	total, err := l.svcCtx.DAO.CountActiveStoryByTimeStamp(l.ctx, userID, storyTimeStamp)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -51,31 +56,27 @@ func (l *GetActiveStoriesLogic) GetActiveStories(req *types.GetActiveStoryReq) (
 	pageOffset := pagerx.PageOffset(pageLimit, req.Page)               //TO WHICH PAGE
 	logx.Info(pageLimit, totalPage, pageOffset)
 
-	stories, err := l.svcCtx.DAO.GetFriendActiveStories(l.ctx, userID, int(pageOffset), int(pageLimit))
+	stories, err := l.svcCtx.DAO.GetFriendActiveStoriesByTimeStamp(l.ctx, userID, int(pageOffset), int(pageLimit), storyTimeStamp)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
 	activeStories := make([]types.FriendStroy, 0)
 	for _, fd := range stories {
-		ids, err := toolx.StringTouIntArray(fd.Ids)
-		if err != nil {
-			return nil, errx.NewCustomErrCode(errx.DB_ERROR)
-		}
 		activeStories = append(activeStories, types.FriendStroy{
 			UserID:     fd.UserInfo.Id,
 			Uuid:       fd.UserInfo.Uuid,
 			UserName:   fd.UserInfo.NickName,
 			UserAvatar: fd.UserInfo.Avatar,
 			IsSeen:     false, //for testing...
-			StoriesIDs: ids,
 		})
 
 	}
 
 	return &types.GetActiveStoryResp{
-		Code:          uint(http.StatusOK),
-		FriendStroies: activeStories,
+		Code:             uint(http.StatusOK),
+		FriendStroies:    activeStories,
+		CurrentStoryTime: uint(storyTimeStamp),
 		PageableInfo: types.PageableInfo{
 			TotalPage: totalPage,
 			Page:      req.Page,

@@ -7,6 +7,7 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"gorm.io/gorm"
 	"net/http"
+	"time"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -14,21 +15,21 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type GetUserStoriesLogic struct {
+type GetUserStoriesByUserIdLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewGetUserStoriesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserStoriesLogic {
-	return &GetUserStoriesLogic{
+func NewGetUserStoriesByUserIdLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserStoriesByUserIdLogic {
+	return &GetUserStoriesByUserIdLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *GetUserStoriesLogic) GetUserStories(req *types.GetUserStoryReq) (resp *types.GetUserStoryResp, err error) {
+func (l *GetUserStoriesByUserIdLogic) GetUserStoriesByUserId(req *types.GetUserStoryReq) (resp *types.GetUserStoryResp, err error) {
 	// todo: add your logic here and delete this line
 	userID := ctxtool.GetUserIDFromCTX(l.ctx)
 	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
@@ -39,7 +40,12 @@ func (l *GetUserStoriesLogic) GetUserStories(req *types.GetUserStoryReq) (resp *
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	storyIds, err := l.svcCtx.DAO.GetUserStories(l.ctx, userID)
+	var storyTimeStamp = int64(req.StoryCreatedTime)
+	if storyTimeStamp == 0 {
+		storyTimeStamp = time.Now().Unix()
+	}
+
+	storyIds, err := l.svcCtx.DAO.GetUserStoriesByTimeStamp(l.ctx, req.UserID, storyTimeStamp)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}

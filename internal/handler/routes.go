@@ -217,8 +217,8 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodGet,
-				Path:    "/stories",
-				Handler: story.GetUserStoriesHandler(serverCtx),
+				Path:    "/stories/:user_id",
+				Handler: story.GetUserStoriesByUserIdHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,

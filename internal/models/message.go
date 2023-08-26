@@ -67,41 +67,22 @@ func (m *Message) CountMessage(ctx context.Context, db *gorm.DB) (int64, error) 
 	return count, nil
 }
 
-func (m *Message) GetMessages(ctx context.Context, db *gorm.DB, pageOffset, pageLimit int) ([]*Message, error) {
+func (m *Message) GetMessages(ctx context.Context, db *gorm.DB, pageLimit int) ([]*Message, error) {
 	var message = make([]*Message, 0)
-	//if m.ContentType == variable.MESSAGE_TYPE_USERCHAT {
-	//	//TODO: User chat will exactly have 2 user in the chat, so from -> to || to -> form are mean the same chat room
-	//	if err := db.WithContext(ctx).Debug().
-	//		Where("message_type = ? and (from_user_id in (?,?) or to_user_id in (?,?))", m.MessageType, m.FromUserID, m.ToUserID, m.ToUserID, m.FromUserID).
-	//		Offset(pageOffset).
-	//		Limit(pageLimit).
-	//		Find(&message).Error; err != nil {
-	//		return nil, err
-	//	}
-	//} else if m.ContentType == variable.MESSAGE_TYPE_GROUPCHAT {
-	//	//TODO: for group chat message
-	//	//TODO: GROUP Id is to user id
-	//	if err := db.WithContext(ctx).Debug().
-	//		Where("message_type = ? AND to_user_id = ?", m.MessageType, m.ToUserID).
-	//		Offset(pageOffset).
-	//		Limit(pageLimit).Find(&message).Error; err != nil {
-	//		return nil, err
-	//	}
-	//}
-
-	/*
-		SINGLE CHAT:
-			MESSAGE TYPE = 1
-			TO USER = ID OR FROM USER =ID
-
-		GROUP CHAT
-			MESSAGE TYPE = 2
-			TO USER = GROUP ID OR FROM USER ID = GROUP ID
-
-	*/
 	if err := db.WithContext(ctx).Debug().
-		Where("message_type = ? and (from_user_id in (?,?) or to_user_id in (?,?))", m.MessageType, m.FromUserID, m.ToUserID, m.ToUserID, m.FromUserID).
-		Offset(pageOffset).
+		Where("message_type = ? and (from_user_id in (?,?) or to_user_id in (?,?)) ", m.MessageType, m.FromUserID, m.ToUserID, m.ToUserID, m.FromUserID).
+		Limit(pageLimit).Order("created_at DESC").
+		Find(&message).Error; err != nil {
+		return nil, err
+	}
+	return message, nil
+}
+
+func (m *Message) GetMessagesByLatestId(ctx context.Context, db *gorm.DB, pageLimit int) ([]*Message, error) {
+	var message = make([]*Message, 0)
+
+	if err := db.WithContext(ctx).Debug().
+		Where("message_type = ? and (from_user_id in (?,?) or to_user_id in (?,?)) AND id < ?", m.MessageType, m.FromUserID, m.ToUserID, m.ToUserID, m.FromUserID, m.ID).
 		Limit(pageLimit).Order("created_at DESC").
 		Find(&message).Error; err != nil {
 		return nil, err

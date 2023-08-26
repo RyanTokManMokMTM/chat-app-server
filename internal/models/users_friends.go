@@ -36,7 +36,7 @@ func (uf *UserFriend) GetFriendList(ctx context.Context, db *gorm.DB, pageOffset
 	var list []*UserFriend
 	if err := db.WithContext(ctx).Debug().Model(&uf).
 		Preload("FriendInfo").
-		Where("user_id = ?", uf.UserID).
+		Where("user_id = ?", uf.UserID, uf.ID).
 		Offset(pageOffset).
 		Limit(pageSize).
 		Find(&list).Error; err != nil {

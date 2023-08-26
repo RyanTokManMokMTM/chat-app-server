@@ -2,9 +2,7 @@ package models
 
 import (
 	"context"
-	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
-	"time"
 )
 
 type StoryModel struct {
@@ -16,12 +14,12 @@ type StoryModel struct {
 	CommonField
 }
 
-type (
-	StoriesWithIds struct {
-		StoryModel
-		Ids string
-	}
-)
+//type (
+//	StoriesWithTime struct {
+//		StoryModel
+//		Ids string
+//	}
+//)
 
 func (s *StoryModel) TableName() string {
 	return "stories"
@@ -43,12 +41,28 @@ func (s *StoryModel) DeleteOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().Where("id = ?", s.Id).Delete(s).Error
 }
 
-func (s *StoryModel) GetFriendStoryList(ctx context.Context, db *gorm.DB, userId uint, pageOffset, pageLimit int) ([]*StoriesWithIds, error) {
-	var stories []*StoriesWithIds
-	if err := db.WithContext(ctx).Debug().Model(s).Select("*", "group_concat(id) as ids").Preload("UserInfo").Where("user_id IN (?)",
+func (s *StoryModel) GetActiveStoryList(ctx context.Context, db *gorm.DB, userId uint, pageOffset, pageLimit int) ([]*StoryModel, error) {
+	var stories []*StoryModel
+	if err := db.WithContext(ctx).Debug().Model(s).Select("*", "max(created_at) as t").Preload("UserInfo").Where("user_id IN (?)",
 		db.Model(UserFriend{}).Select("friend_id").Where("user_id = ?", userId)).
 		Where("created_at >= NOW() - INTERVAL 1 DAY").Group("user_id").
-		Offset(pageOffset).Limit(pageLimit).Find(&stories).Error; err != nil {
+		Offset(pageOffset).
+		Limit(pageLimit).Order("t desc").
+		Find(&stories).Error; err != nil {
+		return nil, err
+	}
+
+	return stories, nil
+}
+
+func (s *StoryModel) GetActiveStoryListByTime(ctx context.Context, db *gorm.DB, userId uint, pageOffset, pageLimit int, timeStamp int64) ([]*StoryModel, error) {
+	var stories []*StoryModel
+	if err := db.WithContext(ctx).Debug().Model(s).Select("*", "max(created_at) as t").Preload("UserInfo").Where("user_id IN (?)",
+		db.Model(UserFriend{}).Select("friend_id").Where("user_id = ?", userId)).
+		Where("created_at >= NOW() - INTERVAL 1 DAY AND created_at  <= FROM_UNIXTIME(?)", timeStamp).Group("user_id").
+		Offset(pageOffset).
+		Limit(pageLimit).Order("t desc").
+		Find(&stories).Error; err != nil {
 		return nil, err
 	}
 
@@ -67,12 +81,36 @@ func (s *StoryModel) CountFriendActiveStory(ctx context.Context, db *gorm.DB, us
 	return count, nil
 }
 
+func (s *StoryModel) CountFriendActiveStoryByTime(ctx context.Context, db *gorm.DB, userId uint, timeStamp int64) (int64, error) {
+	var count int64
+	if err := db.WithContext(ctx).Debug().Model(s).Where("user_id IN (?)",
+		db.Model(UserFriend{}).Select("friend_id").Where("user_id = ?", userId)).
+		Where("created_at >= NOW() - INTERVAL 1 DAY  AND created_at <= FROM_UNIXTIME(?)", timeStamp).Group("user_id").
+		Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 func (s *StoryModel) FindAllUserStories(ctx context.Context, db *gorm.DB) ([]uint, error) {
 	var ids []uint
-	now := time.Now().Unix()
-	logx.Info(now)
-	beforeOneDay := now - (86400) //24 hour
-	err := db.WithContext(ctx).Debug().Model(&s).Select("Id").Where("user_id = ? AND created_at BETWEEN FROM_UNIXTIME(?) AND FROM_UNIXTIME(?)", s.UserId, beforeOneDay, now).Find(&ids).Error
+	err := db.WithContext(ctx).Debug().
+		Model(&s).
+		Select("Id").
+		Where("user_id = ? AND created_at >= NOW() - INTERVAL 1 DAY", s.UserId).Find(&ids).Error
+	if err != nil {
+		return nil, err
+	}
+	return ids, nil
+}
+
+func (s *StoryModel) FindAllUserStoriesByTimeStamp(ctx context.Context, db *gorm.DB, timeStamp int64) ([]uint, error) {
+	var ids []uint
+	err := db.WithContext(ctx).Debug().
+		Model(&s).
+		Select("Id").
+		Where("user_id = ? AND created_at >= NOW() - INTERVAL 1 DAY AND  created_at <= FROM_UNIXTIME(?)", s.UserId, timeStamp).Find(&ids).Error
 	if err != nil {
 		return nil, err
 	}

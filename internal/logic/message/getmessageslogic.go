@@ -60,15 +60,9 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
 	}
-	//
-	total, err := l.svcCtx.DAO.CountMessage(l.ctx, req.MessageType, req.SouceId)
-	if err != nil {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
-	}
+
 	pageLimit := pagerx.GetLimit(req.Limit)
-	pageSize := pagerx.GetTotalPageByPageSize(uint(total), pageLimit)
-	pageOffset := pagerx.PageOffset(pageLimit, req.Page)
-	messages, err := l.svcCtx.DAO.GetMessage(l.ctx, userID, req.SouceId, req.MessageType, int(pageOffset), int(pageLimit))
+	messages, err := l.svcCtx.DAO.GetMessage(l.ctx, userID, req.SouceId, req.MessageType, int(pageLimit), req.LatestID)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -91,9 +85,5 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 	return &types.GetMessagesResp{
 		Code:     http.StatusOK,
 		Messages: respMessages,
-		PageableInfo: types.PageableInfo{
-			TotalPage: pageSize,
-			Page:      req.Page,
-		},
 	}, nil
 }

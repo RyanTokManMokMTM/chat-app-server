@@ -99,8 +99,6 @@ type (
         IsFriend bool `json:"is_friend"`
     }
 
-
-
 )
 
 

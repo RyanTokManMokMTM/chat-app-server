@@ -7,6 +7,7 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/pagerx"
 	"gorm.io/gorm"
+	"net/http"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -46,7 +47,8 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 
 	pageLimit := pagerx.GetLimit(req.Limit)
 	pageSize := pagerx.GetTotalPageByPageSize(uint(total), pageLimit)
-	pageOffset := pagerx.PageOffset(pageSize, req.Page)
+	pageOffset := pagerx.PageOffset(pageLimit, req.Page)
+
 	list, err := l.svcCtx.DAO.GetUserFriendListByPageSize(l.ctx, userID, int(pageOffset), int(pageLimit))
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
@@ -66,6 +68,11 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 
 	//TODO : response to user type
 	return &types.GetFriendListResp{
+		Code: uint(http.StatusOK),
+		PageableInfo: types.PageableInfo{
+			TotalPage: pageSize,
+			Page:      req.Page,
+		},
 		FriendList: respList,
 	}, nil
 }

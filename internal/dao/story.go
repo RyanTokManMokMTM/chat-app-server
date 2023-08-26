@@ -47,14 +47,27 @@ func (d *DAO) GetUserStories(ctx context.Context, userID uint) ([]uint, error) {
 	return s.FindAllUserStories(ctx, d.engine)
 }
 
-func (d *DAO) GetFriendActiveStories(ctx context.Context, userID uint, pageOffset, pageLimit int) ([]*models.StoriesWithIds, error) {
-	s := &models.StoryModel{}
-	return s.GetFriendStoryList(ctx, d.engine, userID, pageOffset, pageLimit)
+func (d *DAO) GetUserStoriesByTimeStamp(ctx context.Context, userID uint, timeStamp int64) ([]uint, error) {
+	s := &models.StoryModel{
+		UserId: userID,
+	}
+
+	return s.FindAllUserStoriesByTimeStamp(ctx, d.engine, timeStamp)
 }
 
-func (d *DAO) CountActiveStory(ctx context.Context, userId uint) (int64, error) {
+func (d *DAO) GetFriendActiveStories(ctx context.Context, userID uint, pageOffset, pageLimit int) ([]*models.StoryModel, error) {
 	s := &models.StoryModel{}
-	return s.CountFriendActiveStory(ctx, d.engine, userId)
+	return s.GetActiveStoryList(ctx, d.engine, userID, pageOffset, pageLimit)
+}
+
+func (d *DAO) GetFriendActiveStoriesByTimeStamp(ctx context.Context, userID uint, pageOffset, pageLimit int, timeStamp int64) ([]*models.StoryModel, error) {
+	s := &models.StoryModel{}
+	return s.GetActiveStoryListByTime(ctx, d.engine, userID, pageOffset, pageLimit, timeStamp)
+}
+
+func (d *DAO) CountActiveStoryByTimeStamp(ctx context.Context, userId uint, timeStamp int64) (int64, error) {
+	s := &models.StoryModel{}
+	return s.CountFriendActiveStoryByTime(ctx, d.engine, userId, timeStamp)
 }
 
 func (d *DAO) DeleteStories(ctx context.Context, storyID uint) error {

@@ -47,13 +47,15 @@ type Store interface {
 	FindOneMessage(ctx context.Context, messageID uint) (*models.Message, error)
 	DeleteOneMessage(ctx context.Context, messageID uint) error
 	CountMessage(ctx context.Context, messageType, id uint) (int64, error)
-	GetMessage(ctx context.Context, from, to, messageType uint, pageOffset, pageLimit int) ([]*models.Message, error)
+	GetMessage(ctx context.Context, from, to, messageType uint, pageLimit int, latestId uint) ([]*models.Message, error)
 
 	InsertOneStory(ctx context.Context, userID uint, mediaPath string) (uint, error)
 	FindOneStory(ctx context.Context, storyID uint) (*models.StoryModel, error)
 	FindOneUserStory(ctx context.Context, storyID, userID uint) (*models.StoryModel, error)
 	GetUserStories(ctx context.Context, userID uint) ([]uint, error)
-	GetFriendActiveStories(ctx context.Context, userID uint, pageOffset, pageLimit int) ([]*models.StoriesWithIds, error)
+	GetUserStoriesByTimeStamp(ctx context.Context, userID uint, timeStamp int64) ([]uint, error)
+	GetFriendActiveStories(ctx context.Context, userID uint, pageOffset, pageLimit int) ([]*models.StoryModel, error)
+	GetFriendActiveStoriesByTimeStamp(ctx context.Context, userID uint, pageOffset, pageLimit int, timeStamp int64) ([]*models.StoryModel, error)
 	DeleteStories(ctx context.Context, storyID uint) error
-	CountActiveStory(ctx context.Context, userId uint) (int64, error)
+	CountActiveStoryByTimeStamp(ctx context.Context, userId uint, timeStamp int64) (int64, error)
 }

@@ -28,6 +28,7 @@ type (
         Limit uint `form:"limit,default=20"`
     }
     GetFriendListResp {
+        Code uint `json:"code"`
         PageableInfo
         FriendList []CommonUserInfo `json:"friends"`
     }

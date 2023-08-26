@@ -15,10 +15,10 @@ type (
         SouceId uint `json:"id"` //can be a groupId or friendId
         Page uint `form:"page,default=1"`
         Limit uint `form:"limit,default=20"`
+        LatestID uint `form:"latest_id,default=0"`
     }
     GetMessagesResp {
         Code uint `json:"code"`
-        PageableInfo
         Messages []MessageUser `json:"message"`
     }
 

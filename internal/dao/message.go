@@ -27,14 +27,19 @@ func (d *DAO) DeleteOneMessage(ctx context.Context, messageID uint) error {
 	return msg.DeleteOne(ctx, d.engine)
 }
 
-func (d *DAO) GetMessage(ctx context.Context, from, to, messageType uint, pageOffset, pageLimit int) ([]*models.Message, error) {
+func (d *DAO) GetMessage(ctx context.Context, from, to, messageType uint, pageLimit int, latestId uint) ([]*models.Message, error) {
 	msg := &models.Message{
+		ID:          latestId,
 		FromUserID:  from,
 		ToUserID:    to,
 		MessageType: messageType,
 	}
 
-	return msg.GetMessages(ctx, d.engine, pageOffset, pageLimit)
+	if latestId <= 0 {
+		return msg.GetMessages(ctx, d.engine, pageLimit)
+	}
+	return msg.GetMessagesByLatestId(ctx, d.engine, pageLimit)
+
 }
 
 func (d *DAO) InsertOneMessage(ctx context.Context, message *socket_message.Message) {

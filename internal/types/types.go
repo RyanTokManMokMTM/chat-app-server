@@ -141,6 +141,7 @@ type GetFriendListReq struct {
 }
 
 type GetFriendListResp struct {
+	Code uint `json:"code"`
 	PageableInfo
 	FriendList []CommonUserInfo `json:"friends"`
 }
@@ -182,9 +183,10 @@ type DeleteGroupResp struct {
 }
 
 type GetGroupMembersReq struct {
-	GroupID uint `path:"group_id"`
-	Page    uint `form:"page,default=1"`
-	Limit   uint `form:"limit,default=20"`
+	GroupID  uint `path:"group_id"`
+	Page     uint `form:"page,default=1"`
+	Limit    uint `form:"limit,default=20"`
+	LatestID uint `form:"lastestId,default=0"`
 }
 
 type GetGroupMembersResp struct {
@@ -212,8 +214,9 @@ type UploadGroupAvatarResp struct {
 }
 
 type GetUserGroupReq struct {
-	Page  uint `form:"page,default=1"`
-	Limit uint `form:"limit,default=20"`
+	Page     uint `form:"page,default=1"`
+	Limit    uint `form:"limit,default=20"`
+	LatestID uint `form:"lastestId,default=0"`
 }
 
 type GetUserGroupResp struct {
@@ -273,11 +276,11 @@ type GetMessagesReq struct {
 	SouceId     uint `json:"id"` //can be a groupId or friendId
 	Page        uint `form:"page,default=1"`
 	Limit       uint `form:"limit,default=20"`
+	LatestID    uint `form:"latest_id,default=0"`
 }
 
 type GetMessagesResp struct {
-	Code uint `json:"code"`
-	PageableInfo
+	Code     uint          `json:"code"`
 	Messages []MessageUser `json:"message"`
 }
 
@@ -336,6 +339,8 @@ type AddStoryResp struct {
 }
 
 type GetUserStoryReq struct {
+	UserID           uint `path:"user_id"`
+	StoryCreatedTime uint `form:"story_created_time,default=0"`
 }
 
 type GetUserStoryResp struct {
@@ -344,14 +349,17 @@ type GetUserStoryResp struct {
 }
 
 type GetActiveStoryReq struct {
-	Page  uint `form:"page,default=0"`
-	Limit uint `form:"limit,default=20"`
+	Page             uint `form:"page,default=1"`
+	Limit            uint `form:"limit,default=20"`
+	LatestID         uint `form:"lastestId,default=0"`
+	StoryCreatedTime uint `form:"story_created_time,default=0"`
 }
 
 type GetActiveStoryResp struct {
 	Code uint `json:"code"`
 	PageableInfo
-	FriendStroies []FriendStroy `json:"active_stories"`
+	CurrentStoryTime uint          `json:"current_story_time"`
+	FriendStroies    []FriendStroy `json:"active_stories"`
 }
 
 type DeleteStoryReq struct {
@@ -379,5 +387,4 @@ type FriendStroy struct {
 	UserName   string `json:"name"`
 	UserAvatar string `json:"avatar"`
 	IsSeen     bool   `json:"is_seen"`
-	StoriesIDs []uint `json:"stories_ids"`
 }

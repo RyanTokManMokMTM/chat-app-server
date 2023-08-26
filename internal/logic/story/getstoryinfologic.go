@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
-	"gorm.io/gorm"
-	"net/http"
-
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
+	"gorm.io/gorm"
+	"net/http"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,6 +28,7 @@ func NewGetStoryInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetS
 
 func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *types.GetStoryInfoByIdResp, err error) {
 	// todo: add your logic here and delete this line
+
 	s, err := l.svcCtx.DAO.FindOneStory(l.ctx, req.StoryID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
