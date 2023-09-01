@@ -63,8 +63,7 @@ func (s *SocketServer) Start() {
 				logx.Error(err)
 				continue
 			}
-
-			logx.Infof("%+v", socketMessage)
+			//return
 
 			//TODO: Send To Who?
 			//TODO: Send To Nobody , it means broadcast to a specific user/group
@@ -90,6 +89,7 @@ func (s *SocketServer) Start() {
 						if ok {
 							client.sendChannel <- bytes
 						} else {
+							logx.Info("user %s is not online ", socketMessage.ToUUID)
 							ctx := context.Background()
 							_, err := variable.RedisConnection.RPush(ctx, socketMessage.ToUUID, string(bytes)).Result()
 							if err != nil {

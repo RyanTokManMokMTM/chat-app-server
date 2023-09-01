@@ -36,7 +36,7 @@ const (
 const (
 	ReadWait  = 60
 	WriteWait = 60
-	ReadLimit = 1024
+	ReadLimit = 1024 * 1024 * 1024
 )
 
 var RedisConnection *redis.Client

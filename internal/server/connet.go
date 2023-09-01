@@ -54,7 +54,7 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 
 		for _, msg := range messages {
 			client.sendChannel <- []byte(msg)
-			time.Sleep(time.Second / 50)
+			time.Sleep(time.Second / 10)
 		}
 
 		_, err = svcCtx.RedisClient.LTrim(ctx, u.Uuid, 100, -1).Result()
