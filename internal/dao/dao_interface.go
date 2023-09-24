@@ -28,7 +28,7 @@ type Store interface {
 	FindOneGroup(ctx context.Context, groupID uint) (*models.Group, error)
 	FindOneGroupByUUID(ctx context.Context, groupUUID string) (*models.Group, error)
 	DeleteOneGroup(ctx context.Context, groupID uint) error
-	UpdateOneGroup(ctx context.Context, groupID uint, groupName string) error
+	UpdateOneGroup(ctx context.Context, groupID uint, groupName string, groupDesc string) error
 	UpdateOneGroupAvatar(ctx context.Context, groupID uint, avatarName string) error
 	GetUserGroups(ctx context.Context, userID uint, pageOffset, pageLimit int) ([]*models.UserGroup, error)
 	CountUserGroups(ctx context.Context, userID uint) int64
@@ -54,8 +54,18 @@ type Store interface {
 	FindOneUserStory(ctx context.Context, storyID, userID uint) (*models.StoryModel, error)
 	GetUserStories(ctx context.Context, userID uint) ([]uint, error)
 	GetUserStoriesByTimeStamp(ctx context.Context, userID uint, timeStamp int64) ([]uint, error)
-	GetFriendActiveStories(ctx context.Context, userID uint, pageOffset, pageLimit int) ([]*models.StoryModel, error)
-	GetFriendActiveStoriesByTimeStamp(ctx context.Context, userID uint, pageOffset, pageLimit int, timeStamp int64) ([]*models.StoryModel, error)
+	GetFriendActiveStories(ctx context.Context, userID uint, pageOffset, pageLimit int) ([]*models.StoriesWithLatestStoryTime, error)
+	GetFriendActiveStoriesByTimeStamp(ctx context.Context, userID uint, pageOffset, pageLimit int, timeStamp int64) ([]*models.StoriesWithLatestStoryTime, error)
 	DeleteStories(ctx context.Context, storyID uint) error
 	CountActiveStoryByTimeStamp(ctx context.Context, userId uint, timeStamp int64) (int64, error)
+
+	InsertOneUserStorySeen(ctx context.Context, userID, friendId, storyId uint) error
+	FindOneUserStorySeen(ctx context.Context, userID, friendId uint) (*models.UserStorySeen, error)
+	UpdateOneUserStorySeen(ctx context.Context, Id, storyId uint) error
+	DeleteOneUserStorySeen(ctx context.Context, ID uint) error
+
+	InsertOneUserStoryLike(ctx context.Context, userID, storyId uint) error
+	FindOneUserStoryLike(ctx context.Context, userID, storyId uint) (*models.UserStoryLikes, error)
+	CountStoryLikes(ctx context.Context, storyId uint) (int64, error)
+	DeleteOneUserStoryLike(ctx context.Context, ID uint) error
 }

@@ -55,12 +55,12 @@ func (d *DAO) GetUserStoriesByTimeStamp(ctx context.Context, userID uint, timeSt
 	return s.FindAllUserStoriesByTimeStamp(ctx, d.engine, timeStamp)
 }
 
-func (d *DAO) GetFriendActiveStories(ctx context.Context, userID uint, pageOffset, pageLimit int) ([]*models.StoryModel, error) {
+func (d *DAO) GetFriendActiveStories(ctx context.Context, userID uint, pageOffset, pageLimit int) ([]*models.StoriesWithLatestStoryTime, error) {
 	s := &models.StoryModel{}
 	return s.GetActiveStoryList(ctx, d.engine, userID, pageOffset, pageLimit)
 }
 
-func (d *DAO) GetFriendActiveStoriesByTimeStamp(ctx context.Context, userID uint, pageOffset, pageLimit int, timeStamp int64) ([]*models.StoryModel, error) {
+func (d *DAO) GetFriendActiveStoriesByTimeStamp(ctx context.Context, userID uint, pageOffset, pageLimit int, timeStamp int64) ([]*models.StoriesWithLatestStoryTime, error) {
 	s := &models.StoryModel{}
 	return s.GetActiveStoryListByTime(ctx, d.engine, userID, pageOffset, pageLimit, timeStamp)
 }

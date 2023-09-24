@@ -12,6 +12,7 @@ type Group struct {
 	Uuid        string `gorm:"type:varchar(64);not null;unique_index:idx_uuid"`
 	GroupName   string `gorm:"type:varchar(64);not null"`
 	GroupAvatar string
+	GroupDesc   string
 	GroupLead   uint `gorm:"not null;index"`
 
 	LeadInfo  User   `gorm:"foreignKey:GroupLead;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
@@ -50,7 +51,7 @@ func (g *Group) FindOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().First(&g).Error
 }
 func (g *Group) FindOneByUUID(ctx context.Context, db *gorm.DB) error {
-	return db.WithContext(ctx).Debug().Where("uuid = ?", g.Uuid).First(&g).Error
+	return db.WithContext(ctx).Debug().Where("uuid = ?", g.Uuid).Preload("LeadInfo").First(&g).Error
 }
 
 func (g *Group) DeleteOne(ctx context.Context, db *gorm.DB) error {
@@ -58,7 +59,10 @@ func (g *Group) DeleteOne(ctx context.Context, db *gorm.DB) error {
 }
 
 func (g *Group) UpdateOne(ctx context.Context, db *gorm.DB) error {
-	return db.WithContext(ctx).Debug().Model(g).Where("id = ?", g.Id).Update("GroupName", g.GroupName).Error
+	return db.WithContext(ctx).Debug().Model(g).Where("id = ?", g.Id).UpdateColumns(map[string]any{
+		"GroupName": g.GroupName,
+		"GroupDesc": g.GroupDesc,
+	}).Error
 }
 
 func (g *Group) UpdateOneAvatar(ctx context.Context, db *gorm.DB) error {

@@ -22,6 +22,7 @@ type (
     GetUserStoryResp {
         Code uint `json:"code"`
         StoryIDs []uint `json:"story_ids"`
+        LastStoryId uint `json:"last_story_id"`
     }
 
     GetActiveStoryReq {
@@ -51,9 +52,34 @@ type (
         Code uint `json:"code"`
         StoryID uint `json:"story_id"`
         StoryMediaURL string `json:"media_url"`
+        IsLiked bool `json:"is_liked"`
         CreateAt uint `json:"create_at"`
     }
 
+)
+
+type (
+    UpdateStorySeenReq {
+        FriendId uint `json:"friend_id"`
+        StoryId uint `json:"story_id"`
+    }
+    UpdateStorySeenResp {
+        Code uint `json:"code"`
+    }
+
+    CreateStoryLikeReq {
+        StoryId uint `json:"story_id"`
+    }
+    CreateStoryLikeResp {
+        Code uint `json:"code"`
+    }
+
+    DeleteStoryLikeReq {
+        StoryId uint `json:"story_id"`
+    }
+    DeleteStoryLikeResp {
+        Code uint `json:"code"`
+    }
 )
 
 type (
@@ -63,6 +89,7 @@ type (
         UserName string `json:"name"`
         UserAvatar string `json:"avatar"`
         IsSeen bool `json:"is_seen"`
+        LatestStoryTimeStamp uint `json:"latest_story_time_stamp"`
     }
 )
 
@@ -96,15 +123,24 @@ service ChatApp{
     @handler GetActiveStories
     get /stories/active(GetActiveStoryReq) returns (GetActiveStoryResp)
 
+    @doc(
+        summary : "Update story Id which is latest seen"
+    )
+    @handler UpdateStorySeen
+    put /story/seen(UpdateStorySeenReq) returns (UpdateStorySeenResp)
 
-}
+    @doc(
+        summary : "Create a story like"
+    )
+    @handler CreateStoryLike
+    post /story/like(CreateStoryLikeReq) returns (CreateStoryLikeResp)
 
+    @doc(
+        summary : "Delete a story like"
+    )
+    @handler DeleteStoryLike
+    delete /story/like(DeleteStoryLikeReq) returns (DeleteStoryLikeResp)
 
-@server (
-    group : story
-    prefix : /api/v1
-)
-service ChatApp {
     @doc(
         summary : "Get an instance story by storyID"
     )

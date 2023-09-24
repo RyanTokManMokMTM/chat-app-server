@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"gorm.io/gorm"
+	"time"
 )
 
 type StoryModel struct {
@@ -14,12 +15,12 @@ type StoryModel struct {
 	CommonField
 }
 
-//type (
-//	StoriesWithTime struct {
-//		StoryModel
-//		Ids string
-//	}
-//)
+type (
+	StoriesWithLatestStoryTime struct {
+		StoryModel
+		LatestTime time.Time
+	}
+)
 
 func (s *StoryModel) TableName() string {
 	return "stories"
@@ -41,13 +42,13 @@ func (s *StoryModel) DeleteOne(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Debug().Where("id = ?", s.Id).Delete(s).Error
 }
 
-func (s *StoryModel) GetActiveStoryList(ctx context.Context, db *gorm.DB, userId uint, pageOffset, pageLimit int) ([]*StoryModel, error) {
-	var stories []*StoryModel
-	if err := db.WithContext(ctx).Debug().Model(s).Select("*", "max(created_at) as t").Preload("UserInfo").Where("user_id IN (?)",
+func (s *StoryModel) GetActiveStoryList(ctx context.Context, db *gorm.DB, userId uint, pageOffset, pageLimit int) ([]*StoriesWithLatestStoryTime, error) {
+	var stories []*StoriesWithLatestStoryTime
+	if err := db.WithContext(ctx).Debug().Model(s).Select("*", "max(created_at) as latest_time").Preload("UserInfo").Where("user_id IN (?)",
 		db.Model(UserFriend{}).Select("friend_id").Where("user_id = ?", userId)).
 		Where("created_at >= NOW() - INTERVAL 1 DAY").Group("user_id").
 		Offset(pageOffset).
-		Limit(pageLimit).Order("t desc").
+		Limit(pageLimit).Order("latest_time desc").
 		Find(&stories).Error; err != nil {
 		return nil, err
 	}
@@ -55,13 +56,13 @@ func (s *StoryModel) GetActiveStoryList(ctx context.Context, db *gorm.DB, userId
 	return stories, nil
 }
 
-func (s *StoryModel) GetActiveStoryListByTime(ctx context.Context, db *gorm.DB, userId uint, pageOffset, pageLimit int, timeStamp int64) ([]*StoryModel, error) {
-	var stories []*StoryModel
-	if err := db.WithContext(ctx).Debug().Model(s).Select("*", "max(created_at) as t").Preload("UserInfo").Where("user_id IN (?)",
+func (s *StoryModel) GetActiveStoryListByTime(ctx context.Context, db *gorm.DB, userId uint, pageOffset, pageLimit int, timeStamp int64) ([]*StoriesWithLatestStoryTime, error) {
+	var stories []*StoriesWithLatestStoryTime
+	if err := db.WithContext(ctx).Debug().Model(s).Select("*", "max(created_at) as latest_time").Preload("UserInfo").Where("user_id IN (?)",
 		db.Model(UserFriend{}).Select("friend_id").Where("user_id = ?", userId)).
 		Where("created_at >= NOW() - INTERVAL 1 DAY AND created_at  <= FROM_UNIXTIME(?)", timeStamp).Group("user_id").
 		Offset(pageOffset).
-		Limit(pageLimit).Order("t desc").
+		Limit(pageLimit).Order("latest_time desc").
 		Find(&stories).Error; err != nil {
 		return nil, err
 	}

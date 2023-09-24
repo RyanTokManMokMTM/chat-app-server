@@ -3,6 +3,7 @@ package story
 import (
 	"context"
 	"errors"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -28,8 +29,16 @@ func NewGetStoryInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetS
 
 func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *types.GetStoryInfoByIdResp, err error) {
 	// todo: add your logic here and delete this line
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+		}
+		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+	}
 
-	s, err := l.svcCtx.DAO.FindOneStory(l.ctx, req.StoryID)
+	story, err := l.svcCtx.DAO.FindOneStory(l.ctx, req.StoryID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.STORY_NOT_EXIST)
@@ -37,10 +46,32 @@ func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
+	//If current story is no belong to ourselves -> am I liked?
+	//If current story is mine -> any one liked
+
+	var isLiked = false
+	if story.UserId == userID {
+		count, err := l.svcCtx.DAO.CountStoryLikes(l.ctx, req.StoryID)
+		if err != nil {
+			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		}
+		isLiked = count > 0
+	} else {
+		userLiked, err := l.svcCtx.DAO.FindOneUserStoryLike(l.ctx, userID, req.StoryID)
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		}
+
+		if userLiked != nil {
+			isLiked = true
+		}
+
+	}
 	return &types.GetStoryInfoByIdResp{
 		Code:          uint(http.StatusOK),
-		StoryID:       s.Id,
-		StoryMediaURL: s.StoryMediaPath,
-		CreateAt:      uint(s.CreatedAt.Unix()),
+		StoryID:       story.Id,
+		StoryMediaURL: story.StoryMediaPath,
+		IsLiked:       isLiked,
+		CreateAt:      uint(story.CreatedAt.Unix()),
 	}, nil
 }

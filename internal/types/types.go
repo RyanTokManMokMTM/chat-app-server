@@ -214,6 +214,7 @@ type GetGroupMembersResp struct {
 type UpdateGroupInfoReq struct {
 	GroupID   uint   `json:"group_id"`
 	GroupName string `json:"group_name"`
+	GroupDesc string `json:"group_desc"`
 }
 
 type UpdateGroupInfoResp struct {
@@ -277,14 +278,16 @@ type GroupInfo struct {
 	Uuid      string `json:"uuid"`
 	Name      string `json:"name"`
 	Avatar    string `json:"avatar"`
+	Desc      string `json:"desc"`
 	CreatedAt uint   `json:"created_at"`
 }
 
 type FullGroupInfo struct {
 	GroupInfo
-	Members  uint `json:"members"`
-	IsJoined bool `json:"is_joined"`
-	IsOwner  bool `json:"is_owner"`
+	Members   uint   `json:"members"`
+	IsJoined  bool   `json:"is_joined"`
+	IsOwner   bool   `json:"is_owner"`
+	CreatedBy string `json:"created_by"`
 }
 
 type GetMessagesReq struct {
@@ -360,8 +363,9 @@ type GetUserStoryReq struct {
 }
 
 type GetUserStoryResp struct {
-	Code     uint   `json:"code"`
-	StoryIDs []uint `json:"story_ids"`
+	Code        uint   `json:"code"`
+	StoryIDs    []uint `json:"story_ids"`
+	LastStoryId uint   `json:"last_story_id"`
 }
 
 type GetActiveStoryReq struct {
@@ -394,13 +398,40 @@ type GetStoryInfoByIdResp struct {
 	Code          uint   `json:"code"`
 	StoryID       uint   `json:"story_id"`
 	StoryMediaURL string `json:"media_url"`
+	IsLiked       bool   `json:"is_liked"`
 	CreateAt      uint   `json:"create_at"`
 }
 
+type UpdateStorySeenReq struct {
+	FriendId uint `json:"friend_id"`
+	StoryId  uint `json:"story_id"`
+}
+
+type UpdateStorySeenResp struct {
+	Code uint `json:"code"`
+}
+
+type CreateStoryLikeReq struct {
+	StoryId uint `json:"story_id"`
+}
+
+type CreateStoryLikeResp struct {
+	Code uint `json:"code"`
+}
+
+type DeleteStoryLikeReq struct {
+	StoryId uint `json:"story_id"`
+}
+
+type DeleteStoryLikeResp struct {
+	Code uint `json:"code"`
+}
+
 type FriendStroy struct {
-	UserID     uint   `json:"id"`
-	Uuid       string `json:"uuid"`
-	UserName   string `json:"name"`
-	UserAvatar string `json:"avatar"`
-	IsSeen     bool   `json:"is_seen"`
+	UserID               uint   `json:"id"`
+	Uuid                 string `json:"uuid"`
+	UserName             string `json:"name"`
+	UserAvatar           string `json:"avatar"`
+	IsSeen               bool   `json:"is_seen"`
+	LatestStoryTimeStamp uint   `json:"latest_story_time_stamp"`
 }

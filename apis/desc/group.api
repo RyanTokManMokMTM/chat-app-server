@@ -57,6 +57,7 @@ type (
     UpdateGroupInfoReq {
         GroupID uint `json:"group_id"`
         GroupName string `json:"group_name"`
+        GroupDesc string `json:"group_desc"`
     }
     UpdateGroupInfoResp {
         Code uint `json:"code"`
@@ -115,6 +116,7 @@ type (
         Uuid string `json:"uuid"`
         Name string `json:"name"`
         Avatar string `json:"avatar"`
+        Desc string `json:"desc"`
         CreatedAt uint `json:"created_at"`
     }
 
@@ -123,6 +125,7 @@ type (
         Members uint `json:"members"`
         IsJoined bool `json:"is_joined"`
         IsOwner bool `json:"is_owner"`
+        CreatedBy string `json:"created_by"`
     }
 
 

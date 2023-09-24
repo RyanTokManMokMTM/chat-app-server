@@ -50,8 +50,19 @@ func (l *GetUserStoriesByUserIdLogic) GetUserStoriesByUserId(req *types.GetUserS
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
+	var lastStoryID uint = 0
+	seenStory, err := l.svcCtx.DAO.FindOneUserStorySeen(l.ctx, userID, req.UserID)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+	}
+
+	if seenStory != nil {
+		lastStoryID = seenStory.StoryModelID
+	}
+
 	return &types.GetUserStoryResp{
-		Code:     uint(http.StatusOK),
-		StoryIDs: storyIds,
+		Code:        uint(http.StatusOK),
+		StoryIDs:    storyIds,
+		LastStoryId: lastStoryID,
 	}, nil
 }

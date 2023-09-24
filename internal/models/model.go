@@ -75,4 +75,14 @@ func migration(db *gorm.DB) {
 		panic(err)
 	}
 
+	err = db.AutoMigrate(UserStorySeen{})
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.AutoMigrate(UserStoryLikes{})
+	if err != nil {
+		panic(err)
+	}
+
 }

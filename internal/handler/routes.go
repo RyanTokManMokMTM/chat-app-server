@@ -230,19 +230,28 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/stories/active",
 				Handler: story.GetActiveStoriesHandler(serverCtx),
 			},
-		},
-		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
-		rest.WithPrefix("/api/v1"),
-	)
-
-	server.AddRoutes(
-		[]rest.Route{
+			{
+				Method:  http.MethodPut,
+				Path:    "/story/seen",
+				Handler: story.UpdateStorySeenHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/story/like",
+				Handler: story.CreateStoryLikeHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/story/like",
+				Handler: story.DeleteStoryLikeHandler(serverCtx),
+			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/story/:story_id",
 				Handler: story.GetStoryInfoHandler(serverCtx),
 			},
 		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),
 	)
 }

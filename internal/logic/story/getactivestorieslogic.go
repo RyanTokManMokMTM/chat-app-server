@@ -63,12 +63,28 @@ func (l *GetActiveStoriesLogic) GetActiveStories(req *types.GetActiveStoryReq) (
 
 	activeStories := make([]types.FriendStroy, 0)
 	for _, fd := range stories {
+		//Get story seen record...
+		seenStory, err := l.svcCtx.DAO.FindOneUserStorySeen(l.ctx, userID, fd.UserId)
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		}
+
+		userStories, err := l.svcCtx.DAO.GetUserStories(l.ctx, fd.UserId)
+		if err != nil {
+			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		}
+
+		var isSeen = false
+		if seenStory != nil {
+			isSeen = seenStory.StoryInfo.Id == userStories[len(userStories)-1]
+		}
 		activeStories = append(activeStories, types.FriendStroy{
-			UserID:     fd.UserInfo.Id,
-			Uuid:       fd.UserInfo.Uuid,
-			UserName:   fd.UserInfo.NickName,
-			UserAvatar: fd.UserInfo.Avatar,
-			IsSeen:     false, //for testing...
+			UserID:               fd.UserInfo.Id,
+			Uuid:                 fd.UserInfo.Uuid,
+			UserName:             fd.UserInfo.NickName,
+			UserAvatar:           fd.UserInfo.Avatar,
+			IsSeen:               isSeen,
+			LatestStoryTimeStamp: uint(fd.LatestTime.Unix()),
 		})
 
 	}
