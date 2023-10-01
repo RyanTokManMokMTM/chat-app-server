@@ -395,11 +395,18 @@ type GetStoryInfoByIdRep struct {
 }
 
 type GetStoryInfoByIdResp struct {
-	Code          uint   `json:"code"`
-	StoryID       uint   `json:"story_id"`
-	StoryMediaURL string `json:"media_url"`
-	IsLiked       bool   `json:"is_liked"`
-	CreateAt      uint   `json:"create_at"`
+	Code           uint                     `json:"code"`
+	StoryID        uint                     `json:"story_id"`
+	StoryMediaURL  string                   `json:"media_url"`
+	IsLiked        bool                     `json:"is_liked"`
+	TotalSeenCount uint                     `json:"seen_count"`
+	CreateAt       uint                     `json:"create_at"`
+	StorySeenList  []StorySeenUserBasicInfo `json:"story_seen_list"`
+}
+
+type StorySeenUserBasicInfo struct {
+	Id     uint   `json:"user_id"`
+	Avatar string `json:"avatar"`
 }
 
 type UpdateStorySeenReq struct {
@@ -427,6 +434,16 @@ type DeleteStoryLikeResp struct {
 	Code uint `json:"code"`
 }
 
+type GetStorySeenListReq struct {
+	StoryId uint `path:"story_id"`
+}
+
+type GetStorySeenListResp struct {
+	Code      uint            `json:"code"`
+	TotalSeen uint            `json:"total_seen"`
+	SeenList  []StorySeenInfo `json:"seen_list"`
+}
+
 type FriendStroy struct {
 	UserID               uint   `json:"id"`
 	Uuid                 string `json:"uuid"`
@@ -434,4 +451,13 @@ type FriendStroy struct {
 	UserAvatar           string `json:"avatar"`
 	IsSeen               bool   `json:"is_seen"`
 	LatestStoryTimeStamp uint   `json:"latest_story_time_stamp"`
+}
+
+type StorySeenInfo struct {
+	UserID     uint   `json:"id"`
+	Uuid       string `json:"uuid"`
+	UserName   string `json:"name"`
+	UserAvatar string `json:"avatar"`
+	IsLiked    bool   `json:"is_liked"`
+	CreatedAt  uint   `json:"created_at"`
 }

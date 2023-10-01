@@ -60,9 +60,12 @@ type Store interface {
 	CountActiveStoryByTimeStamp(ctx context.Context, userId uint, timeStamp int64) (int64, error)
 
 	InsertOneUserStorySeen(ctx context.Context, userID, friendId, storyId uint) error
-	FindOneUserStorySeen(ctx context.Context, userID, friendId uint) (*models.UserStorySeen, error)
+	FindOneUserStorySeen(ctx context.Context, userID, friendId, storyId uint) (*models.UserStorySeen, error)
+	FindOneLatestUserStorySeen(ctx context.Context, userID, friendId uint) (*models.UserStorySeen, error)
+	GetStorySeenUserList(ctx context.Context, storyId uint, limit int) ([]*models.UserStorySeen, error)
 	UpdateOneUserStorySeen(ctx context.Context, Id, storyId uint) error
 	DeleteOneUserStorySeen(ctx context.Context, ID uint) error
+	CountOneStorySeen(ctx context.Context, storyId uint) (int64, error)
 
 	InsertOneUserStoryLike(ctx context.Context, userID, storyId uint) error
 	FindOneUserStoryLike(ctx context.Context, userID, storyId uint) (*models.UserStoryLikes, error)

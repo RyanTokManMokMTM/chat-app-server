@@ -39,7 +39,7 @@ func (l *UpdateStorySeenLogic) UpdateStorySeen(req *types.UpdateStorySeenReq) (r
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	storySeen, err := l.svcCtx.DAO.FindOneUserStorySeen(l.ctx, userID, req.FriendId)
+	_, err = l.svcCtx.DAO.FindOneUserStorySeen(l.ctx, userID, req.FriendId, req.StoryId)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -48,20 +48,6 @@ func (l *UpdateStorySeenLogic) UpdateStorySeen(req *types.UpdateStorySeenReq) (r
 		if err := l.svcCtx.DAO.InsertOneUserStorySeen(l.ctx, userID, req.FriendId, req.StoryId); err != nil {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
-
-	} else {
-		currentStory, err := l.svcCtx.DAO.FindOneUserStory(l.ctx, req.StoryId, req.FriendId)
-		if err != nil {
-			//this story should be existed
-			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
-		}
-
-		if currentStory.CreatedAt.After(storySeen.StoryInfo.CreatedAt) {
-			if err := l.svcCtx.DAO.UpdateOneUserStorySeen(l.ctx, storySeen.ID, req.StoryId); err != nil {
-				return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
-			}
-		}
-
 	}
 
 	return &types.UpdateStorySeenResp{

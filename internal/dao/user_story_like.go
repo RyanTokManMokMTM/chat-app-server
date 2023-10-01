@@ -7,7 +7,7 @@ import (
 
 func (d *DAO) InsertOneUserStoryLike(ctx context.Context, userID, storyId uint) error {
 	model := &models.UserStoryLikes{
-		UserID:  userID,
+		UserId:  userID,
 		StoryId: storyId,
 	}
 
@@ -16,7 +16,7 @@ func (d *DAO) InsertOneUserStoryLike(ctx context.Context, userID, storyId uint) 
 
 func (d *DAO) FindOneUserStoryLike(ctx context.Context, userID, storyId uint) (*models.UserStoryLikes, error) {
 	model := &models.UserStoryLikes{
-		UserID:  userID,
+		UserId:  userID,
 		StoryId: storyId,
 	}
 

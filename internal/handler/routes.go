@@ -250,6 +250,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/story/:story_id",
 				Handler: story.GetStoryInfoHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/story/seen/:story_id",
+				Handler: story.GetStorySeenListInfoHandler(serverCtx),
+			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),

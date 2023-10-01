@@ -50,12 +50,25 @@ func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *
 	//If current story is mine -> any one liked
 
 	var isLiked = false
+	var seenUserList []types.StorySeenUserBasicInfo = nil
 	if story.UserId == userID {
 		count, err := l.svcCtx.DAO.CountStoryLikes(l.ctx, req.StoryID)
 		if err != nil {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
 		isLiked = count > 0
+
+		users, err := l.svcCtx.DAO.GetStorySeenUserList(l.ctx, req.StoryID, 3) // MARK: the latest 3 user
+		if err != nil {
+			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		}
+
+		for _, u := range users {
+			seenUserList = append(seenUserList, types.StorySeenUserBasicInfo{
+				Id:     u.UserInfo.Id,
+				Avatar: u.UserInfo.Avatar,
+			})
+		}
 	} else {
 		userLiked, err := l.svcCtx.DAO.FindOneUserStoryLike(l.ctx, userID, req.StoryID)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -67,11 +80,13 @@ func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *
 		}
 
 	}
+
 	return &types.GetStoryInfoByIdResp{
 		Code:          uint(http.StatusOK),
 		StoryID:       story.Id,
 		StoryMediaURL: story.StoryMediaPath,
 		IsLiked:       isLiked,
 		CreateAt:      uint(story.CreatedAt.Unix()),
+		StorySeenList: seenUserList,
 	}, nil
 }
