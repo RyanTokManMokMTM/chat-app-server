@@ -66,7 +66,7 @@ func (c *SocketClient) ReadLoop() {
 			break
 		}
 		_ = c.conn.SetReadDeadline(time.Now().Add(time.Second * variable.ReadWait))
-
+		logx.Info("reading a message ", message)
 		//TODO: Unmarshal message to prototype message
 		var socketMessage socket_message.Message
 		err = protojson.Unmarshal(message, &socketMessage)
@@ -113,10 +113,9 @@ func (c *SocketClient) WriteLoop() {
 			if !ok {
 				break
 			}
-
+			logx.Info(data)
 			//TODO: Set WriteDeadLine
 			c.conn.SetWriteDeadline(time.Now().Add(time.Second * variable.WriteWait))
-			logx.Info("received a message")
 
 			w, err := c.conn.NextWriter(websocket.BinaryMessage)
 			if err != nil {
@@ -149,6 +148,7 @@ func (c *SocketClient) WriteLoop() {
 				logx.Error(err)
 			}
 			c.conn.WriteMessage(websocket.BinaryMessage, bytes)
+
 		case <-c.isClose:
 			logx.Info("received a connection closed signal and user is disconnected")
 			return

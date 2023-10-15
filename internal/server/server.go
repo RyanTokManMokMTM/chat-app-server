@@ -67,9 +67,10 @@ func (s *SocketServer) Start() {
 
 			//TODO: Send To Who?
 			//TODO: Send To Nobody , it means broadcast to a specific user/group
+			logx.Infof("receive from server %+v", socketMessage)
 			if socketMessage.ToUUID != "" {
 				//TODO: Send it to someone with a specific Uuid
-				if socketMessage.ContentType >= variable.TEXT && socketMessage.ContentType <= variable.SYS {
+				if socketMessage.ContentType >= variable.TEXT && socketMessage.ContentType <= variable.SHARED {
 					//TODO: save message
 					conn, ok := s.Clients[socketMessage.FromUUID]
 					if ok && socketMessage.ContentType != variable.SYS {
@@ -168,20 +169,21 @@ func sendGroupMessage(message *socket_message.Message, server *SocketServer, svc
 		conn, ok := server.Clients[mem.MemberInfo.Uuid]
 
 		socketMessage := socket_message.Message{
-			MessageID:    message.MessageID,
-			Avatar:       message.Avatar,
-			FromUserName: message.FromUserName,
-			FromUUID:     message.ToUUID,   //From Group UUID
-			ToUUID:       message.FromUUID, //To Member UUID
-			Content:      message.Content,
-			ContentType:  message.ContentType,
-			MessageType:  message.MessageType,
-			Type:         message.Type,
-			UrlPath:      message.UrlPath,
-			GroupName:    group.GroupName,
-			GroupAvatar:  group.GroupAvatar,
-			FileName:     message.FileName,
-			FileSize:     message.FileSize,
+			MessageID:      message.MessageID,
+			ReplyMessageID: message.ReplyMessageID,
+			Avatar:         message.Avatar,
+			FromUserName:   message.FromUserName,
+			FromUUID:       message.ToUUID,   //From Group UUID
+			ToUUID:         message.FromUUID, //To Member UUID
+			Content:        message.Content,
+			ContentType:    message.ContentType,
+			MessageType:    message.MessageType,
+			Type:           message.Type,
+			UrlPath:        message.UrlPath,
+			GroupName:      group.GroupName,
+			GroupAvatar:    group.GroupAvatar,
+			FileName:       message.FileName,
+			FileSize:       message.FileSize,
 		}
 
 		messageBytes, err := json.MarshalIndent(socketMessage, "", "\t")

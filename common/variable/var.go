@@ -31,6 +31,9 @@ const (
 	//Story Reply?
 	STORY //with Url path and content and available time
 	SYS
+	REPLY
+	STICKER
+	SHARED
 )
 
 const (

@@ -4,20 +4,26 @@ option go_package = "./socket_message";
 
 message Message {
   string messageID = 1; // messageID / packageID
-  string avatar = 2; //user avatar path
-  string fromUserName = 3; //sender user name
-  string fromUUID = 4; //sender uuid
-  string toUUID = 5; //receiver uuid
-  string content = 6; //sending content
-  int32 contentType = 7; //sending content type. For example 1: text, 2: file, 3: audio, 4: video....
-  int32 type = 8; //For example: "heatbeat" for checking server/client health , video call/audio call ->"webrtc"
-  int32 messageType = 9; //1: single 2: group
-  string groupName = 10; // will have data iff messageType = 2
-  string groupAvatar = 11; //will have data iff messageType = 2
+  string replyMessageID = 2;
+  string avatar = 3; //user avatar path
+  string fromUserName = 4; //sender user name
+  string fromUUID = 5; //sender uuid
+  string toUUID = 6; //receiver uuid
+  string content = 7; //sending content
+  int32 contentType = 8; //sending content type. For example 1: text, 2: file, 3: audio, 4: video....
+  int32 type = 9; //For example: "heatbeat" for checking server/client health , video call/audio call ->"webrtc"
+  int32 messageType = 10; //1: single 2: group
+  string groupName = 11; // will have data iff messageType = 2
+  string groupAvatar = 12; //will have data iff messageType = 2
   //more....
-  string urlPath = 12; //file url path or other path
-  string fileName = 13;
-  int32 fileSize = 14;
-  int32 storyAvailableTime = 15;
-  int32 storyId = 16;
+  string urlPath = 13; //file url path or other path
+  string fileName = 14;
+  int32 fileSize = 15;
+
+  //will it work on group??
+  int32 storyAvailableTime = 16;
+  int32 storyId = 17;
+  string storyUserName = 18;
+  string storyUserAvatar = 19;
+  string storyUserUUID = 20;
 }
