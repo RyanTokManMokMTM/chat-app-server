@@ -1,6 +1,8 @@
 package variable
 
-import "github.com/redis/go-redis/v9"
+import (
+	"github.com/redis/go-redis/v9"
+)
 
 const (
 	MESSAGE_TYPE_USERCHAT = iota + 1

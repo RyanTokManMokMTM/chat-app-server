@@ -27,6 +27,8 @@ type SocketServer struct {
 	Register   chan *SocketClient
 	UnRegister chan *SocketClient
 	Broadcast  chan []byte
+
+	isDone chan struct{}
 }
 
 func NewSocketServer() *SocketServer {
@@ -35,6 +37,7 @@ func NewSocketServer() *SocketServer {
 		Register:   make(chan *SocketClient),
 		UnRegister: make(chan *SocketClient),
 		Broadcast:  make(chan []byte),
+		isDone:     make(chan struct{}),
 	}
 }
 
@@ -52,6 +55,9 @@ func (s *SocketServer) Start() {
 				old.Closed()                                       //TODO: close the sending channel of old client
 			}
 
+			logx.Info("Done")
+			s.isDone <- struct{}{}
+
 		case client := <-s.UnRegister:
 			logx.Infof("User %v is leaving.", client.UUID)
 			s.Remove(client)
@@ -67,7 +73,6 @@ func (s *SocketServer) Start() {
 
 			//TODO: Send To Who?
 			//TODO: Send To Nobody , it means broadcast to a specific user/group
-			logx.Infof("receive from server %+v", socketMessage)
 			if socketMessage.ToUUID != "" {
 				//TODO: Send it to someone with a specific Uuid
 				if socketMessage.ContentType >= variable.TEXT && socketMessage.ContentType <= variable.SHARED {
@@ -85,12 +90,12 @@ func (s *SocketServer) Start() {
 					}
 
 					if socketMessage.MessageType == variable.MESSAGE_TYPE_USERCHAT {
-
-						client, ok := s.Clients[socketMessage.ToUUID]
-						if ok {
+						logx.Error(s)
+						//0x105a1b020
+						if client, ok := s.Clients[socketMessage.ToUUID]; ok {
 							client.sendChannel <- bytes
 						} else {
-							logx.Info("user %s is not online ", socketMessage.ToUUID)
+							logx.Infof("user %s is not online ", socketMessage.ToUUID)
 							ctx := context.Background()
 							_, err := variable.RedisConnection.RPush(ctx, socketMessage.ToUUID, string(bytes)).Result()
 							if err != nil {
@@ -129,6 +134,8 @@ func (s *SocketServer) Add(uuid string, client *SocketClient) (*SocketClient, bo
 	defer s.Unlock()
 	old, ok := s.Clients[uuid]
 	s.Clients[client.UUID] = client //add to our map
+
+	logx.Infof("Added user %s", client.UUID)
 	if ok {
 		return old, ok //TODO: Close the older connection
 	}
@@ -225,6 +232,7 @@ func sendAcknowledgement(seqID string, server *SocketServer, toUUID string) {
 	}
 
 	client, ok := server.Clients[toUUID]
+	logx.Error(toUUID)
 	if ok {
 		client.sendChannel <- ackMessage
 	} else {

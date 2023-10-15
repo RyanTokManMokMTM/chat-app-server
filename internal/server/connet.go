@@ -8,11 +8,11 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
-	"time"
 )
 
 func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request, wsServer *SocketServer) {
 	//TODO: Upgrade http to websocket
+	logx.Error("Starting....", &wsServer)
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -31,10 +31,13 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 
 	client := NewSocketClient(u.Uuid, u.NickName, conn, wsServer, svcCtx)
 	wsServer.Register <- client
-
+	//We need to wait...
+	logx.Info("Waiting Register progress....")
+	<-wsServer.isDone
+	logx.Error("added...")
+	logx.Error("added?", wsServer)
 	go client.ReadLoop()
 	go client.WriteLoop()
-	time.Sleep(time.Second * 10)
 	go func() {
 		ctx := context.Background()
 
@@ -44,7 +47,6 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 			logx.Error("getting Redis length err ", err)
 			return
 		}
-
 		messages, err := svcCtx.RedisClient.LRange(ctx, u.Uuid, 0, len).Result()
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -53,9 +55,9 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 		}
 
 		for _, msg := range messages {
-			logx.Infof("msg to send %+v", msg)
+			logx.Info("Sending offline message")
 			client.sendChannel <- []byte(msg)
-			time.Sleep(time.Second)
+			////time.Sleep(time.Second)
 		}
 
 		_, err = svcCtx.RedisClient.LTrim(ctx, u.Uuid, 100, -1).Result()

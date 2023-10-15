@@ -66,7 +66,6 @@ func (c *SocketClient) ReadLoop() {
 			break
 		}
 		_ = c.conn.SetReadDeadline(time.Now().Add(time.Second * variable.ReadWait))
-		logx.Info("reading a message ", message)
 		//TODO: Unmarshal message to prototype message
 		var socketMessage socket_message.Message
 		err = protojson.Unmarshal(message, &socketMessage)
@@ -116,7 +115,7 @@ func (c *SocketClient) WriteLoop() {
 			logx.Info(data)
 			//TODO: Set WriteDeadLine
 			c.conn.SetWriteDeadline(time.Now().Add(time.Second * variable.WriteWait))
-
+			//
 			w, err := c.conn.NextWriter(websocket.BinaryMessage)
 			if err != nil {
 				logx.Error(err)
@@ -124,10 +123,11 @@ func (c *SocketClient) WriteLoop() {
 			}
 
 			_, _ = w.Write(data)
-			n := len(c.sendChannel)
-			for i := 0; i < n; i++ {
-				_, _ = w.Write(data)
-			}
+			//n := len(c.sendChannel)
+			//logx.Info("buffer size ", n)
+			//for i := 0; i < n; i++ {
+			//	_, _ = w.Write(data)
+			//}
 
 			if err := w.Close(); err != nil {
 				logx.Error("writer close err :%v", err)

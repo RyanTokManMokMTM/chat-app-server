@@ -1,6 +1,7 @@
 package router
 
 import (
+	"errors"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/config"
@@ -22,9 +23,10 @@ func ConfigRouter(c config.Config) *rest.Server {
 	handler.RegisterHandlers(server, ctx)
 
 	httpx.SetErrorHandler(func(err error) (int, interface{}) {
-		switch e := err.(type) {
+		var e *errx.CustomError
+		switch {
 
-		case *errx.CustomError:
+		case errors.As(err, &e):
 			return http.StatusOK, e.ToJSON()
 		default:
 			return http.StatusInternalServerError, errx.NewCustomError(errx.SERVER_COMMON_ERROR, err.Error()).ToJSON()

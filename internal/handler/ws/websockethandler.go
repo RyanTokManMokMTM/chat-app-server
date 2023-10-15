@@ -33,7 +33,6 @@ func SendGroupSystemNotification(FromUUID, groupUUID, content string) {
 		MessageType: variable.MESSAGE_TYPE_GROUPCHAT,
 		Type:        variable.MESSAGE,
 	}
-	logx.Info(msg)
 	messageBytes, err := json.MarshalIndent(msg, "", "\t")
 	if err != nil {
 		logx.Error(err)
