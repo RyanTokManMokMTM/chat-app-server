@@ -13,6 +13,7 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"net/http"
+	"strings"
 )
 
 func ConfigRouter(c config.Config) *rest.Server {
@@ -38,11 +39,12 @@ func ConfigRouter(c config.Config) *rest.Server {
 		Handler: ws.WebSocketHandler(ctx),
 	}, rest.WithJwt(c.Auth.AccessSecret))
 
-	server.AddRoute(rest.Route{
-		Method:  http.MethodGet,
-		Path:    "/resources/:file",
-		Handler: http.StripPrefix("/resources/", http.FileServer(http.Dir("./resources"))).ServeHTTP,
-	})
+	//server.AddRoute(rest.Route{
+	//	Method:  http.MethodGet,
+	//	Path:    "/resources/:file",
+	//	Handler: http.StripPrefix("/resources/", http.FileServer(http.Dir("./resources"))).ServeHTTP,
+	//})
+	dirRouterRegister(server, "/resources/", "./resources/")
 
 	if c.Mode != service.TestMode {
 		client, err := redisClient.ConnectToClient(c.Redis.Addr, c.Redis.Password) //connect to redis for using in websocket
@@ -53,4 +55,26 @@ func ConfigRouter(c config.Config) *rest.Server {
 	}
 
 	return server
+}
+
+func directoryHandler(pattern, filedir string) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		handler := http.StripPrefix(pattern, http.FileServer(http.Dir(filedir)))
+		handler.ServeHTTP(w, req)
+
+	}
+}
+
+func dirRouterRegister(server *rest.Server, pattern, dirPath string) {
+	totalLevel := []string{
+		":l1", ":l2", ":l3", ":l2", ":l4", ":l5", ":l6", ":l7", ":l8",
+	}
+	for i := 1; i < len(totalLevel); i++ {
+		path := pattern + strings.Join(totalLevel[:i], "/")
+		server.AddRoute(rest.Route{
+			Method:  http.MethodGet,
+			Path:    path,
+			Handler: directoryHandler(pattern, dirPath),
+		})
+	}
 }

@@ -71,4 +71,8 @@ type Store interface {
 	FindOneUserStoryLike(ctx context.Context, userID, storyId uint) (*models.UserStoryLikes, error)
 	CountStoryLikes(ctx context.Context, storyId uint) (int64, error)
 	DeleteOneUserStoryLike(ctx context.Context, ID uint) error
+
+	InsertOneStickerGroup(ctx context.Context, name string) (*models.Sticker, error)
+	InsertOneStickerIntoGroup(ctx context.Context, sticker *models.Sticker, paths []string) error
+	FindOneStickerGroupByStickerUUID(ctx context.Context, uuid string) (*models.Sticker, error)
 }

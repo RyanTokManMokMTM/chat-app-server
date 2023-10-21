@@ -112,7 +112,6 @@ func (c *SocketClient) WriteLoop() {
 			if !ok {
 				break
 			}
-			logx.Info(data)
 			//TODO: Set WriteDeadLine
 			c.conn.SetWriteDeadline(time.Now().Add(time.Second * variable.WriteWait))
 			//

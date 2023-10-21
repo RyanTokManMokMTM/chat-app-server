@@ -2,6 +2,7 @@ package uploadx
 
 import (
 	"encoding/base64"
+	"fmt"
 	"github.com/google/uuid"
 	"io"
 	"mime/multipart"
@@ -36,7 +37,34 @@ func UploadFileFromRequest(r *http.Request, maxMemory int64, name, filePath stri
 	return "/" + header.Filename, nil
 }
 
+func UploadFileWithCustomName(f multipart.File, header *multipart.FileHeader, fileName, filePath string) (string, error) {
+	fileType := strings.Split(header.Filename, ".")[1]
+	name := fmt.Sprintf("%s.%s", fileName, fileType)
+	tempFile, err := os.Create(path.Join(filePath, name))
+	if err != nil {
+		return "", err
+	}
+
+	defer tempFile.Close()
+
+	_, _ = io.Copy(tempFile, f)
+	return "/" + name, nil
+}
+
 func UploadFile(f multipart.File, header *multipart.FileHeader, filePath string) (string, error) {
+
+	tempFile, err := os.Create(path.Join(filePath, header.Filename))
+	if err != nil {
+		return "", err
+	}
+
+	defer tempFile.Close()
+
+	_, _ = io.Copy(tempFile, f)
+	return "/" + header.Filename, nil
+}
+
+func UploadFileWithCustome(f multipart.File, header *multipart.FileHeader, filePath string) (string, error) {
 
 	tempFile, err := os.Create(path.Join(filePath, header.Filename))
 	if err != nil {

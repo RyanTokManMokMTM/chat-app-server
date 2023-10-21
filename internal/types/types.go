@@ -461,3 +461,21 @@ type StorySeenInfo struct {
 	IsLiked    bool   `json:"is_liked"`
 	CreatedAt  uint   `json:"created_at"`
 }
+
+type CreateStickerGroupReq struct {
+	StickerName string `form:"sticker_name"`
+}
+
+type CreateStickerGroupResp struct {
+	Code             uint   `json:"code"`
+	StickerGroupUUID string `json:"sticker_group_id"`
+}
+
+type GetStickerGroupReq struct {
+	StickerGroupUUID string `path:"sticker_group_uuid"`
+}
+
+type GetStickerGroupResp struct {
+	Code                  uint     `json:"code"`
+	StickerGroupResources []string `json:"sticker_resources"`
+}

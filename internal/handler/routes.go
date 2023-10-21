@@ -9,6 +9,7 @@ import (
 	group "github.com/ryantokmanmokmtm/chat-app-server/internal/handler/group"
 	health "github.com/ryantokmanmokmtm/chat-app-server/internal/handler/health"
 	message "github.com/ryantokmanmokmtm/chat-app-server/internal/handler/message"
+	sticker "github.com/ryantokmanmokmtm/chat-app-server/internal/handler/sticker"
 	story "github.com/ryantokmanmokmtm/chat-app-server/internal/handler/story"
 	user "github.com/ryantokmanmokmtm/chat-app-server/internal/handler/user"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
@@ -254,6 +255,23 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodGet,
 				Path:    "/story/seen/:story_id",
 				Handler: story.GetStorySeenListInfoHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/sticker",
+				Handler: sticker.CreateStickerGroupHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/sticker/:sticker_group_uuid",
+				Handler: sticker.GetStickerGroupResourcesHandler(serverCtx),
 			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),

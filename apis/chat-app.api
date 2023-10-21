@@ -5,6 +5,7 @@ import "desc/group.api"
 import "desc/message.api"
 import "desc/file.api"
 import "desc/story.api"
+import "desc/sticker.api"
 
 info(
 	title: "chat-app-router"

@@ -1,0 +1,43 @@
+syntax = "v1"
+
+info(
+    title: "Sticker API"
+    desc: "Sticker Resource using in Message"
+    author: "jackson.tmm"
+    version: "v1"
+)
+
+
+type (
+    // TODO: add members here and delete this comment
+    CreateStickerGroupReq{
+        StickerName string `form:"sticker_name"`
+    }
+    CreateStickerGroupResp{
+        Code uint `json:"code"`
+        StickerGroupUUID string `json:"sticker_group_id"`
+    }
+
+    GetStickerGroupReq {
+        StickerGroupUUID string `path:"sticker_group_uuid"`
+    }
+
+    GetStickerGroupResp {
+        Code uint `json:"code"`
+        StickerGroupResources []string `json:"sticker_resources"`
+    }
+
+)
+
+@server(
+    jwt: Auth
+    group: sticker
+    prefix : /api/v1
+)
+service ChatApp {
+    @handler CreateStickerGroup
+    post /sticker(CreateStickerGroupReq) returns (CreateStickerGroupResp)
+
+    @handler GetStickerGroupResources
+    get /sticker/:sticker_group_uuid(GetStickerGroupReq) returns (GetStickerGroupResp)
+}

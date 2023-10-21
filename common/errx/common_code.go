@@ -43,3 +43,9 @@ const (
 	STORY_CREATED_FAILED InternalCode = 600002
 	STORY_NOT_AVAILABLE  InternalCode = 600003
 )
+
+const (
+	STICKER_NOT_EXIST      InternalCode = 700001
+	STICKER_CREATED_FAILED InternalCode = 700002
+	STICKER_NOT_AVAILABLE  InternalCode = 700003
+)
