@@ -73,6 +73,9 @@ type Store interface {
 	DeleteOneUserStoryLike(ctx context.Context, ID uint) error
 
 	InsertOneStickerGroup(ctx context.Context, name string) (*models.Sticker, error)
-	InsertOneStickerIntoGroup(ctx context.Context, sticker *models.Sticker, paths []string) error
+	UpdateOneStickerGroup(ctx context.Context, sticker *models.Sticker) error
+	GetStickerGroupList(ctx context.Context) ([]*models.Sticker, error)
+
+	InsertStickerListIntoGroup(ctx context.Context, sticker *models.Sticker, paths []string) error
 	FindOneStickerGroupByStickerUUID(ctx context.Context, uuid string) (*models.Sticker, error)
 }

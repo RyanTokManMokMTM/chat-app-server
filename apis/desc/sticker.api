@@ -24,13 +24,28 @@ type (
 
     GetStickerGroupResp {
         Code uint `json:"code"`
-        StickerGroupResources []string `json:"sticker_resources"`
+        StickerId string `json:"sticker_id"`
+        ResourcesPath []string `json:"resources_path"`
+    }
+
+    GetStickerListReq{}
+
+    GetStickerListResp {
+        Code uint `json:"code"`
+        Stickers []StickerInfo `json:"stickers"`
     }
 
 )
 
+type (
+    StickerInfo {
+        StickerID string `json:"sticker_id"`
+        StickerName string `json:"sticker_name"`
+        StickerThum string `json:"sticker_thum"`
+    }
+)
+
 @server(
-    jwt: Auth
     group: sticker
     prefix : /api/v1
 )
@@ -40,4 +55,7 @@ service ChatApp {
 
     @handler GetStickerGroupResources
     get /sticker/:sticker_group_uuid(GetStickerGroupReq) returns (GetStickerGroupResp)
+
+    @handler GetStickerGroupList
+    get /sticker/list(GetStickerListReq) returns (GetStickerListResp)
 }

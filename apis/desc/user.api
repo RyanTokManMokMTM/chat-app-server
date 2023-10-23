@@ -99,6 +99,13 @@ type (
         IsFriend bool `json:"is_friend"`
     }
 
+    AddStickerReq{
+        StickerUUID string `json:"sticker_id"`
+    }
+    AddStickerResp {
+        Code uint `json:"code"`
+    }
+
 )
 
 
@@ -169,4 +176,10 @@ service ChatApp{
     )
     @handler SearchUser
     get /user/search(SearchUserReq) returns (SearchUserResp)
+
+    @doc(
+        summary :  "Add an existing sticker to user account"
+    )
+    @handler AddUserSticker
+    post /user/sticker(AddStickerReq) returns (AddStickerResp)
 }

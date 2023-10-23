@@ -119,6 +119,14 @@ type SearchUserResult struct {
 	IsFriend bool           `json:"is_friend"`
 }
 
+type AddStickerReq struct {
+	StickerUUID string `json:"sticker_id"`
+}
+
+type AddStickerResp struct {
+	Code uint `json:"code"`
+}
+
 type AddFriendReq struct {
 	UserID uint `json:"user_id"`
 }
@@ -476,6 +484,21 @@ type GetStickerGroupReq struct {
 }
 
 type GetStickerGroupResp struct {
-	Code                  uint     `json:"code"`
-	StickerGroupResources []string `json:"sticker_resources"`
+	Code          uint     `json:"code"`
+	StickerId     string   `json:"sticker_id"`
+	ResourcesPath []string `json:"resources_path"`
+}
+
+type GetStickerListReq struct {
+}
+
+type GetStickerListResp struct {
+	Code     uint          `json:"code"`
+	Stickers []StickerInfo `json:"stickers"`
+}
+
+type StickerInfo struct {
+	StickerID   string `json:"sticker_id"`
+	StickerName string `json:"sticker_name"`
+	StickerThum string `json:"sticker_thum"`
 }

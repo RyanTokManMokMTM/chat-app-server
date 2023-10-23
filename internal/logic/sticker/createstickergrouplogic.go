@@ -46,26 +46,48 @@ func (l *CreateStickerGroupLogic) CreateStickerGroup(req *types.CreateStickerGro
 	if err := os.Mkdir(stickerGroupDir, 0777); err != nil {
 		return nil, errx.NewCustomError(errx.SERVER_COMMON_ERROR, err.Error())
 	}
-
 	fileMap := l.r.MultipartForm.File
 	filePaths := make([]string, 0)
-	for _, files := range fileMap {
-		for _, file := range files {
-			f, err := file.Open()
+	for key, files := range fileMap {
+		if key == "thum" {
+			thumFile := files[0]
+			f, err := thumFile.Open()
 			if err != nil {
 				return nil, errx.NewCustomError(errx.FILE_UPLOAD_FAILED, err.Error())
 			}
 
-			path, err := uploadx.UploadFileWithCustomName(f, file, uuid.NewString(), stickerGroupDir)
+			path, err := uploadx.UploadFileWithCustomName(f, thumFile, uuid.NewString(), stickerGroupDir)
 			if err != nil {
 				return nil, errx.NewCustomError(errx.FILE_UPLOAD_FAILED, err.Error())
 			}
+			f.Close()
 
-			filePaths = append(filePaths, path)
+			stickerModel.StickerThum = fmt.Sprintf("/%s%s", stickerModel.Uuid, path)
+			if err := l.svcCtx.DAO.UpdateOneStickerGroup(l.ctx, stickerModel); err != nil {
+				return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+			}
+		} else {
+			for _, file := range files {
+
+				f, err := file.Open()
+				if err != nil {
+					return nil, errx.NewCustomError(errx.FILE_UPLOAD_FAILED, err.Error())
+				}
+
+				path, err := uploadx.UploadFileWithCustomName(f, file, uuid.NewString(), stickerGroupDir)
+				if err != nil {
+					return nil, errx.NewCustomError(errx.FILE_UPLOAD_FAILED, err.Error())
+				}
+
+				filePaths = append(filePaths, fmt.Sprintf("/%s%s", stickerModel.Uuid, path))
+				f.Close()
+			}
 		}
-	}
 
-	if err := l.svcCtx.DAO.InsertOneStickerIntoGroup(l.ctx, stickerModel, filePaths); err != nil {
+	}
+	logx.Info(filePaths)
+
+	if err := l.svcCtx.DAO.InsertStickerListIntoGroup(l.ctx, stickerModel, filePaths); err != nil {
 		return nil, errx.NewCustomError(errx.STORY_CREATED_FAILED, err.Error())
 	}
 

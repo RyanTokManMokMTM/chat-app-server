@@ -18,8 +18,9 @@ type User struct {
 	StatusMessage string `gorm:"type:varchar(64);null;comment:'user status message'"`
 	CommonField
 
-	Stories []StoryModel `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Groups  []Group      `gorm:"many2many:users_groups;foreignKey:Id;joinForeignKey:UserId"`
+	Stories       []StoryModel `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Groups        []Group      `gorm:"many2many:users_groups;foreignKey:Id;joinForeignKey:UserId"`
+	StickerGroups []Sticker    `gorm:"many2many:users_stickers;foreignKey:Id;joinForeignKey:UserId"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {

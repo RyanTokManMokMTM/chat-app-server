@@ -82,6 +82,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/user/search",
 				Handler: user.SearchUserHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/user/sticker",
+				Handler: user.AddUserStickerHandler(serverCtx),
+			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),
@@ -273,8 +278,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/sticker/:sticker_group_uuid",
 				Handler: sticker.GetStickerGroupResourcesHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/sticker/list",
+				Handler: sticker.GetStickerGroupListHandler(serverCtx),
+			},
 		},
-		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),
 	)
 }

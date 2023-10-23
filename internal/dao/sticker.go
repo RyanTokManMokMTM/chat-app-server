@@ -7,7 +7,7 @@ import (
 
 func (d *DAO) InsertOneStickerGroup(ctx context.Context, name string) (*models.Sticker, error) {
 	sticker := &models.Sticker{
-		SickerName: name,
+		StickerName: name,
 	}
 
 	if err := sticker.InsertOne(ctx, d.engine); err != nil {
@@ -16,7 +16,7 @@ func (d *DAO) InsertOneStickerGroup(ctx context.Context, name string) (*models.S
 	return sticker, nil
 }
 
-func (d *DAO) InsertOneStickerIntoGroup(ctx context.Context, sticker *models.Sticker, paths []string) error {
+func (d *DAO) InsertStickerListIntoGroup(ctx context.Context, sticker *models.Sticker, paths []string) error {
 	return sticker.InsertResources(ctx, d.engine, paths)
 }
 
@@ -29,4 +29,12 @@ func (d *DAO) FindOneStickerGroupByStickerUUID(ctx context.Context, uuid string)
 		return nil, err
 	}
 	return sticker, nil
+}
+
+func (d *DAO) UpdateOneStickerGroup(ctx context.Context, sticker *models.Sticker) error {
+	return sticker.UpdateOne(ctx, d.engine)
+}
+
+func (d *DAO) GetStickerGroupList(ctx context.Context) ([]*models.Sticker, error) {
+	return (&models.Sticker{}).FindAll(ctx, d.engine)
 }
