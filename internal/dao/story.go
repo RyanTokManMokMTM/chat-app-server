@@ -5,16 +5,16 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 )
 
-func (d *DAO) InsertOneStory(ctx context.Context, userID uint, mediaPath string) (uint, error) {
+func (d *DAO) InsertOneStory(ctx context.Context, userID uint, mediaPath string) (*models.StoryModel, error) {
 	s := &models.StoryModel{
 		UserId:         userID,
 		StoryMediaPath: mediaPath,
 	}
 
 	if err := s.InsertOne(ctx, d.engine); err != nil {
-		return 0, err
+		return nil, err
 	}
-	return s.Id, nil
+	return s, nil
 }
 
 func (d *DAO) FindOneStory(ctx context.Context, storyID uint) (*models.StoryModel, error) {
@@ -47,7 +47,7 @@ func (d *DAO) GetUserStories(ctx context.Context, userID uint) ([]uint, error) {
 	return s.FindAllUserStories(ctx, d.engine)
 }
 
-func (d *DAO) GetUserStoriesByTimeStamp(ctx context.Context, userID uint, timeStamp int64) ([]uint, error) {
+func (d *DAO) GetUserStoriesByTimeStamp(ctx context.Context, userID uint, timeStamp int64) ([]*models.StoryModel, error) {
 	s := &models.StoryModel{
 		UserId: userID,
 	}

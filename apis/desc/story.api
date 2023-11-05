@@ -12,7 +12,7 @@ type (
     AddStoryReq {}
     AddStoryResp {
         Code uint `json:"code"`
-        StoryID uint `json:"story_id"`
+        Info StoryInfo `json:"story_info"`
     }
 
     GetUserStoryReq {
@@ -21,7 +21,7 @@ type (
     }
     GetUserStoryResp {
         Code uint `json:"code"`
-        StoryIDs []uint `json:"story_ids"`
+        Stories []StoryInfo `json:"stories"`
         LastStoryId uint `json:"last_story_id"`
     }
 
@@ -50,12 +50,17 @@ type (
     }
     GetStoryInfoByIdResp {
         Code uint `json:"code"`
-        StoryID uint `json:"story_id"`
-        StoryMediaURL string `json:"media_url"`
+        StoryInfo
         IsLiked bool `json:"is_liked"`
         TotalSeenCount uint `json:"seen_count"`
         CreateAt uint `json:"create_at"`
         StorySeenList []StorySeenUserBasicInfo `json:"story_seen_list"`
+    }
+
+    StoryInfo{
+        StoryID uint `json:"story_id"`
+        StoryUUID string `json:"story_uuid"`
+        StoryMediaURL string `json:"media_url"`
     }
 
 )

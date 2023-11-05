@@ -386,8 +386,8 @@ type AddStoryReq struct {
 }
 
 type AddStoryResp struct {
-	Code    uint `json:"code"`
-	StoryID uint `json:"story_id"`
+	Code uint      `json:"code"`
+	Info StoryInfo `json:"story_info"`
 }
 
 type GetUserStoryReq struct {
@@ -396,9 +396,9 @@ type GetUserStoryReq struct {
 }
 
 type GetUserStoryResp struct {
-	Code        uint   `json:"code"`
-	StoryIDs    []uint `json:"story_ids"`
-	LastStoryId uint   `json:"last_story_id"`
+	Code        uint        `json:"code"`
+	Stories     []StoryInfo `json:"stories"`
+	LastStoryId uint        `json:"last_story_id"`
 }
 
 type GetActiveStoryReq struct {
@@ -428,13 +428,18 @@ type GetStoryInfoByIdRep struct {
 }
 
 type GetStoryInfoByIdResp struct {
-	Code           uint                     `json:"code"`
-	StoryID        uint                     `json:"story_id"`
-	StoryMediaURL  string                   `json:"media_url"`
+	Code uint `json:"code"`
+	StoryInfo
 	IsLiked        bool                     `json:"is_liked"`
 	TotalSeenCount uint                     `json:"seen_count"`
 	CreateAt       uint                     `json:"create_at"`
 	StorySeenList  []StorySeenUserBasicInfo `json:"story_seen_list"`
+}
+
+type StoryInfo struct {
+	StoryID       uint   `json:"story_id"`
+	StoryUUID     string `json:"story_uuid"`
+	StoryMediaURL string `json:"media_url"`
 }
 
 type StorySeenUserBasicInfo struct {
@@ -504,14 +509,23 @@ type CreateStickerGroupResp struct {
 	StickerGroupUUID string `json:"sticker_group_id"`
 }
 
-type GetStickerGroupReq struct {
+type GetStickerResourcesReq struct {
 	StickerGroupUUID string `path:"sticker_group_uuid"`
 }
 
-type GetStickerGroupResp struct {
+type GetStickerResourcesResp struct {
 	Code          uint     `json:"code"`
 	StickerId     string   `json:"sticker_id"`
 	ResourcesPath []string `json:"resources_path"`
+}
+
+type GetStickerInfoReq struct {
+	StickerUUID string `path:"sticker_uuid"`
+}
+
+type GetStickerInfoResp struct {
+	Code        uint        `json:"code"`
+	StickerInfo StickerInfo `json:"sticker_info"`
 }
 
 type GetStickerListReq struct {

@@ -53,11 +53,11 @@ type Store interface {
 	CountMessage(ctx context.Context, messageType, id uint) (int64, error)
 	GetMessage(ctx context.Context, from, to, messageType uint, pageLimit int, latestId uint) ([]*models.Message, error)
 
-	InsertOneStory(ctx context.Context, userID uint, mediaPath string) (uint, error)
+	InsertOneStory(ctx context.Context, userID uint, mediaPath string) (*models.StoryModel, error)
 	FindOneStory(ctx context.Context, storyID uint) (*models.StoryModel, error)
 	FindOneUserStory(ctx context.Context, storyID, userID uint) (*models.StoryModel, error)
 	GetUserStories(ctx context.Context, userID uint) ([]uint, error)
-	GetUserStoriesByTimeStamp(ctx context.Context, userID uint, timeStamp int64) ([]uint, error)
+	GetUserStoriesByTimeStamp(ctx context.Context, userID uint, timeStamp int64) ([]*models.StoryModel, error)
 	GetFriendActiveStories(ctx context.Context, userID uint, pageOffset, pageLimit int) ([]*models.StoriesWithLatestStoryTime, error)
 	GetFriendActiveStoriesByTimeStamp(ctx context.Context, userID uint, pageOffset, pageLimit int, timeStamp int64) ([]*models.StoriesWithLatestStoryTime, error)
 	DeleteStories(ctx context.Context, storyID uint) error

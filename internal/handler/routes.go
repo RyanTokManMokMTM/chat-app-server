@@ -290,8 +290,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodGet,
-				Path:    "/sticker/:sticker_group_uuid",
+				Path:    "/sticker/resources/:sticker_group_uuid",
 				Handler: sticker.GetStickerGroupResourcesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/sticker/:sticker_uuid",
+				Handler: sticker.GetStickerGroupInfoHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,

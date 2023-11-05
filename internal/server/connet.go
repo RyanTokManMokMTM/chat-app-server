@@ -42,12 +42,12 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 		ctx := context.Background()
 
 		//we need to create a connection for each user?
-		len, err := variable.RedisConnection.LLen(ctx, u.Uuid).Result()
+		length, err := variable.RedisConnection.LLen(ctx, u.Uuid).Result()
 		if err != nil {
 			logx.Error("getting Redis length err ", err)
 			return
 		}
-		messages, err := svcCtx.RedisClient.LRange(ctx, u.Uuid, 0, len).Result()
+		messages, err := svcCtx.RedisClient.LRange(ctx, u.Uuid, 0, length).Result()
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			logx.Errorf("get offline messages error %s ", err.Error())

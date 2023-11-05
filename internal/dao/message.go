@@ -76,21 +76,23 @@ func insertUserMessage(ctx context.Context, message *socket_message.Message, eng
 	}
 
 	return &models.Message{
-		Uuid:        message.MessageID,
-		FromUserID:  fromUser.Id,
-		ToUserID:    toUser.Id,
-		Content:     message.Content,
-		MessageType: uint(message.MessageType),
-		ContentType: uint(message.ContentType),
-		Url:         message.UrlPath,
-		FileName:    message.FileName,
-		FileSize:    uint(message.FileSize),
-		StoryTime:   uint(message.StoryAvailableTime),
-		StoryId:     uint(message.StoryId),
+		Uuid:                 message.MessageID,
+		FromUserID:           fromUser.Id,
+		ToUserID:             toUser.Id,
+		Content:              message.Content,
+		MessageType:          uint(message.MessageType),
+		ContentType:          uint(message.ContentType),
+		Url:                  message.UrlPath,
+		FileName:             message.FileName,
+		FileSize:             uint(message.FileSize),
+		ContentAvailableTime: uint(message.ContentAvailableTime),
+		ContentId:            message.ContentUUID,
+		ContentUserName:      message.ContentUserName,
+		ContentUserAvatar:    message.ContentUserAvatar,
+		ContentUserUUID:      message.ContentUserUUID,
 	}
 
 }
-
 func (d *DAO) CountMessage(ctx context.Context, messageType, id uint) (int64, error) {
 	m := &models.Message{
 		FromUserID:  id,
@@ -119,16 +121,20 @@ func insertOneGroupMessage(ctx context.Context, message *socket_message.Message,
 	}
 
 	return &models.Message{
-		Uuid:        message.MessageID,
-		FromUserID:  fromUser.Id,
-		ToUserID:    groupInfo.Id,
-		Content:     message.Content,
-		ContentType: uint(message.ContentType),
-		MessageType: uint(message.MessageType),
-		Url:         message.UrlPath,
-		FileName:    message.FileName,
-		FileSize:    uint(message.FileSize),
-		StoryTime:   uint(message.StoryAvailableTime),
+		Uuid:                 message.MessageID,
+		FromUserID:           fromUser.Id,
+		ToUserID:             groupInfo.Id,
+		Content:              message.Content,
+		ContentType:          uint(message.ContentType),
+		MessageType:          uint(message.MessageType),
+		Url:                  message.UrlPath,
+		FileName:             message.FileName,
+		FileSize:             uint(message.FileSize),
+		ContentAvailableTime: uint(message.ContentAvailableTime),
+		ContentId:            message.ContentUUID,
+		ContentUserName:      message.ContentUserName,
+		ContentUserAvatar:    message.ContentUserAvatar,
+		ContentUserUUID:      message.ContentUserUUID,
 	}
 
 }

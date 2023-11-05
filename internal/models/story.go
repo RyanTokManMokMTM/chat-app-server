@@ -2,17 +2,24 @@ package models
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"time"
 )
 
 type StoryModel struct {
-	Id             uint `gorm:"primaryKey;autoIncrement;type:int"`
-	UserId         uint `gorm:"not null;index;comment:'belong to which group Id'"`
+	Id             uint      `gorm:"primaryKey;autoIncrement;type:int"`
+	Uuid           uuid.UUID `gorm:"index"`
+	UserId         uint      `gorm:"not null;index;comment:'belong to which group Id'"`
 	StoryMediaPath string
 
 	UserInfo User `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	CommonField
+}
+
+func (s *StoryModel) BeforeCreate(tx *gorm.DB) error {
+	s.Uuid = uuid.New()
+	return nil
 }
 
 type (
@@ -106,14 +113,13 @@ func (s *StoryModel) FindAllUserStories(ctx context.Context, db *gorm.DB) ([]uin
 	return ids, nil
 }
 
-func (s *StoryModel) FindAllUserStoriesByTimeStamp(ctx context.Context, db *gorm.DB, timeStamp int64) ([]uint, error) {
-	var ids []uint
+func (s *StoryModel) FindAllUserStoriesByTimeStamp(ctx context.Context, db *gorm.DB, timeStamp int64) ([]*StoryModel, error) {
+	var story []*StoryModel
 	err := db.WithContext(ctx).Debug().
 		Model(&s).
-		Select("Id").
-		Where("user_id = ? AND created_at >= NOW() - INTERVAL 1 DAY AND  created_at <= FROM_UNIXTIME(?)", s.UserId, timeStamp).Find(&ids).Error
+		Where("user_id = ? AND created_at >= NOW() - INTERVAL 1 DAY AND  created_at <= FROM_UNIXTIME(?)", s.UserId, timeStamp).Find(&story).Error
 	if err != nil {
 		return nil, err
 	}
-	return ids, nil
+	return story, nil
 }

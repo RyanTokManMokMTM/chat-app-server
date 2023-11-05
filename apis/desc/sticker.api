@@ -18,14 +18,23 @@ type (
         StickerGroupUUID string `json:"sticker_group_id"`
     }
 
-    GetStickerGroupReq {
+    GetStickerResourcesReq {
         StickerGroupUUID string `path:"sticker_group_uuid"`
     }
 
-    GetStickerGroupResp {
+    GetStickerResourcesResp {
         Code uint `json:"code"`
         StickerId string `json:"sticker_id"`
         ResourcesPath []string `json:"resources_path"`
+    }
+
+    GetStickerInfoReq {
+        StickerUUID string `path:"sticker_uuid"`
+    }
+
+    GetStickerInfoResp {
+        Code uint `json:"code"`
+        StickerInfo StickerInfo `json:"sticker_info"`
     }
 
     GetStickerListReq{}
@@ -54,7 +63,11 @@ service ChatApp {
     post /sticker(CreateStickerGroupReq) returns (CreateStickerGroupResp)
 
     @handler GetStickerGroupResources
-    get /sticker/:sticker_group_uuid(GetStickerGroupReq) returns (GetStickerGroupResp)
+    get /sticker/resources/:sticker_group_uuid(GetStickerResourcesReq) returns (GetStickerResourcesResp)
+
+    @handler GetStickerGroupInfo
+    get /sticker/:sticker_uuid(GetStickerInfoReq) returns (GetStickerInfoResp)
+
 
     @handler GetStickerGroupList
     get /sticker/list(GetStickerListReq) returns (GetStickerListResp)

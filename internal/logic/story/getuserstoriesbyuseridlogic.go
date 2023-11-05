@@ -45,7 +45,7 @@ func (l *GetUserStoriesByUserIdLogic) GetUserStoriesByUserId(req *types.GetUserS
 		storyTimeStamp = time.Now().Unix()
 	}
 
-	storyIds, err := l.svcCtx.DAO.GetUserStoriesByTimeStamp(l.ctx, req.UserID, storyTimeStamp)
+	storys, err := l.svcCtx.DAO.GetUserStoriesByTimeStamp(l.ctx, req.UserID, storyTimeStamp)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -60,9 +60,17 @@ func (l *GetUserStoriesByUserIdLogic) GetUserStoriesByUserId(req *types.GetUserS
 		lastStoryID = seenStory.StoryId
 	}
 
+	var storiesList = make([]types.StoryInfo, 0)
+	for _, s := range storys {
+		storiesList = append(storiesList, types.StoryInfo{
+			StoryID:       s.Id,
+			StoryUUID:     s.Uuid.String(),
+			StoryMediaURL: s.StoryMediaPath,
+		})
+	}
 	return &types.GetUserStoryResp{
 		Code:        uint(http.StatusOK),
-		StoryIDs:    storyIds,
+		Stories:     storiesList,
 		LastStoryId: lastStoryID,
 	}, nil
 }

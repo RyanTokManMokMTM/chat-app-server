@@ -24,16 +24,19 @@ type Message struct {
 			Uuid - group member(efd) -> group's Uuid(aaa)
 			in group's with Uuid aaa have 2 message which send from Uuid abc and Uuid efd
 	*/
-	FromUserID  uint   `gorm:"index;comment:'sender userID'"`
-	ToUserID    uint   `gorm:"index;comment:'receiver userID'"`
-	Content     string `gorm:"comment:'message content'"`
-	MessageType uint   `gorm:"comment;'sent message type: 1:single ,2: group'"`
-	ContentType uint   `gorm:"comment:'content type: 1: text, 2: file,3:audio,4:video'"`
-	Url         string `gorm:"comment:'image url path'"`
-	FileName    string `gorm:"comment:'file name'"`
-	FileSize    uint   `gorm:"comment:'file size'"`
-	StoryTime   uint   `gorm:"comment:'reply story available time'"`
-	StoryId     uint   `gorm:"comment:'reply story id'"`
+	FromUserID           uint   `gorm:"index;comment:'sender userID'"`
+	ToUserID             uint   `gorm:"index;comment:'receiver userID'"`
+	Content              string `gorm:"comment:'message content'"`
+	MessageType          uint   `gorm:"comment;'sent message type: 1:single ,2: group'"`
+	ContentType          uint   `gorm:"comment:'content type: 1: text, 2: file,3:audio,4:video'"`
+	Url                  string `gorm:"comment:'image url path'"`
+	FileName             string `gorm:"comment:'file name'"`
+	FileSize             uint   `gorm:"comment:'file size'"`
+	ContentAvailableTime uint   `gorm:"comment:'reply content available time'"`
+	ContentId            string `gorm:"comment:'reply content id'"`
+	ContentUserName      string `gorm:"comment:'reply content belong to which user name'"`
+	ContentUserAvatar    string `gorm:"comment:'reply content belong to which user avatar'"`
+	ContentUserUUID      string `gorm:"comment:'reply content belong to which user uuid'"`
 	CommonField
 }
 

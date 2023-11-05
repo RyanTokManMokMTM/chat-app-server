@@ -79,7 +79,7 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 			Url:         msg.Url,
 			FileName:    msg.FileName,
 			FileSize:    msg.FileSize,
-			StoryTime:   msg.StoryTime,
+			StoryTime:   msg.ContentAvailableTime,
 			CreatedAt:   uint(msg.CreatedAt.Unix()),
 		})
 	}

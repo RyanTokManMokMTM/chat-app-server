@@ -27,7 +27,7 @@ func NewGetStickerGroupResourcesLogic(ctx context.Context, svcCtx *svc.ServiceCo
 	}
 }
 
-func (l *GetStickerGroupResourcesLogic) GetStickerGroupResources(req *types.GetStickerGroupReq) (resp *types.GetStickerGroupResp, err error) {
+func (l *GetStickerGroupResourcesLogic) GetStickerGroupResources(req *types.GetStickerResourcesReq) (resp *types.GetStickerResourcesResp, err error) {
 	// todo: add your logic here and delete this line
 	sticker, err := l.svcCtx.DAO.FindOneStickerGroupByStickerUUID(l.ctx, req.StickerGroupUUID)
 	if err != nil {
@@ -42,7 +42,7 @@ func (l *GetStickerGroupResourcesLogic) GetStickerGroupResources(req *types.GetS
 	for _, stickerPath := range sticker.Resources {
 		resources = append(resources, stickerPath.Path)
 	}
-	return &types.GetStickerGroupResp{
+	return &types.GetStickerResourcesResp{
 		Code:          http.StatusOK,
 		StickerId:     sticker.Uuid,
 		ResourcesPath: resources,

@@ -82,9 +82,12 @@ func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *
 	}
 
 	return &types.GetStoryInfoByIdResp{
-		Code:          uint(http.StatusOK),
-		StoryID:       story.Id,
-		StoryMediaURL: story.StoryMediaPath,
+		Code: uint(http.StatusOK),
+		StoryInfo: types.StoryInfo{
+			StoryID:       story.Id,
+			StoryUUID:     story.Uuid.String(),
+			StoryMediaURL: story.StoryMediaPath,
+		},
 		IsLiked:       isLiked,
 		CreateAt:      uint(story.CreatedAt.Unix()),
 		StorySeenList: seenUserList,

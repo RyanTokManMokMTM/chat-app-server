@@ -21,9 +21,9 @@ message Message {
   int32 fileSize = 15;
 
   //will it work on group??
-  int32 storyAvailableTime = 16;
-  int32 storyId = 17;
-  string storyUserName = 18;
-  string storyUserAvatar = 19;
-  string storyUserUUID = 20;
+  int32 contentAvailableTime = 16;
+  string contentUUID = 17;
+  string contentUserName = 18;
+  string contentUserAvatar = 19;
+  string contentUserUUID = 20;
 }

@@ -49,13 +49,17 @@ func (l *AddStoryLogic) AddStory(req *types.AddStoryReq) (resp *types.AddStoryRe
 	}
 
 	mediaPath := path
-	storyID, err := l.svcCtx.DAO.InsertOneStory(l.ctx, userID, mediaPath)
+	story, err := l.svcCtx.DAO.InsertOneStory(l.ctx, userID, mediaPath)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
 	return &types.AddStoryResp{
-		Code:    uint(http.StatusOK),
-		StoryID: storyID,
+		Code: uint(http.StatusOK),
+		Info: types.StoryInfo{
+			StoryID:       story.Id,
+			StoryUUID:     story.Uuid.String(),
+			StoryMediaURL: story.StoryMediaPath,
+		},
 	}, nil
 }
