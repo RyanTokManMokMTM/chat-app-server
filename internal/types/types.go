@@ -127,6 +127,31 @@ type AddStickerResp struct {
 	Code uint `json:"code"`
 }
 
+type DeleteStickerReq struct {
+	StickerUUID string `json:"sticker_id"`
+}
+
+type DeleteStickerResp struct {
+	Code uint `json:"code"`
+}
+
+type IsStickerExistReq struct {
+	StickerUUID string `path:"sticker_id"`
+}
+
+type IsStickerExistResp struct {
+	Code    uint `json:"code"`
+	IsExist bool `json:"is_exist"`
+}
+
+type GetUserStickerReq struct {
+}
+
+type GetUserStickerResp struct {
+	Code     uint          `json:"code"`
+	Stickers []StickerInfo `json:"stickers"`
+}
+
 type AddFriendReq struct {
 	UserID uint `json:"user_id"`
 }

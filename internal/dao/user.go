@@ -91,3 +91,31 @@ func (d *DAO) CountUserAvailableStory(ctx context.Context, userID uint) (int64, 
 	}
 	return u.CountUserStory(d.engine, ctx)
 }
+
+func (d *DAO) InsertOneStickerToUser(ctx context.Context, userID uint, sticker *models.Sticker) error {
+	u := &models.User{
+		Id: userID,
+	}
+
+	return u.InsertOneSticker(d.engine, ctx, sticker)
+}
+func (d *DAO) FindOneStickerFromUser(ctx context.Context, userID uint, stickerUUID string) (*models.Sticker, error) {
+	u := &models.User{
+		Id: userID,
+	}
+	return u.FindOneSticker(d.engine, ctx, stickerUUID)
+}
+func (d *DAO) DeleteOneStickerFromUser(ctx context.Context, userID uint, sticker *models.Sticker) error {
+	u := &models.User{
+		Id: userID,
+	}
+
+	return u.DeleteOneSticker(d.engine, ctx, sticker)
+}
+
+func (d *DAO) FindAllSticker(ctx context.Context, userID uint) ([]*models.Sticker, error) {
+	u := &models.User{
+		Id: userID,
+	}
+	return u.FindAllSticker(d.engine, ctx)
+}

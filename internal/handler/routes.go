@@ -87,6 +87,21 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/user/sticker",
 				Handler: user.AddUserStickerHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodPatch,
+				Path:    "/user/sticker",
+				Handler: user.DeleteUserStickerHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/user/sticker/:sticker_id",
+				Handler: user.IsStickerExistHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/user/sticker/list",
+				Handler: user.GetUserStickersHandler(serverCtx),
+			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),

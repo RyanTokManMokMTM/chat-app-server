@@ -8,7 +8,7 @@ import (
 
 type Sticker struct {
 	Id          uint   `gorm:"primaryKey;autoIncrement"`
-	Uuid        string `gorm:"type:varchar(64);not null;index:idx_uuid"`
+	Uuid        string `gorm:"type:varchar(64);not null;index:unique"`
 	StickerName string `gorm:"not null"`
 	StickerThum string
 
@@ -30,11 +30,11 @@ func (sk *Sticker) InsertOne(ctx context.Context, db *gorm.DB) error {
 }
 
 func (sk *Sticker) FindOneById(ctx context.Context, db *gorm.DB) error {
-	return db.WithContext(ctx).Debug().Preload("Resources").Where("id = ?", sk.Id).Find(sk).Error
+	return db.WithContext(ctx).Debug().Preload("Resources").Where("id = ?", sk.Id).First(sk).Error
 }
 
 func (sk *Sticker) FindOneByUuid(ctx context.Context, db *gorm.DB) error {
-	return db.WithContext(ctx).Debug().Preload("Resources").Where("uuid = ?", sk.Uuid).Find(sk).Error
+	return db.WithContext(ctx).Debug().Preload("Resources").Where("uuid = ?", sk.Uuid).First(sk).Error
 }
 
 func (sk *Sticker) UpdateOne(ctx context.Context, db *gorm.DB) error {

@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"github.com/google/uuid"
+	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 	"time"
 )
@@ -20,7 +21,7 @@ type User struct {
 
 	Stories       []StoryModel `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Groups        []Group      `gorm:"many2many:users_groups;foreignKey:Id;joinForeignKey:UserId"`
-	StickerGroups []Sticker    `gorm:"many2many:users_stickers;foreignKey:Id;joinForeignKey:UserId"`
+	StickerGroups []Sticker    `gorm:"many2many:users_stickers;foreignKey:Id;joinForeignKey:UserId;References:Uuid;joinReferences:StickerId"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
@@ -40,11 +41,11 @@ func (u *User) TableName() string {
 }
 
 func (u *User) FindOneUserByID(db *gorm.DB, ctx context.Context) error {
-	return db.Debug().WithContext(ctx).First(&u).Error
+	return db.Debug().WithContext(ctx).Preload("StickerGroups").First(&u).Error
 }
 
 func (u *User) FindOneUserByUUID(db *gorm.DB, ctx context.Context) error {
-	return db.Debug().WithContext(ctx).Where("uuid = ?", u.Uuid).First(&u).Error
+	return db.Debug().WithContext(ctx).Preload("StickerGroups").Where("uuid = ?", u.Uuid).First(&u).Error
 }
 
 func (u *User) FindOneUserByEmail(db *gorm.DB, ctx context.Context) error {
@@ -100,4 +101,29 @@ func (u *User) CountUserGroup(db *gorm.DB, ctx context.Context) int64 {
 
 func (u *User) JoinGroup(db *gorm.DB, ctx context.Context, group *Group) error {
 	return db.WithContext(ctx).Model(&u).Association("GroupInfos").Append(group)
+}
+
+func (u *User) InsertOneSticker(db *gorm.DB, ctx context.Context, sticker *Sticker) error {
+	return db.WithContext(ctx).Debug().Omit("StickerGroups.*").Model(&u).Association("StickerGroups").Append(sticker)
+}
+
+func (u *User) FindOneSticker(db *gorm.DB, ctx context.Context, stickerUUID string) (*Sticker, error) {
+	var sticker Sticker
+	if err := db.WithContext(ctx).Debug().Model(&u).Association("StickerGroups").Find(&sticker, "sticker_id = ?", stickerUUID); err != nil {
+		return nil, err
+	}
+	return &sticker, nil
+}
+
+func (u *User) FindAllSticker(db *gorm.DB, ctx context.Context) ([]*Sticker, error) {
+	var sticker []*Sticker
+	logx.Info("Testing final all stickers")
+	if err := db.WithContext(ctx).Debug().Model(&u).Association("StickerGroups").Find(&sticker); err != nil {
+		return nil, err
+	}
+	return sticker, nil
+}
+
+func (u *User) DeleteOneSticker(db *gorm.DB, ctx context.Context, sticker *Sticker) error {
+	return db.WithContext(ctx).Model(&u).Association("StickerGroups").Delete(sticker)
 }

@@ -106,6 +106,27 @@ type (
         Code uint `json:"code"`
     }
 
+    DeleteStickerReq{
+        StickerUUID string `json:"sticker_id"`
+    }
+    DeleteStickerResp {
+        Code uint `json:"code"`
+    }
+
+    IsStickerExistReq{
+        StickerUUID string `path:"sticker_id"`
+    }
+    IsStickerExistResp {
+        Code uint `json:"code"`
+        IsExist bool `json:"is_exist"`
+    }
+
+    GetUserStickerReq{}
+    GetUserStickerResp {
+        Code uint `json:"code"`
+        Stickers []StickerInfo `json:"stickers"`
+    }
+
 )
 
 
@@ -182,4 +203,23 @@ service ChatApp{
     )
     @handler AddUserSticker
     post /user/sticker(AddStickerReq) returns (AddStickerResp)
+
+    @doc(
+        summary :  "Remove the sticker is added"
+    )
+    @handler DeleteUserSticker
+    patch /user/sticker(DeleteStickerReq) returns (DeleteStickerResp)
+
+    @doc(
+        summary :  "Check an existing sticker has been added to user"
+    )
+    @handler IsStickerExist
+    get /user/sticker/:sticker_id(IsStickerExistReq) returns (IsStickerExistResp)
+
+    @doc(
+        summary :  "Get user sticker group"
+    )
+    @handler getUserStickers
+    get /user/sticker/list(GetUserStickerReq) returns (GetUserStickerResp)
+
 }

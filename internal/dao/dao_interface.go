@@ -17,6 +17,10 @@ type Store interface {
 	UpdateUserCover(ctx context.Context, id uint, coverPath string) error
 	FindUsers(ctx context.Context, query string) ([]*models.User, error)
 	CountUserAvailableStory(ctx context.Context, userID uint) (int64, error)
+	InsertOneStickerToUser(ctx context.Context, userID uint, sticker *models.Sticker) error
+	FindOneStickerFromUser(ctx context.Context, userID uint, stickerUUID string) (*models.Sticker, error)
+	FindAllSticker(ctx context.Context, userID uint) ([]*models.Sticker, error)
+	DeleteOneStickerFromUser(ctx context.Context, userID uint, sticker *models.Sticker) error
 
 	InsertOneFriend(ctx context.Context, userID, friendID uint) error
 	FindOneFriend(ctx context.Context, userID, friendID uint) (*models.User, error)

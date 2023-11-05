@@ -19,6 +19,7 @@ const (
 	USER_SIGN_IN_FAILED       InternalCode = 200002
 	EMAIL_HAS_BEEN_REGISTERED InternalCode = 200003
 	USER_NOT_EXIST            InternalCode = 200004
+	USER_STICKER_GROUP_EXIST  InternalCode = 200005
 )
 
 const (
