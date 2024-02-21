@@ -48,7 +48,8 @@ func (l *AddStoryLogic) AddStory(req *types.AddStoryReq) (resp *types.AddStoryRe
 		return nil, errx.NewCustomError(errx.REQ_PARAM_ERROR, err.Error())
 	}
 
-	mediaPath := path
+	mediaPath := "/" + path
+	logx.Info("media url " + mediaPath)
 	story, err := l.svcCtx.DAO.InsertOneStory(l.ctx, userID, mediaPath)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())

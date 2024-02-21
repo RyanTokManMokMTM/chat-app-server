@@ -66,6 +66,7 @@ func (c *SocketClient) ReadLoop() {
 			break
 		}
 		_ = c.conn.SetReadDeadline(time.Now().Add(time.Second * variable.ReadWait))
+
 		//TODO: Unmarshal message to prototype message
 		var socketMessage socket_message.Message
 		err = protojson.Unmarshal(message, &socketMessage)
@@ -74,28 +75,54 @@ func (c *SocketClient) ReadLoop() {
 			continue
 		}
 
-		if socketMessage.Type == variable.HEAT_BEAT_PING {
-			//ping message -> send pong message
-			logx.Info("Get a ping message from client")
-			msg := socket_message.Message{
-				Content: variable.PONG_MESSAGE,
-				Type:    variable.HEAT_BEAT_PONG,
-			}
-
-			bytes, err := protojson.Marshal(&msg)
-			if err != nil {
-				logx.Error(err)
-				continue
-
-			}
-			c.conn.WriteMessage(websocket.BinaryMessage, bytes) //TODO: Send it to client directly
-		} else if socketMessage.Type == variable.HEAT_BEAT_PONG {
-			logx.Info("received pong message from client")
-			continue
-		} else {
-			c.server.Broadcast <- message
+		if err := c.onEvent(socketMessage.EventType, message); err != nil {
+			c.sendChannel <- []byte(err.Error()) //Send the error back to the client
 		}
 	}
+}
+
+func (c *SocketClient) onEvent(event int32, message []byte) error {
+	switch event {
+	case variable.HEAT_BEAT_PING:
+		//ping message -> send pong message
+		logx.Info("Get a ping message from client")
+		msg := socket_message.Message{
+			Content:   variable.PONG_MESSAGE,
+			EventType: variable.HEAT_BEAT_PONG,
+		}
+
+		bytes, err := protojson.Marshal(&msg)
+		if err != nil {
+			logx.Error(err)
+			return err
+		}
+		err = c.conn.WriteMessage(websocket.BinaryMessage, bytes) //TODO: Send it to client directly
+		if err != nil {
+			logx.Error(err)
+			return err
+		}
+		break
+	case variable.HEAT_BEAT_PONG:
+		logx.Info("received pong message from client")
+		break
+	case
+		variable.SYSTEM,
+		variable.WEB_RTC,
+		variable.MSG_ACK,
+		variable.SFU_JOIN,
+		variable.SFU_OFFER,
+		variable.SFU_ANSWER,
+		variable.SFU_CONSUM,
+		variable.SFU_CONSUM_ICE,
+		variable.SFU_CLOSE:
+		c.server.Multicast <- message
+		break
+	case variable.ALL:
+		c.server.Broadcast <- message
+	default:
+		logx.Info("Message Event wsType no supported")
+	}
+	return nil
 }
 
 func (c *SocketClient) WriteLoop() {
@@ -112,9 +139,11 @@ func (c *SocketClient) WriteLoop() {
 			if !ok {
 				break
 			}
+
 			//TODO: Set WriteDeadLine
 			c.conn.SetWriteDeadline(time.Now().Add(time.Second * variable.WriteWait))
-			//
+			logx.Info("received a message")
+
 			w, err := c.conn.NextWriter(websocket.BinaryMessage)
 			if err != nil {
 				logx.Error(err)
@@ -122,11 +151,10 @@ func (c *SocketClient) WriteLoop() {
 			}
 
 			_, _ = w.Write(data)
-			//n := len(c.sendChannel)
-			//logx.Info("buffer size ", n)
-			//for i := 0; i < n; i++ {
-			//	_, _ = w.Write(data)
-			//}
+			n := len(c.sendChannel)
+			for i := 0; i < n; i++ {
+				_, _ = w.Write(data)
+			}
 
 			if err := w.Close(); err != nil {
 				logx.Error("writer close err :%v", err)
@@ -138,8 +166,8 @@ func (c *SocketClient) WriteLoop() {
 			logx.Info("received a ping ticker")
 			//TODO: Send Ticket message
 			msg := socket_message.Message{
-				Content: variable.PING_MESSAGE,
-				Type:    variable.HEAT_BEAT_PING,
+				Content:   variable.PING_MESSAGE,
+				EventType: variable.HEAT_BEAT_PING,
 			}
 
 			bytes, err := protojson.Marshal(&msg)
@@ -147,7 +175,6 @@ func (c *SocketClient) WriteLoop() {
 				logx.Error(err)
 			}
 			c.conn.WriteMessage(websocket.BinaryMessage, bytes)
-
 		case <-c.isClose:
 			logx.Info("received a connection closed signal and user is disconnected")
 			return

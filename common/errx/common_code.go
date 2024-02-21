@@ -50,3 +50,8 @@ const (
 	STICKER_CREATED_FAILED InternalCode = 700002
 	STICKER_NOT_AVAILABLE  InternalCode = 700003
 )
+const(
+	SFU_ROOM_NOT_FOUND      InternalCode = 11001
+	SFU_ROOM_PEER_NOT_FOUND InternalCode = 11002
+	CLIENT_NOT_FOUND        InternalCode = 11003
+)

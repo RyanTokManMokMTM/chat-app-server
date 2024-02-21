@@ -48,7 +48,7 @@ func (l *UploadUserAvatarLogic) UploadUserAvatar(req *types.UploadUserAvatarReq)
 		return nil, errx.NewCustomErrCode(errx.FILE_UPLOAD_FAILED)
 	}
 
-	path := fmt.Sprintf("/%v", name)
+	path := fmt.Sprintf("%v", name)
 	l.svcCtx.DAO.UpdateUserAvatar(l.ctx, userID, path)
 	return &types.UploadUserAvatarResp{
 		Code: uint(http.StatusOK),

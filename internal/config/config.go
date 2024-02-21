@@ -28,4 +28,8 @@ type Config struct {
 		Addr     string
 		Password string
 	}
+
+	IceServer struct {
+		Urls []string
+	}
 }

@@ -14,6 +14,7 @@ const (
 	PING_MESSAGE = "PING"
 )
 
+// EventType
 const (
 	HEAT_BEAT_PING int32 = iota + 1
 	HEAT_BEAT_PONG
@@ -21,6 +22,16 @@ const (
 	MESSAGE
 	WEB_RTC
 	MSG_ACK
+
+	//For SFU feature
+	SFU_JOIN
+	SFU_OFFER
+	SFU_ANSWER
+	SFU_CONSUM
+	SFU_CONSUM_ICE
+	SFU_CLOSE
+
+	ALL //For multiple communication
 )
 
 const (
@@ -36,6 +47,7 @@ const (
 	REPLY
 	STICKER
 	SHARED
+	SFU
 )
 
 const (

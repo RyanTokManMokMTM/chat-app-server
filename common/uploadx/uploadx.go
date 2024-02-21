@@ -25,8 +25,8 @@ func UploadFileFromRequest(r *http.Request, maxMemory int64, name, filePath stri
 		return "", err
 	}
 	defer f.Close()
-
-	tempFile, err := os.Create(path.Join(filePath, header.Filename))
+	fileName := strings.ToLower(header.Filename)
+	tempFile, err := os.Create(path.Join(filePath, fileName))
 	if err != nil {
 		return "", err
 	}
@@ -34,7 +34,7 @@ func UploadFileFromRequest(r *http.Request, maxMemory int64, name, filePath stri
 	defer tempFile.Close()
 
 	io.Copy(tempFile, f)
-	return "/" + header.Filename, nil
+	return "/" + fileName, nil
 }
 
 func UploadFileWithCustomName(f multipart.File, header *multipart.FileHeader, fileName, filePath string) (string, error) {
@@ -52,7 +52,7 @@ func UploadFileWithCustomName(f multipart.File, header *multipart.FileHeader, fi
 }
 
 func UploadFile(f multipart.File, header *multipart.FileHeader, filePath string) (string, error) {
-
+	fileName := strings.ToLower(header.Filename)
 	tempFile, err := os.Create(path.Join(filePath, header.Filename))
 	if err != nil {
 		return "", err
@@ -61,7 +61,7 @@ func UploadFile(f multipart.File, header *multipart.FileHeader, filePath string)
 	defer tempFile.Close()
 
 	_, _ = io.Copy(tempFile, f)
-	return "/" + header.Filename, nil
+	return "/" + fileName, nil
 }
 
 func UploadFileWithCustome(f multipart.File, header *multipart.FileHeader, filePath string) (string, error) {
@@ -78,7 +78,7 @@ func UploadFileWithCustome(f multipart.File, header *multipart.FileHeader, fileP
 }
 
 func UploadImageByBase64(data string, format string, path string) (string, error) {
-	uri := uuid.New().String() + "." + format
+	uri := strings.ToLower(uuid.New().String()) + "." + format
 	index := strings.Index(data, "base64")
 	index += 7 //"data:image/$type};base64,(data stating here)xyz...."
 	fileData := data[index:]

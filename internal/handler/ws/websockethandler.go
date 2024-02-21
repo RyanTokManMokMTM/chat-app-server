@@ -2,7 +2,6 @@ package ws
 
 import (
 	"encoding/json"
-	"github.com/google/uuid"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/server"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
@@ -15,9 +14,10 @@ var Socket *server.SocketServer
 
 func WebSocketHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	if Socket == nil {
-		Socket = server.NewSocketServer()
+		Socket = server.NewSocketServer(svcCtx.Config.IceServer.Urls)
 		go Socket.Start()
 	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		server.ServeWS(svcCtx, w, r, Socket)
 	}
@@ -25,13 +25,12 @@ func WebSocketHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 func SendGroupSystemNotification(FromUUID, groupUUID, content string) {
 	msg := socket_message.Message{
-		MessageID:   uuid.New().String(),
 		FromUUID:    FromUUID,
 		ToUUID:      groupUUID,
 		ContentType: variable.SYS,
 		Content:     content,
 		MessageType: variable.MESSAGE_TYPE_GROUPCHAT,
-		Type:        variable.MESSAGE,
+		EventType:   variable.MESSAGE,
 	}
 	messageBytes, err := json.MarshalIndent(msg, "", "\t")
 	if err != nil {
