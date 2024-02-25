@@ -3,11 +3,8 @@ package socketClient
 import (
 	"github.com/gorilla/websocket"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/sfu"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/serverTypes"
-
-	//"github.com/ryantokmanmokmtm/chat-app-server/internal/serverTypes"
-
-	//"github.com/ryantokmanmokmtm/chat-app-server/internal/server/socketType"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	socket_message "github.com/ryantokmanmokmtm/chat-app-server/socket-proto"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -27,6 +24,7 @@ type SocketClient struct {
 	isClose     chan struct{}
 	server      serverTypes.SocketServerIf
 	SvcCtx      *svc.ServiceContext
+	TrackGroup  *sfu.PeerTrackGroup
 }
 
 func NewSocketClient(uuid string, name string, conn *websocket.Conn, server serverTypes.SocketServerIf, svcCtx *svc.ServiceContext) *SocketClient {
@@ -38,6 +36,7 @@ func NewSocketClient(uuid string, name string, conn *websocket.Conn, server serv
 		isClose:     make(chan struct{}),
 		server:      server,
 		SvcCtx:      svcCtx,
+		TrackGroup:  nil, // null by default?
 	}
 }
 
@@ -114,12 +113,13 @@ func (c *SocketClient) OnEvent(event int32, message []byte) error {
 		variable.SYSTEM,
 		variable.WEB_RTC,
 		variable.MSG_ACK,
-		variable.SFU_JOIN,
-		variable.SFU_OFFER,
-		variable.SFU_ANSWER,
-		variable.SFU_CONSUM,
-		variable.SFU_CONSUM_ICE,
-		variable.SFU_CLOSE:
+		//variable.SFU_CREATE,     //The person to create the room
+		variable.SFU_JOIN,       //To join the existing room
+		variable.SFU_OFFER,      //To receive an offer from client
+		variable.SFU_ANSWER,     //To response an answer with the related offer
+		variable.SFU_CONSUM,     //Pending...
+		variable.SFU_CONSUM_ICE, //Pending...
+		variable.SFU_CLOSE:      //Pending...
 		c.server.MulticastMessage(message)
 		break
 	case variable.ALL:

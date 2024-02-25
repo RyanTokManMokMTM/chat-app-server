@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/websocket"
-	"github.com/pion/webrtc/v3"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/serialization"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
@@ -102,6 +101,7 @@ func (s *SocketServer) MulticastMessage(message []byte) {
 	s.multicast <- message
 }
 
+// Internal function
 func (s *SocketServer) multicastMessageHandler(message []byte) error {
 	var socketMessage socket_message.Message
 	err := protojson.Unmarshal(message, &socketMessage)
@@ -175,17 +175,10 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				logx.Error("Find client error ", err)
 				break
 			}
-			answer, err := room.NewConnection(s.sfuRooms.IceUrls, client.UUID, joinData.Offer, func(peerConn *webrtc.PeerConnection, remote *webrtc.TrackRemote, receiver *webrtc.RTPReceiver) {
-				if receiver != nil && receiver.Tracks()[0] != nil {
-					//peerConn.AddTrack(webrtc.NewTrackLocalStaticSample())
-					stream, err := webrtc.NewTrackLocalStaticSample(remote.Codec().RTPCodecCapability, remote.ID(), remote.StreamID())
-					if err != nil {
-						logx.Error("Create stream local err : ", err)
-						return
-					}
-					peerConn.AddTrack(stream)
-				}
-			})
+
+			//For each peer connection has its own track streaming channel, for receiving the track from remove.
+
+			answer, err := room.NewConnection(s.sfuRooms.IceUrls, client.TrackGroup, client.UUID, joinData.Offer)
 			if err != nil {
 				logx.Error("Create Peer connection error ", err)
 				break
@@ -222,7 +215,6 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 	return nil
 }
 
-// Internal function
 func (s *SocketServer) broadcastMessageHandler(message []byte) error {
 	var socketMessage socket_message.Message
 	err := protojson.Unmarshal(message, &socketMessage)

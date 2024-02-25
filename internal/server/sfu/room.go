@@ -24,53 +24,18 @@ func NewSFURoom(roomUUID string) *SFURoom {
 
 func (sf *SFURoom) NewConnection(
 	iceServerURls []string,
-	clientID string,
-	remoteSDP string,
-	onTrackFunc func(peerConn *webrtc.PeerConnection, remote *webrtc.TrackRemote, receiver *webrtc.RTPReceiver)) (*webrtc.SessionDescription, error) {
+	trackGroup *PeerTrackGroup,
+	clientId string,
+	remoteSDP string) (*webrtc.SessionDescription, error) {
 
-	peerConn, err := webrtc.NewPeerConnection(webrtc.Configuration{
-		ICEServers: []webrtc.ICEServer{
-			{
-				URLs: iceServerURls,
-			},
-		},
-	})
-
-	if err != nil {
-		return nil, err
-	}
-	//Set up peer connection.
-	removeDesc := webrtc.SessionDescription{
-		SDP: remoteSDP,
-	}
-
-	if err := peerConn.SetRemoteDescription(removeDesc); err != nil {
-		return nil, err
-	}
-
-	peerConn.OnTrack(func(remote *webrtc.TrackRemote, receiver *webrtc.RTPReceiver) {
-		onTrackFunc(peerConn, remote, receiver)
-	})
-
-	//Create a answers and return to client.
-	ans, err := peerConn.CreateAnswer(&webrtc.AnswerOptions{
-		//TODO: some option here..
-	})
-
+	sfuPeer := NewSFUPeer(clientId)
+	ans, err := sfuPeer.CreatePeerConnection(iceServerURls, remoteSDP, trackGroup)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := peerConn.SetLocalDescription(ans); err != nil {
-		return nil, err
-	}
-
-	//What about the track? -> set on the upper layer?
-
-	//MARK : Added current peer to server map
-	peerClient := NewSFUPeer(clientID, peerConn)
-	sf.addNewClient(clientID, peerClient)
-	return &ans, nil
+	sf.addNewClient(clientId, sfuPeer)
+	return ans, nil
 }
 
 func (sf *SFURoom) CloseConnection(clientId string) {
