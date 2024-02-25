@@ -9,7 +9,7 @@ import (
 type StickerResource struct {
 	Id        uint   `gorm:"primaryKey;autoIncrement"`
 	StickerId uint   `gorm:"not null"`
-	Uuid      string `gorm:"type:varchar(64);not null;unique_index:idx_uuid"`
+	Uuid      string `gorm:"types:varchar(64);not null;unique_index:idx_uuid"`
 	Path      string `gorm:"not null"`
 
 	Sticker Sticker `gorm:"foreignKey:StickerId;"`

@@ -10,13 +10,13 @@ import (
 
 type User struct {
 	Id            uint   `gorm:"primaryKey;autoIncrement;not null"`
-	Uuid          string `gorm:"type:varchar(64);not null;unique_index:idx_uuid"`
-	NickName      string `gorm:"type:varchar(32)"`
-	Email         string `gorm:"type:varchar(64)"`
-	Password      string `gorm:"type:varchar(64)"`
-	Avatar        string `gorm:"type:varchar(64);null;comment:'user avatar'"`
-	Cover         string `gorm:"type:varchar(64);null;comment:'user cover'"`
-	StatusMessage string `gorm:"type:varchar(64);null;comment:'user status message'"`
+	Uuid          string `gorm:"types:varchar(64);not null;unique_index:idx_uuid"`
+	NickName      string `gorm:"types:varchar(32)"`
+	Email         string `gorm:"types:varchar(64)"`
+	Password      string `gorm:"types:varchar(64)"`
+	Avatar        string `gorm:"types:varchar(64);null;comment:'user avatar'"`
+	Cover         string `gorm:"types:varchar(64);null;comment:'user cover'"`
+	StatusMessage string `gorm:"types:varchar(64);null;comment:'user status message'"`
 	CommonField
 
 	Stories       []StoryModel `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`

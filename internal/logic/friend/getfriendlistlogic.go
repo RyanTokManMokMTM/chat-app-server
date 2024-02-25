@@ -66,7 +66,7 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 		})
 	}
 
-	//TODO : response to user type
+	//TODO : response to user types
 	return &types.GetFriendListResp{
 		Code: uint(http.StatusOK),
 		PageableInfo: types.PageableInfo{

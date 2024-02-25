@@ -2,18 +2,23 @@ package server
 
 import (
 	"context"
+	"github.com/gorilla/websocket"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/socketClient"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/socketServer"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/serverTypes"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
 	"time"
 )
 
-func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request, wsServer *SocketServer) {
+func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request, wsServer serverTypes.SocketServerIf) {
 	//TODO: Upgrade http to websocket
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := socketServer.Upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Websocket upgrade error"))
@@ -29,8 +34,9 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 		return
 	}
 
-	client := NewSocketClient(u.Uuid, u.NickName, conn, wsServer, svcCtx)
-	wsServer.Register <- client
+	websocketServer := wsServer.(*socketServer.SocketServer)
+	client := socketClient.NewSocketClient(u.Uuid, u.NickName, conn, websocketServer, svcCtx)
+	wsServer.RegisterClient(client)
 
 	go client.ReadLoop()
 	go client.WriteLoop()
@@ -53,7 +59,7 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 		}
 
 		for _, msg := range messages {
-			client.sendChannel <- []byte(msg)
+			client.SendMessage(websocket.BinaryMessage, []byte(msg))
 			time.Sleep(time.Second / 50)
 		}
 

@@ -8,7 +8,7 @@ import (
 
 type Sticker struct {
 	Id          uint   `gorm:"primaryKey;autoIncrement"`
-	Uuid        string `gorm:"type:varchar(64);not null;index:unique"`
+	Uuid        string `gorm:"types:varchar(64);not null;index:unique"`
 	StickerName string `gorm:"not null"`
 	StickerThum string
 

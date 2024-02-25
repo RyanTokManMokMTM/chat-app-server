@@ -1,17 +1,17 @@
-package server
+package sfu
 
 import (
 	rtc "github.com/pion/webrtc/v3"
 )
 
 type SFUPeer struct {
-	client   *SocketClient       //Client Websocket information.
+	clientId string
 	peerConn *rtc.PeerConnection //Client's peerConnection
 }
 
-func NewSFUPeer(client *SocketClient, peerConn *rtc.PeerConnection) (sfuPeer *SFUPeer) {
+func NewSFUPeer(clientId string, peerConn *rtc.PeerConnection) (sfuPeer *SFUPeer) {
 	sfuPeer = &SFUPeer{
-		client:   client,
+		clientId: clientId,
 		peerConn: peerConn,
 	}
 	return
@@ -25,4 +25,8 @@ func (sp *SFUPeer) AddTrack(track *rtc.TrackRemote) {}
 
 func (sp *SFUPeer) AddIceCandidate(candidate string) error {
 	return sp.peerConn.AddICECandidate(rtc.ICECandidateInit{Candidate: candidate})
+}
+
+func (sp *SFUPeer) GetClientID() string {
+	return sp.clientId
 }

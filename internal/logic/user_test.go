@@ -36,7 +36,7 @@ func TestUserSignUp(t *testing.T) {
 	//	Email:    "",
 	//	Password: "",
 	//}
-	//type testCasesStruct struct {
+	//types testCasesStruct struct {
 	//	TestName string
 	//	mockTest func(store *mock_dao.MockStore)
 	//	response func(t *testing.T, recorder *httptest.ResponseRecorder)

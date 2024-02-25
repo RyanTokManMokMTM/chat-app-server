@@ -1,8 +1,13 @@
-package server
+package socketClient
 
 import (
 	"github.com/gorilla/websocket"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/serverTypes"
+
+	//"github.com/ryantokmanmokmtm/chat-app-server/internal/serverTypes"
+
+	//"github.com/ryantokmanmokmtm/chat-app-server/internal/server/socketType"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	socket_message "github.com/ryantokmanmokmtm/chat-app-server/socket-proto"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -11,6 +16,8 @@ import (
 	"time"
 )
 
+var _ serverTypes.SocketClientIf = (*SocketClient)(nil)
+
 type SocketClient struct {
 	once        sync.Once
 	UUID        string
@@ -18,13 +25,11 @@ type SocketClient struct {
 	conn        *websocket.Conn
 	sendChannel chan []byte
 	isClose     chan struct{}
-	server      *SocketServer
-	svcCtx      *svc.ServiceContext
-
-	//redisClient *redisClient.Client
+	server      serverTypes.SocketServerIf
+	SvcCtx      *svc.ServiceContext
 }
 
-func NewSocketClient(uuid string, name string, conn *websocket.Conn, server *SocketServer, svcCtx *svc.ServiceContext) *SocketClient {
+func NewSocketClient(uuid string, name string, conn *websocket.Conn, server serverTypes.SocketServerIf, svcCtx *svc.ServiceContext) *SocketClient {
 	return &SocketClient{
 		UUID:        uuid,
 		Name:        name,
@@ -32,7 +37,7 @@ func NewSocketClient(uuid string, name string, conn *websocket.Conn, server *Soc
 		sendChannel: make(chan []byte),
 		isClose:     make(chan struct{}),
 		server:      server,
-		svcCtx:      svcCtx,
+		SvcCtx:      svcCtx,
 	}
 }
 
@@ -40,7 +45,7 @@ func NewSocketClient(uuid string, name string, conn *websocket.Conn, server *Soc
 func (c *SocketClient) ReadLoop() {
 
 	defer func() {
-		c.server.UnRegister <- c
+		c.server.UnRegisterClient(c)
 		c.conn.Close() //TODO: close the connection
 		//c.mqChannel.Close()
 		//c.mqConn.Close()
@@ -75,13 +80,13 @@ func (c *SocketClient) ReadLoop() {
 			continue
 		}
 
-		if err := c.onEvent(socketMessage.EventType, message); err != nil {
+		if err := c.OnEvent(socketMessage.EventType, message); err != nil {
 			c.sendChannel <- []byte(err.Error()) //Send the error back to the client
 		}
 	}
 }
 
-func (c *SocketClient) onEvent(event int32, message []byte) error {
+func (c *SocketClient) OnEvent(event int32, message []byte) error {
 	switch event {
 	case variable.HEAT_BEAT_PING:
 		//ping message -> send pong message
@@ -115,10 +120,10 @@ func (c *SocketClient) onEvent(event int32, message []byte) error {
 		variable.SFU_CONSUM,
 		variable.SFU_CONSUM_ICE,
 		variable.SFU_CLOSE:
-		c.server.Multicast <- message
+		c.server.MulticastMessage(message)
 		break
 	case variable.ALL:
-		c.server.Broadcast <- message
+		c.server.BroadcastMessage(message)
 	default:
 		logx.Info("Message Event wsType no supported")
 	}
@@ -128,7 +133,7 @@ func (c *SocketClient) onEvent(event int32, message []byte) error {
 func (c *SocketClient) WriteLoop() {
 	t := time.NewTicker(time.Second * variable.ReadWait * 9 / 10)
 	defer func() {
-		c.server.UnRegister <- c
+		c.server.UnRegisterClient(c)
 		c.conn.Close()
 	}()
 
@@ -183,6 +188,33 @@ func (c *SocketClient) WriteLoop() {
 }
 
 func (c *SocketClient) Closed() {
+	c.once.Do(func() {
+		logx.Info("client close the connection")
+		c.isClose <- struct{}{}
+	})
+}
+
+func (c *SocketClient) SendMessage(socketMessageType int, message []byte) {
+	switch socketMessageType {
+	case websocket.TextMessage:
+		logx.Info("websocket.TextMessage sending")
+		break
+	case websocket.BinaryMessage:
+		logx.Info("websocket.BinaryMessage sending")
+		break
+	case websocket.PingMessage:
+		logx.Info("websocket.PingMessage sending")
+		break
+	case websocket.PongMessage:
+		c.sendChannel <- message
+	case websocket.CloseMessage:
+		err := c.conn.WriteMessage(websocket.CloseMessage, message) //TODO: send a close message to client
+		logx.Error(err)
+		break
+	}
+}
+
+func (c *SocketClient) ReceiveMessage(message []byte) {
 	c.once.Do(func() {
 		logx.Info("client close the connection")
 		c.isClose <- struct{}{}

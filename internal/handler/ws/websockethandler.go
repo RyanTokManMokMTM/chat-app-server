@@ -4,17 +4,19 @@ import (
 	"encoding/json"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/server"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/socketServer"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/serverTypes"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	socket_message "github.com/ryantokmanmokmtm/chat-app-server/socket-proto"
 	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
 )
 
-var Socket *server.SocketServer
+var Socket serverTypes.SocketServerIf
 
 func WebSocketHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	if Socket == nil {
-		Socket = server.NewSocketServer(svcCtx.Config.IceServer.Urls)
+		Socket = socketServer.NewSocketServer(svcCtx.Config.IceServer.Urls)
 		go Socket.Start()
 	}
 
@@ -39,5 +41,5 @@ func SendGroupSystemNotification(FromUUID, groupUUID, content string) {
 	}
 
 	logx.Info(messageBytes)
-	Socket.Broadcast <- messageBytes
+	Socket.BroadcastMessage(messageBytes)
 }

@@ -1,4 +1,4 @@
-package server
+package sfu
 
 import (
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"

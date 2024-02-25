@@ -13,7 +13,7 @@ package file
 //	"github.com/zeromicro/go-zero/core/logx"
 //)
 //
-//type UploadDocumentLogic struct {
+//types UploadDocumentLogic struct {
 //	logx.Logger
 //	ctx    context.Context
 //	svcCtx *svc.ServiceContext

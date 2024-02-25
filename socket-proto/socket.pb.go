@@ -32,7 +32,7 @@ type Message struct {
 	FromUUID       string `protobuf:"bytes,5,opt,name=fromUUID,proto3" json:"fromUUID,omitempty"`         //sender uuid
 	ToUUID         string `protobuf:"bytes,6,opt,name=toUUID,proto3" json:"toUUID,omitempty"`             //receiver uuid
 	Content        string `protobuf:"bytes,7,opt,name=content,proto3" json:"content,omitempty"`           //sending content
-	ContentType    int32  `protobuf:"varint,8,opt,name=contentType,proto3" json:"contentType,omitempty"`  //sending content type. For example 1: text, 2: file, 3: audio, 4: video....
+	ContentType    int32  `protobuf:"varint,8,opt,name=contentType,proto3" json:"contentType,omitempty"`  //sending content types. For example 1: text, 2: file, 3: audio, 4: video....
 	EventType      int32  `protobuf:"varint,9,opt,name=eventType,proto3" json:"eventType,omitempty"`      //For example: "heatbeat" for checking server/client health , video call/audio call ->"webrtc"
 	MessageType    int32  `protobuf:"varint,10,opt,name=messageType,proto3" json:"messageType,omitempty"` //1: single 2: group
 	GroupName      string `protobuf:"bytes,11,opt,name=groupName,proto3" json:"groupName,omitempty"`      // will have data iff messageType = 2

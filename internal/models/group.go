@@ -9,8 +9,8 @@ import (
 
 type Group struct {
 	Id          uint   `gorm:"primaryKey;autoIncrement"`
-	Uuid        string `gorm:"type:varchar(64);not null;unique_index:idx_uuid"`
-	GroupName   string `gorm:"type:varchar(64);not null"`
+	Uuid        string `gorm:"types:varchar(64);not null;unique_index:idx_uuid"`
+	GroupName   string `gorm:"types:varchar(64);not null"`
 	GroupAvatar string
 	GroupDesc   string
 	GroupLead   uint `gorm:"not null;index"`

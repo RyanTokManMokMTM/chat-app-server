@@ -1,4 +1,4 @@
-package server
+package sfu
 
 import (
 	"errors"
@@ -24,7 +24,7 @@ func NewSFURoom(roomUUID string) *SFURoom {
 
 func (sf *SFURoom) NewConnection(
 	iceServerURls []string,
-	client *SocketClient,
+	clientID string,
 	remoteSDP string,
 	onTrackFunc func(peerConn *webrtc.PeerConnection, remote *webrtc.TrackRemote, receiver *webrtc.RTPReceiver)) (*webrtc.SessionDescription, error) {
 
@@ -68,14 +68,14 @@ func (sf *SFURoom) NewConnection(
 	//What about the track? -> set on the upper layer?
 
 	//MARK : Added current peer to server map
-	peerClient := NewSFUPeer(client, peerConn)
-	sf.addNewClient(client.UUID, peerClient)
+	peerClient := NewSFUPeer(clientID, peerConn)
+	sf.addNewClient(clientID, peerClient)
 	return &ans, nil
 }
 
 func (sf *SFURoom) CloseConnection(clientId string) {
 	for _, peer := range sf.producerMap {
-		if peer.client.UUID == clientId {
+		if peer.GetClientID() == clientId {
 			sf.remoteClient(clientId)
 			return
 		}
@@ -93,7 +93,7 @@ func (sf *SFURoom) AddIceCandidate(clientId string, iceCandidate string) error {
 func (sf *SFURoom) GetAllPeers(clientId string) []*SFUPeer {
 	peersIds := make([]*SFUPeer, 0)
 	for _, peer := range sf.producerMap {
-		if peer.client.UUID != clientId {
+		if peer.GetClientID() != clientId {
 			peersIds = append(peersIds, peer)
 		}
 	}
@@ -102,7 +102,7 @@ func (sf *SFURoom) GetAllPeers(clientId string) []*SFUPeer {
 
 func (sf *SFURoom) GetPeerById(clientId string) (*SFUPeer, error) {
 	for _, peer := range sf.producerMap {
-		if peer.client.UUID == clientId {
+		if peer.GetClientID() == clientId {
 			return peer, nil
 		}
 	}

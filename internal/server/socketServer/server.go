@@ -1,4 +1,4 @@
-package server
+package socketServer
 
 import (
 	"context"
@@ -9,7 +9,10 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/serialization"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
-	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/sfuType"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/sfu"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/sfu/sfuType"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/socketClient"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/serverTypes"
 	svc "github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	socket_message "github.com/ryantokmanmokmtm/chat-app-server/socket-proto"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -18,34 +21,35 @@ import (
 	"sync"
 )
 
-var upgrader = websocket.Upgrader{
+var Upgrader = websocket.Upgrader{
 	//ReadBufferSize:  1024,
 	//WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
 }
+var _ serverTypes.SocketServerIf = (*SocketServer)(nil)
 
 type SocketServer struct {
 	sync.Mutex
-	Clients    map[string]*SocketClient
-	Register   chan *SocketClient
-	UnRegister chan *SocketClient
-	Multicast  chan []byte
-	Broadcast  chan []byte
+	Clients    map[string]*socketClient.SocketClient
+	register   chan *socketClient.SocketClient
+	unRegister chan *socketClient.SocketClient
+	multicast  chan []byte
+	broadcast  chan []byte
 
-	sfuRooms *SFURooms
+	sfuRooms *sfu.SFURooms
 	//eventListener *listener.SocketEvent
 }
 
 func NewSocketServer(iceServerURLs []string) *SocketServer {
 	return &SocketServer{
-		Clients:    make(map[string]*SocketClient),
-		Register:   make(chan *SocketClient),
-		UnRegister: make(chan *SocketClient),
-		Multicast:  make(chan []byte),
-		Broadcast:  make(chan []byte),
-		sfuRooms:   NewSFURooms(iceServerURLs),
+		Clients:    make(map[string]*socketClient.SocketClient),
+		register:   make(chan *socketClient.SocketClient),
+		unRegister: make(chan *socketClient.SocketClient),
+		multicast:  make(chan []byte),
+		broadcast:  make(chan []byte),
+		sfuRooms:   sfu.NewSFURooms(iceServerURLs),
 	}
 }
 
@@ -53,33 +57,49 @@ func (s *SocketServer) Start() {
 	logx.Info("Starting ws server")
 	for {
 		select {
-		case client := <-s.Register:
+		case client := <-s.register:
 			logx.Infof("New User is connecting : uuid: %v and name: %v ", client.UUID, client.Name)
-			old, ok := s.Add(client.UUID, client)
+			old, ok := s.add(client.UUID, client)
 
 			//TODO: Send a welcome message?
 			if ok {
-				old.conn.WriteMessage(websocket.CloseMessage, nil) //TODO: send a close message to client
-				old.Closed()                                       //TODO: close the sending channel of old client
+				old.SendMessage(websocket.CloseMessage, []byte("Closed connection")) //TODO: send a close message to client
+				old.Closed()                                                         //TODO: close the sending channel of old client
 			}
 
-		case client := <-s.UnRegister:
+		case client := <-s.unRegister:
 			logx.Infof("User %v is leaving.", client.UUID)
-			s.Remove(client)
-		case message := <-s.Multicast:
+			s.remove(client)
+		case message := <-s.multicast:
 			err := s.multicastMessageHandler(message)
 			if err != nil {
 				logx.Error("multicast error ", err)
 				//send back to the sender?
 			}
 
-		case message := <-s.Broadcast: //received protoBuffer message -> it need to be decoded
+		case message := <-s.broadcast: //received protoBuffer message -> it need to be decoded
 			err := s.broadcastMessageHandler(message)
 			if err != nil {
 				logx.Error(err)
 			}
 		}
 	}
+}
+
+func (s *SocketServer) RegisterClient(client serverTypes.SocketClientIf) {
+	s.register <- (client).(*socketClient.SocketClient)
+}
+
+func (s *SocketServer) UnRegisterClient(client serverTypes.SocketClientIf) {
+	s.unRegister <- (client).(*socketClient.SocketClient)
+}
+
+func (s *SocketServer) BroadcastMessage(message []byte) {
+	s.broadcast <- message
+}
+
+func (s *SocketServer) MulticastMessage(message []byte) {
+	s.multicast <- message
 }
 
 func (s *SocketServer) multicastMessageHandler(message []byte) error {
@@ -97,7 +117,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			conn, ok := s.Clients[socketMessage.FromUUID]
 			if ok && socketMessage.ContentType != variable.SYS {
 				//TODO: No need to save system message
-				saveMessage(conn.svcCtx, &socketMessage)
+				s.saveMessage(conn.SvcCtx, &socketMessage)
 			}
 
 			bytes, err := protojson.Marshal(&socketMessage)
@@ -110,7 +130,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 
 				client, ok := s.Clients[socketMessage.ToUUID]
 				if ok {
-					client.sendChannel <- bytes
+					client.SendMessage(websocket.BinaryMessage, bytes)
 				} else {
 					ctx := context.Background()
 					_, err := variable.RedisConnection.RPush(ctx, socketMessage.ToUUID, string(bytes)).Result()
@@ -122,7 +142,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 
 			} else if socketMessage.MessageType == variable.MESSAGE_TYPE_GROUPCHAT {
 				logx.Info("Sending Group Message")
-				sendGroupMessage(&socketMessage, s, conn.svcCtx)
+				s.sendGroupMessage(&socketMessage, s, conn.SvcCtx)
 			}
 
 		}
@@ -155,7 +175,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				logx.Error("Find client error ", err)
 				break
 			}
-			answer, err := room.NewConnection(s.sfuRooms.IceUrls, client, joinData.Offer, func(peerConn *webrtc.PeerConnection, remote *webrtc.TrackRemote, receiver *webrtc.RTPReceiver) {
+			answer, err := room.NewConnection(s.sfuRooms.IceUrls, client.UUID, joinData.Offer, func(peerConn *webrtc.PeerConnection, remote *webrtc.TrackRemote, receiver *webrtc.RTPReceiver) {
 				if receiver != nil && receiver.Tracks()[0] != nil {
 					//peerConn.AddTrack(webrtc.NewTrackLocalStaticSample())
 					stream, err := webrtc.NewTrackLocalStaticSample(remote.Codec().RTPCodecCapability, remote.ID(), remote.StreamID())
@@ -202,6 +222,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 	return nil
 }
 
+// Internal function
 func (s *SocketServer) broadcastMessageHandler(message []byte) error {
 	var socketMessage socket_message.Message
 	err := protojson.Unmarshal(message, &socketMessage)
@@ -212,18 +233,12 @@ func (s *SocketServer) broadcastMessageHandler(message []byte) error {
 	//MARK: to all user....
 	//MARK: just like system message..
 	for _, client := range s.Clients {
-		select {
-		case client.sendChannel <- message: //TODO: IF sendChannel is not available -> close and remove from the map
-		default:
-			close(client.sendChannel)
-			s.Remove(client)
-		}
-
+		client.SendMessage(websocket.BinaryMessage, message)
 	}
 	return nil
 }
 
-func (s *SocketServer) Add(uuid string, client *SocketClient) (*SocketClient, bool) {
+func (s *SocketServer) add(uuid string, client *socketClient.SocketClient) (*socketClient.SocketClient, bool) {
 	s.Lock()
 	defer s.Unlock()
 	old, ok := s.Clients[uuid]
@@ -234,7 +249,7 @@ func (s *SocketServer) Add(uuid string, client *SocketClient) (*SocketClient, bo
 	return nil, false
 }
 
-func (s *SocketServer) Remove(client *SocketClient) {
+func (s *SocketServer) remove(client *socketClient.SocketClient) {
 	s.Lock()
 	defer s.Unlock()
 
@@ -243,7 +258,7 @@ func (s *SocketServer) Remove(client *SocketClient) {
 	}
 }
 
-func (s *SocketServer) GetOneClient(clientUUId string) (*SocketClient, error) {
+func (s *SocketServer) GetOneClient(clientUUId string) (*socketClient.SocketClient, error) {
 	for _, client := range s.Clients {
 		if client.UUID == clientUUId {
 			return client, nil
@@ -252,7 +267,7 @@ func (s *SocketServer) GetOneClient(clientUUId string) (*SocketClient, error) {
 	return nil, errx.NewCustomErrCode(errx.CLIENT_NOT_FOUND)
 }
 
-func sendGroupMessage(message *socket_message.Message, server *SocketServer, svcCtx *svc.ServiceContext) {
+func (s *SocketServer) sendGroupMessage(message *socket_message.Message, server *SocketServer, svcCtx *svc.ServiceContext) {
 	//TODO: GET ALL GROUP MEMBER
 	//TODO: Check if group is exist
 	ctx := context.Background()
@@ -308,12 +323,12 @@ func sendGroupMessage(message *socket_message.Message, server *SocketServer, svc
 			continue
 
 		}
-		conn.sendChannel <- messageBytes
+		conn.SendMessage(websocket.BinaryMessage, messageBytes)
 	}
 }
 
 // saveMessage, TEXT:Save directly and other types need to be store to FS
-func saveMessage(svcCtx *svc.ServiceContext, message *socket_message.Message) {
+func (s *SocketServer) saveMessage(svcCtx *svc.ServiceContext, message *socket_message.Message) {
 	//TODO : Save Message into db
 	svcCtx.DAO.InsertOneMessage(context.Background(), message)
 }

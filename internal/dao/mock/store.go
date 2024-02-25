@@ -13,7 +13,7 @@ import (
 	socket_message "github.com/ryantokmanmokmtm/chat-app-server/socket-proto"
 )
 
-// MockStore is a mock of Store interface.
+// MockStore is a mock of Store interfaces.
 type MockStore struct {
 	ctrl     *gomock.Controller
 	recorder *MockStoreMockRecorder

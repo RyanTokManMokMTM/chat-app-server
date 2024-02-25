@@ -8,7 +8,7 @@ import (
 )
 
 type StoryModel struct {
-	Id             uint      `gorm:"primaryKey;autoIncrement;type:int"`
+	Id             uint      `gorm:"primaryKey;autoIncrement;types:int"`
 	Uuid           uuid.UUID `gorm:"index"`
 	UserId         uint      `gorm:"not null;index;comment:'belong to which group Id'"`
 	StoryMediaPath string

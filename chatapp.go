@@ -24,7 +24,7 @@ func main() {
 	flag.Parse()
 
 	var c config.Config
-	conf.MustLoad(*configFile, &c)
+	conf.Load(*configFile, &c)
 	//fmt.Println(c.MaxFileSize)
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
