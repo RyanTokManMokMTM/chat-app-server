@@ -1,4 +1,4 @@
-package sfu
+package trackGroup
 
 import (
 	"fmt"
@@ -7,12 +7,12 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type PeerTrackGroup struct {
+type TrackGroup struct {
 	VideoTrack *webrtc.TrackLocalStaticRTP
 	AudioTrack *webrtc.TrackLocalStaticRTP
 }
 
-func NewPeerTrackGroup() *PeerTrackGroup {
+func NewTrackGroup() *TrackGroup {
 	//Get RTP
 	videoTrack, err := webrtc.NewTrackLocalStaticRTP(
 		webrtc.RTPCodecCapability{
@@ -36,7 +36,7 @@ func NewPeerTrackGroup() *PeerTrackGroup {
 		logx.Error(err)
 		return nil
 	}
-	return &PeerTrackGroup{
+	return &TrackGroup{
 		VideoTrack: videoTrack,
 		AudioTrack: audioTrack,
 	}

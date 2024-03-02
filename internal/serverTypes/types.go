@@ -1,6 +1,6 @@
 package serverTypes
 
-type SocketClientIf interface {
+type ISocketClient interface {
 	//ReadLoop()
 	OnEvent(int32, []byte) error
 	//WriteLoop()
@@ -9,10 +9,10 @@ type SocketClientIf interface {
 	ReceiveMessage(message []byte)
 }
 
-type SocketServerIf interface {
+type ISocketServer interface {
 	Start()
-	RegisterClient(SocketClientIf)
-	UnRegisterClient(SocketClientIf)
+	RegisterClient(ISocketClient)
+	UnRegisterClient(ISocketClient)
 	BroadcastMessage(message []byte)
 	MulticastMessage(message []byte)
 }

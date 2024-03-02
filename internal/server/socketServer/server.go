@@ -3,17 +3,17 @@ package socketServer
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"github.com/gorilla/websocket"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
-	"github.com/ryantokmanmokmtm/chat-app-server/common/serialization"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
-	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/sfu"
-	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/sfu/sfuType"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/rtcSFU/sessionManager"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/rtcSFU/transportClient"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/rtcSFU/types"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/socketClient"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/serverTypes"
 	svc "github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	socket_message "github.com/ryantokmanmokmtm/chat-app-server/socket-proto"
+	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/protobuf/encoding/protojson"
 	"net/http"
@@ -27,7 +27,7 @@ var Upgrader = websocket.Upgrader{
 		return true
 	},
 }
-var _ serverTypes.SocketServerIf = (*SocketServer)(nil)
+var _ serverTypes.ISocketServer = (*SocketServer)(nil)
 
 type SocketServer struct {
 	sync.Mutex
@@ -37,18 +37,18 @@ type SocketServer struct {
 	multicast  chan []byte
 	broadcast  chan []byte
 
-	sfuRooms *sfu.SFURooms
+	sessionManager *sessionManager.SessionManager
 	//eventListener *listener.SocketEvent
 }
 
 func NewSocketServer(iceServerURLs []string) *SocketServer {
 	return &SocketServer{
-		Clients:    make(map[string]*socketClient.SocketClient),
-		register:   make(chan *socketClient.SocketClient),
-		unRegister: make(chan *socketClient.SocketClient),
-		multicast:  make(chan []byte),
-		broadcast:  make(chan []byte),
-		sfuRooms:   sfu.NewSFURooms(iceServerURLs),
+		Clients:        make(map[string]*socketClient.SocketClient),
+		register:       make(chan *socketClient.SocketClient),
+		unRegister:     make(chan *socketClient.SocketClient),
+		multicast:      make(chan []byte),
+		broadcast:      make(chan []byte),
+		sessionManager: sessionManager.NewSessionManager(),
 	}
 }
 
@@ -85,11 +85,11 @@ func (s *SocketServer) Start() {
 	}
 }
 
-func (s *SocketServer) RegisterClient(client serverTypes.SocketClientIf) {
+func (s *SocketServer) RegisterClient(client serverTypes.ISocketClient) {
 	s.register <- (client).(*socketClient.SocketClient)
 }
 
-func (s *SocketServer) UnRegisterClient(client serverTypes.SocketClientIf) {
+func (s *SocketServer) UnRegisterClient(client serverTypes.ISocketClient) {
 	s.unRegister <- (client).(*socketClient.SocketClient)
 }
 
@@ -151,58 +151,44 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 		//Or communicate with server?
 		switch socketMessage.EventType {
 		case variable.SFU_JOIN:
-			roomUUID := socketMessage.Content //Can be a json string?
-			var joinData sfuType.SFUJoinEventDataReq
-			if err := serialization.DecodeJSON([]byte(socketMessage.Content), joinData); err != nil {
-				logx.Error("join data decode error ", err)
-			}
-			//MARK: For a new connection has joined/create the channel.
-			/*
-				STEP:
-				1. check if the svc exists
-				2.
-
-			*/
-			room, err := s.sfuRooms.FindOneRoom(roomUUID)
-			if errors.Is(err, errx.NewCustomErrCode(errx.SFU_ROOM_NOT_FOUND)) {
-				room = s.sfuRooms.CreateNewRoom(roomUUID)
-			}
-
-			//NARK get client data...
-
-			client, err := s.GetOneClient(socketMessage.FromUUID)
-			if err != nil {
-				logx.Error("Find client error ", err)
+			var joinRoomData types.SFUJoinRoomReq
+			jsonString := socketMessage.Content //Can be a json string?
+			if err := jsonx.Unmarshal([]byte(jsonString), &joinRoomData); err != nil {
+				logx.Error("json unmarshal error", err)
 				break
 			}
 
-			//For each peer connection has its own track streaming channel, for receiving the track from remove.
-
-			answer, err := room.NewConnection(s.sfuRooms.IceUrls, client.TrackGroup, client.UUID, joinData.Offer)
+			clientId := socketMessage.FromUUID
+			socketClient, err := s.GetOneClient(clientId)
 			if err != nil {
-				logx.Error("Create Peer connection error ", err)
+				logx.Error("SocketClient not found")
+				break
+			}
+			logx.Info("Joining to session : ", joinRoomData.SessionId)
+
+			//Find a session
+			//session, err := s.sessionManager.GetOneSession(joinRoomData.SessionId)
+			//if err != nil {
+			//	logx.Error("Session not found")
+			//	session = s.sessionManager.CreateOneSession(joinRoomData.SessionId)
+			//}
+
+			//Create transport client
+			tc := transportClient.NewTransportClient(clientId, socketClient)
+			logx.Info("Created transport client for ", clientId)
+
+			//Create the SFU connection
+			err = tc.NewConnection(socketClient.SvcCtx.Config.IceServer.Urls, joinRoomData.Offer)
+			if err != nil {
+				logx.Error("Create ans error ", err)
 				break
 			}
 
-			answerJSON, err := serialization.EncodeJSON(answer)
-			if err != nil {
-				logx.Error("Encode json err ", err)
-				break
-			}
-
-			_ = sfuType.SFUJoinEventDataResp{
-				Answer: string(answerJSON),
-			}
-
-			break
-		case variable.SFU_OFFER:
-			//MARK: Same as Create?
-			break
-		case variable.SFU_ANSWER:
 			break
 		case variable.SFU_CONSUM:
+			//MARK: Same as Create?
 			break
-		case variable.SFU_CONSUM_ICE:
+		case variable.SFU_ICE:
 			break
 		case variable.SFU_CLOSE:
 			break

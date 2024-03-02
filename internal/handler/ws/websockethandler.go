@@ -12,7 +12,7 @@ import (
 	"net/http"
 )
 
-var Socket serverTypes.SocketServerIf
+var Socket serverTypes.ISocketServer
 
 func WebSocketHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	if Socket == nil {

@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request, wsServer serverTypes.SocketServerIf) {
+func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request, wsServer serverTypes.ISocketServer) {
 	//TODO: Upgrade http to websocket
 	conn, err := socketServer.Upgrader.Upgrade(w, r, nil)
 	if err != nil {

@@ -3,7 +3,6 @@ package socketClient
 import (
 	"github.com/gorilla/websocket"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
-	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/sfu"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/serverTypes"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	socket_message "github.com/ryantokmanmokmtm/chat-app-server/socket-proto"
@@ -13,7 +12,7 @@ import (
 	"time"
 )
 
-var _ serverTypes.SocketClientIf = (*SocketClient)(nil)
+var _ serverTypes.ISocketClient = (*SocketClient)(nil)
 
 type SocketClient struct {
 	once        sync.Once
@@ -22,12 +21,11 @@ type SocketClient struct {
 	conn        *websocket.Conn
 	sendChannel chan []byte
 	isClose     chan struct{}
-	server      serverTypes.SocketServerIf
+	server      serverTypes.ISocketServer
 	SvcCtx      *svc.ServiceContext
-	TrackGroup  *sfu.PeerTrackGroup
 }
 
-func NewSocketClient(uuid string, name string, conn *websocket.Conn, server serverTypes.SocketServerIf, svcCtx *svc.ServiceContext) *SocketClient {
+func NewSocketClient(uuid string, name string, conn *websocket.Conn, server serverTypes.ISocketServer, svcCtx *svc.ServiceContext) *SocketClient {
 	return &SocketClient{
 		UUID:        uuid,
 		Name:        name,
@@ -36,7 +34,6 @@ func NewSocketClient(uuid string, name string, conn *websocket.Conn, server serv
 		isClose:     make(chan struct{}),
 		server:      server,
 		SvcCtx:      svcCtx,
-		TrackGroup:  nil, // null by default?
 	}
 }
 
@@ -113,13 +110,11 @@ func (c *SocketClient) OnEvent(event int32, message []byte) error {
 		variable.SYSTEM,
 		variable.WEB_RTC,
 		variable.MSG_ACK,
-		//variable.SFU_CREATE,     //The person to create the room
-		variable.SFU_JOIN,       //To join the existing room
-		variable.SFU_OFFER,      //To receive an offer from client
-		variable.SFU_ANSWER,     //To response an answer with the related offer
-		variable.SFU_CONSUM,     //Pending...
-		variable.SFU_CONSUM_ICE, //Pending...
-		variable.SFU_CLOSE:      //Pending...
+
+		variable.SFU_JOIN,
+		variable.SFU_ICE,
+		variable.SFU_CONSUM,
+		variable.SFU_CLOSE:
 		c.server.MulticastMessage(message)
 		break
 	case variable.ALL:

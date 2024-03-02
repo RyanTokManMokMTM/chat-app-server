@@ -25,10 +25,9 @@ const (
 
 	//For SFU feature
 	SFU_JOIN
-	SFU_OFFER
-	SFU_ANSWER
+	SFU_ANS
+	SFU_ICE
 	SFU_CONSUM
-	SFU_CONSUM_ICE
 	SFU_CLOSE
 
 	ALL //For multiple communication
