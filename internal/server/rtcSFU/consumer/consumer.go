@@ -81,64 +81,6 @@ func (c *Consumer) GetPeerConnection() *webrtc.PeerConnection {
 	return c.conn
 }
 
-//
-//func (c *Consumer) peerConnectionListener() {
-//	c.conn.OnICEConnectionStateChange(func(state webrtc.ICEConnectionState) {
-//		logx.Info("Ice connection State change : ", state)
-//	})
-//
-//	c.conn.OnICEGatheringStateChange(func(state webrtc.ICEGathererState) {
-//		logx.Info("Ice Gathering State change : ", state)
-//	})
-//
-//	c.conn.OnNegotiationNeeded(func() {
-//		logx.Info("Negotiation needed")
-//	})
-//
-//	c.conn.OnSignalingStateChange(func(state webrtc.SignalingState) {
-//		logx.Info("Signaling State Change ", state)
-//	})
-//
-//	c.conn.OnConnectionStateChange(func(state webrtc.PeerConnectionState) {
-//		switch state {
-//		case webrtc.PeerConnectionStateNew:
-//			logx.Info("Connection State Change : New Connection")
-//			break
-//		case webrtc.PeerConnectionStateConnecting:
-//			logx.Info("Connection State Change : Connecting")
-//			break
-//		case webrtc.PeerConnectionStateConnected:
-//			logx.Info("Connection State Change : Connected")
-//			//TODO: added the track into the connection.
-//			videoTrackSender, err := c.conn.AddTrack(c.remoteVideoTrack)
-//			if err != nil {
-//				logx.Error("Consumer add remote video track error: ", err)
-//				return
-//			}
-//			audioTrackSender, err := c.conn.AddTrack(c.remoteAudioTrack)
-//			if err != nil {
-//				logx.Error("Consumer add remote audio track error: ", err)
-//				return
-//			}
-//
-//			c.audioRTCSender = audioTrackSender
-//			c.videoRTCSender = videoTrackSender
-//			break
-//		case webrtc.PeerConnectionStateDisconnected:
-//			logx.Info("Connection State Change : Disconnected")
-//			break
-//		case webrtc.PeerConnectionStateFailed:
-//			logx.Info("Connection State Change : Failed")
-//			break
-//		case webrtc.PeerConnectionStateClosed:
-//			logx.Info("Connection State Change : Closed")
-//			break
-//		}
-//	})
-//}
-
-// If the connected is connected, we can start to send to track
-
 func (c *Consumer) Close() error {
 	return c.conn.Close()
 }

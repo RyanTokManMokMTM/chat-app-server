@@ -111,7 +111,7 @@ func (c *SocketClient) OnEvent(event int32, message []byte) error {
 		variable.WEB_RTC,
 		variable.MSG_ACK,
 
-		variable.SFU_JOIN,
+		variable.SFU_CONNECT,
 		variable.SFU_ICE,
 		variable.SFU_CONSUM,
 		variable.SFU_CLOSE:

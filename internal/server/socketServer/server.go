@@ -150,7 +150,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 		logx.Error("Receiver is empty?")
 		//Or communicate with server?
 		switch socketMessage.EventType {
-		case variable.SFU_JOIN:
+		case variable.SFU_CONNECT:
 			var joinRoomData types.SFUJoinRoomReq
 			jsonString := socketMessage.Content //Can be a json string?
 			if err := jsonx.Unmarshal([]byte(jsonString), &joinRoomData); err != nil {
@@ -188,9 +188,14 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 		case variable.SFU_CONSUM:
 			//MARK: Same as Create?
 			break
+
+		case variable.SFU_GET_RPODUCERS:
+			//MARK: Get All producer -> return a list of producerUserId
+			break
 		case variable.SFU_ICE:
 			break
 		case variable.SFU_CLOSE:
+
 			break
 
 		default:
