@@ -3,6 +3,7 @@ package producer
 import (
 	"errors"
 	"github.com/pion/webrtc/v3"
+	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -71,52 +72,6 @@ func (p *Producer) GetPeerConnection() *webrtc.PeerConnection {
 	return p.conn
 }
 
-//
-//func (p *Producer) peerConnectionListener() {
-//	p.conn.OnICEConnectionStateChange(func(state webrtc.ICEConnectionState) {
-//		logx.Info("Ice connection State change : ", state)
-//	})
-//
-//	p.conn.OnICEGatheringStateChange(func(state webrtc.ICEGathererState) {
-//		logx.Info("Ice Gathering State change : ", state)
-//	})
-//
-//	p.conn.OnNegotiationNeeded(func() {
-//		logx.Info("Negotiation needed")
-//	})
-//
-//	p.conn.OnSignalingStateChange(func(state webrtc.SignalingState) {
-//		logx.Info("Signaling State Change ", state)
-//	})
-//
-//	p.conn.OnICECandidate(func(candidate *webrtc.ICECandidate) {
-//		//Send the candidate to client.
-//	})
-//
-//	p.conn.OnConnectionStateChange(func(state webrtc.PeerConnectionState) {
-//		switch state {
-//		case webrtc.PeerConnectionStateNew:
-//			logx.Info("Connection State Change : New Connection")
-//			break
-//		case webrtc.PeerConnectionStateConnecting:
-//			logx.Info("Connection State Change : Connecting")
-//			break
-//		case webrtc.PeerConnectionStateConnected:
-//			logx.Info("Connection State Change : Connected")
-//			break
-//		case webrtc.PeerConnectionStateDisconnected:
-//			logx.Info("Connection State Change : Disconnected")
-//			break
-//		case webrtc.PeerConnectionStateFailed:
-//			logx.Info("Connection State Change : Failed")
-//			break
-//		case webrtc.PeerConnectionStateClosed:
-//			logx.Info("Connection State Change : Closed")
-//			break
-//		}
-//	})
-//}
-
 func (p *Producer) SetLocalTrack(track *webrtc.TrackLocalStaticRTP, kind webrtc.MediaKind) error {
 	if kind == webrtc.MediaKindAudio {
 		audioSender, err := p.conn.AddTrack(track)
@@ -143,6 +98,24 @@ func (p *Producer) CloseConnection() error {
 func (p *Producer) GetVideoSenderRTPTrack() webrtc.TrackLocal {
 	return p.videoRTCSender.Track()
 }
+
 func (p *Producer) GetAudioSenderRTPTrack() webrtc.TrackLocal {
 	return p.audioRTCSender.Track()
+}
+
+func (p *Producer) UpdateIceCandindate(data []byte) error {
+	if p.conn == nil {
+		return errors.New("peer connection is nil")
+	}
+
+	var iceCandindate webrtc.ICECandidateInit
+	if err := jsonx.Unmarshal(data, &iceCandindate); err != nil {
+		return err
+	}
+
+	if err := p.conn.AddICECandidate(iceCandindate); err != nil {
+		return err
+	}
+
+	return nil
 }

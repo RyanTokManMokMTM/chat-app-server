@@ -6,6 +6,7 @@ type IProducer interface {
 	NewConnection(iceServer []string) error
 	CreateAnswers(sdp string) (*webrtc.SessionDescription, error)
 	CloseConnection() error
+	UpdateIceCandindate([]byte) error
 
 	SetLocalTrack(*webrtc.TrackLocalStaticRTP, webrtc.MediaKind) error
 	GetVideoSenderRTPTrack() webrtc.TrackLocal

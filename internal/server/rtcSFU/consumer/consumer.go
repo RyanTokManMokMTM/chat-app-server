@@ -3,6 +3,7 @@ package consumer
 import (
 	"errors"
 	"github.com/pion/webrtc/v3"
+	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -87,4 +88,21 @@ func (c *Consumer) Close() error {
 
 func (c *Consumer) ClientId() string {
 	return c.clientId
+}
+
+func (c *Consumer) UpdateIceCandindate(data []byte) error {
+	if c.conn == nil {
+		return errors.New("peer connection is nil")
+	}
+
+	var iceCandindate webrtc.ICECandidateInit
+	if err := jsonx.Unmarshal(data, &iceCandindate); err != nil {
+		return err
+	}
+
+	if err := c.conn.AddICECandidate(iceCandindate); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -1,0 +1,8 @@
+package variable
+
+const (
+	SFU_EVENT_SDP      = "SFU_EVENT_SDP"
+	SFU_EVENT_ICE      = "SFU_EVENT_ICE"
+	SFU_EVENT_PRODUCER = "SFU_EVENT_PRODUCER"
+	SFU_EVENT_CLOSE
+)

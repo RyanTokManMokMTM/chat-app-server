@@ -1,6 +1,7 @@
 package session
 
 import (
+	"errors"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/rtcSFU/transportClient"
 	"sync"
 )
@@ -40,4 +41,13 @@ func (s *Session) RemoveSessionClient(clientId string) {
 	if ok {
 		delete(s.sessionClients, clientId)
 	}
+}
+
+func (s *Session) GetTransportClient(clientId string) (*transportClient.TransportClient, error) {
+	client, ok := s.sessionClients[clientId]
+	if ok {
+		return nil, errors.New("client not in the session")
+	}
+
+	return client, nil
 }

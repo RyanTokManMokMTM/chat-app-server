@@ -2,6 +2,7 @@ package transportClient
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gorilla/websocket"
 	"github.com/pion/webrtc/v3"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
@@ -14,11 +15,6 @@ import (
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
 	"sync"
-)
-
-const (
-	SDP = "SDP"
-	ICE = "ICE"
 )
 
 type TransportClient struct {
@@ -60,7 +56,7 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdp string) error {
 	}
 
 	sfuResp := types.SFUResponse{
-		Type: SDP,
+		Type: variable.SFU_EVENT_SDP,
 		Data: string(ansStr),
 	}
 
@@ -112,7 +108,7 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdp stri
 	}
 
 	sfuResp := types.SFUConsumeResp{
-		Type:       SDP,
+		Type:       variable.SFU_EVENT_SDP,
 		ProducerId: clientId,
 		Data:       string(ansStr),
 	}
@@ -166,7 +162,7 @@ func (tc *TransportClient) connectionEventHandler(conn *webrtc.PeerConnection) {
 		}
 
 		resp := types.SFUResponse{
-			Type: ICE,
+			Type: variable.SFU_EVENT_ICE,
 			Data: string(iceStr),
 		}
 
@@ -233,10 +229,44 @@ func (tc *TransportClient) removeConsumer(clientId string) {
 	}
 }
 
+func (tc *TransportClient) getConsumer(clientId string) (consumer.IConsumer, error) {
+	if c, ok := tc.transportConsumers[clientId]; ok {
+		return c, nil
+	}
+	return nil, errors.New("consumer not found")
+}
+
 func (tc *TransportClient) Close() error {
+	for _, c := range tc.transportConsumers {
+		if err := c.Close(); err != nil {
+			logx.Error("Close consumer connection err :", err)
+		}
+		tc.removeConsumer(c.ClientId())
+	}
 	return tc.transportProducer.CloseConnection()
 }
 
 func (tc *TransportClient) GetClientId() string {
 	return tc.clientId
+}
+
+func (tc *TransportClient) ExchangeIceCandindateForProducer(iceData string) error {
+	return tc.transportProducer.UpdateIceCandindate([]byte(iceData))
+}
+
+func (tc *TransportClient) CloseConsumer(clientId string) error {
+	if c, ok := tc.transportConsumers[clientId]; ok {
+		_ = c.Close()
+		tc.removeConsumer(clientId)
+		return nil
+	}
+	return errors.New("consumer not found")
+}
+
+func (tc *TransportClient) ExchangeIceCandindateForConsumers(consumerId, iceData string) error {
+	c, err := tc.getConsumer(consumerId)
+	if err != nil {
+		return err
+	}
+	return c.UpdateIceCandindate([]byte(iceData))
 }

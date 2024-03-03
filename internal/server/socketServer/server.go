@@ -147,7 +147,6 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 
 		}
 	} else {
-		logx.Error("Receiver is empty?")
 		//Or communicate with server?
 		switch socketMessage.EventType {
 		case variable.SFU_CONNECT:
@@ -159,7 +158,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			}
 
 			clientId := socketMessage.FromUUID
-			socketClient, err := s.GetOneClient(clientId)
+			c, err := s.GetOneClient(clientId)
 			if err != nil {
 				logx.Error("SocketClient not found")
 				break
@@ -167,18 +166,20 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			logx.Info("Joining to session : ", joinRoomData.SessionId)
 
 			//Find a session
-			//session, err := s.sessionManager.GetOneSession(joinRoomData.SessionId)
-			//if err != nil {
-			//	logx.Error("Session not found")
-			//	session = s.sessionManager.CreateOneSession(joinRoomData.SessionId)
-			//}
+			session, err := s.sessionManager.GetOneSession(joinRoomData.SessionId)
+			if err != nil {
+				logx.Error("Session not found")
+				session = s.sessionManager.CreateOneSession(joinRoomData.SessionId)
+			}
+
+			logx.Info("Current session Id : ", session.SessionId)
 
 			//Create transport client
-			tc := transportClient.NewTransportClient(clientId, socketClient)
+			tc := transportClient.NewTransportClient(clientId, c)
 			logx.Info("Created transport client for ", clientId)
 
 			//Create the SFU connection
-			err = tc.NewConnection(socketClient.SvcCtx.Config.IceServer.Urls, joinRoomData.Offer)
+			err = tc.NewConnection(c.SvcCtx.Config.IceServer.Urls, joinRoomData.Offer)
 			if err != nil {
 				logx.Error("Create ans error ", err)
 				break
@@ -187,14 +188,215 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			break
 		case variable.SFU_CONSUM:
 			//MARK: Same as Create?
+			consumeReq := types.SFUConsumeReq{}
+			jsonString := socketMessage.Content //Can be a json string?
+			userId := socketMessage.FromUUID
+
+			c, err := s.GetOneClient(userId)
+			if err != nil {
+				logx.Error("Get SocketClient error : ", err)
+				break
+			}
+
+			if err := jsonx.Unmarshal([]byte(jsonString), &consumeReq); err != nil {
+				logx.Error("Unmarshal error")
+				break
+			}
+
+			session, err := s.sessionManager.GetOneSession(consumeReq.SessionId)
+			if err != nil {
+				logx.Error("Get session error : ", err)
+				break
+			}
+
+			transC, err := session.GetTransportClient(userId)
+			if err != nil {
+				logx.Error("Get transportClient error : ", err)
+				break
+			}
+
+			if err := transC.Consume(consumeReq.ConsumerId, c.SvcCtx.Config.IceServer.Urls, consumeReq.Offer); err != nil {
+				logx.Errorf("Consume %s error %s", consumeReq.ConsumerId, err)
+				break
+			}
 			break
 
 		case variable.SFU_GET_RPODUCERS:
 			//MARK: Get All producer -> return a list of producerUserId
+			getProducersReq := types.SFUGetProducerReq{}
+			jsonString := socketMessage.Content //Can be a json string?
+
+			c, err := s.GetOneClient(socketMessage.FromUUID)
+			if err != nil {
+				logx.Error("SocketClient not found")
+				break
+			}
+
+			if err := jsonx.Unmarshal([]byte(jsonString), &getProducersReq); err != nil {
+				logx.Error("Unmarshal get producers request error : ", err)
+				break
+			}
+
+			session, err := s.sessionManager.GetOneSession(getProducersReq.SessionId)
+			if err != nil {
+				logx.Error(err)
+				break
+			}
+
+			producersList := session.GetSessionClients()
+			respList, err := jsonx.Marshal(producersList)
+
+			resp := types.SFUResponse{
+				Type: variable.SFU_EVENT_PRODUCER,
+				Data: string(respList),
+			}
+
+			respStr, err := jsonx.Marshal(resp)
+			if err != nil {
+				logx.Error("resp marshal error : ", err)
+				break
+			}
+
+			msg := socket_message.Message{
+				ToUUID:      socketMessage.FromUUID,
+				Content:     string(respStr),
+				ContentType: variable.SFU,
+				EventType:   variable.SFU_GET_RPODUCERS, //join room.
+			}
+
+			msgBytes, err := json.MarshalIndent(msg, "", "\t")
+			if err != nil {
+				logx.Error(err)
+				break
+			}
+
+			c.SendMessage(websocket.BinaryMessage, msgBytes)
+
 			break
 		case variable.SFU_ICE:
+			//Add to ice candindate info into the peer connection that data is provided
+			//MARK: Get All producer -> return a list of producerUserId
+			iceCandindateReq := types.SFUIceCandindateReq{}
+			jsonString := socketMessage.Content //Can be a json string?
+
+			_, err := s.GetOneClient(socketMessage.FromUUID)
+			if err != nil {
+				logx.Error("SocketClient not found")
+				break
+			}
+
+			if err := jsonx.Unmarshal([]byte(jsonString), &iceCandindateReq); err != nil {
+				logx.Error("Unmarshal get producers request error : ", err)
+				break
+			}
+
+			session, err := s.sessionManager.GetOneSession(iceCandindateReq.SessionId)
+			if err != nil {
+				logx.Error(err)
+				break
+			}
+
+			transC, err := session.GetTransportClient(socketMessage.FromUUID) //get current user - transport client obj
+			if err != nil {
+				logx.Error("Get Transport client error,", err)
+				break
+			}
+
+			if iceCandindateReq.IsProducer {
+				if err := transC.ExchangeIceCandindateForProducer(iceCandindateReq.IceCandidate); err != nil {
+					logx.Error("Exchange ice candindate for producer error,", err)
+					break
+				}
+			} else {
+				if err := transC.ExchangeIceCandindateForConsumers(iceCandindateReq.ToClientId, iceCandindateReq.IceCandidate); err != nil {
+					logx.Error("Exchange ice candindate for consumer error,", err)
+					break
+				}
+			}
 			break
 		case variable.SFU_CLOSE:
+			closeConnReq := types.SFUCloseReq{}
+			jsonString := socketMessage.Content //Can be a json string?
+			userId := socketMessage.FromUUID
+
+			_, err := s.GetOneClient(socketMessage.FromUUID)
+			if err != nil {
+				logx.Error("SocketClient not found")
+				break
+			}
+
+			if err := jsonx.Unmarshal([]byte(jsonString), &closeConnReq); err != nil {
+				logx.Error("Unmarshal get producers request error : ", err)
+				break
+			}
+
+			session, err := s.sessionManager.GetOneSession(closeConnReq.SessionId)
+			if err != nil {
+				logx.Error("Get one session error , ", err)
+				break
+			}
+
+			//Send a close message to all session client.
+			//Disconnect consumer with userId
+			for _, clientId := range session.GetSessionClients() {
+				if clientId != userId {
+					sessionClient, err := s.GetOneClient(clientId)
+					if err != nil {
+						logx.Error("Socket client error : ", err)
+						continue
+					}
+
+					closeResp := types.SFUProducerClosedResp{
+						Type:       variable.SFU_EVENT_CLOSE,
+						ProducerId: userId,
+					}
+
+					respStr, err := jsonx.Marshal(closeResp)
+					if err != nil {
+						logx.Error(err)
+						continue
+					}
+
+					msg := socket_message.Message{
+						ToUUID:      clientId,
+						Content:     string(respStr),
+						ContentType: variable.SFU,
+						EventType:   variable.SFU_CLOSE,
+					}
+
+					msgBytes, err := json.MarshalIndent(msg, "", "\t")
+					if err != nil {
+						logx.Error(err)
+						break
+					}
+
+					sessionClient.SendMessage(websocket.BinaryMessage, msgBytes)
+
+					//Disconnect consumer
+					transClient, err := session.GetTransportClient(clientId)
+					if err != nil {
+						logx.Error(err)
+						break
+					}
+
+					if err := transClient.CloseConsumer(userId); err != nil {
+						logx.Error(err)
+						break
+					}
+				}
+			}
+
+			transC, err := session.GetTransportClient(socketMessage.FromUUID)
+			if err != nil {
+				logx.Error("Get transport client , ", err)
+				break
+			}
+
+			//Close and disconnect all consumer connection.
+			if err := transC.Close(); err != nil {
+				logx.Error("Close connection error ,", err)
+				break
+			}
 
 			break
 
