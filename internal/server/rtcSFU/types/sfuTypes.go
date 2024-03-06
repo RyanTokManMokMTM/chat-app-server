@@ -21,24 +21,20 @@ type SFUCloseReq struct {
 }
 
 type SFUConsumeReq struct {
-	Type       string `json:"type"`
 	SessionId  string `json:"session_id"`
 	ConsumerId string `json:"consumer_id"`
 	Offer      string `json:"data"`
 }
 
 type SFUConsumeResp struct {
-	Type       string `json:"type"`
 	ProducerId string `json:"producer_id"`
 	Data       string `json:"data"`
 }
 
 type SFUProducerClosedResp struct {
-	Type       string `json:"type"`
 	ProducerId string `json:"producer_id"`
 }
 
 type SFUResponse struct {
-	Type string `json:"type"`
 	Data string `json:"data"`
 }

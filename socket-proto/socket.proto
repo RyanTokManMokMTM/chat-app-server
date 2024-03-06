@@ -11,7 +11,7 @@ message Message {
   string toUUID = 6; //receiver uuid
   string content = 7; //sending content
   int32 contentType = 8; //sending content type. For example 1: text, 2: file, 3: audio, 4: video....
-  int32 eventType = 9; //For example: "heatbeat" for checking server/client health , video call/audio call ->"webrtc"
+  string eventType = 9; //For example: "heatbeat" for checking server/client health , video call/audio call ->"webrtc"
   int32 messageType = 10; //1: single 2: group
   string groupName = 11; // will have data iff messageType = 2
   string groupAvatar = 12; //will have data iff messageType = 2

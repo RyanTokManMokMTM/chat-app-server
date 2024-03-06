@@ -2,7 +2,7 @@ package serverTypes
 
 type ISocketClient interface {
 	//ReadLoop()
-	OnEvent(int32, []byte) error
+	OnEvent(string, []byte) error
 	//WriteLoop()
 	Closed()
 	SendMessage(socketMessageType int, message []byte)

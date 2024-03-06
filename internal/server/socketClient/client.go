@@ -82,7 +82,7 @@ func (c *SocketClient) ReadLoop() {
 	}
 }
 
-func (c *SocketClient) OnEvent(event int32, message []byte) error {
+func (c *SocketClient) OnEvent(event string, message []byte) error {
 	switch event {
 	case variable.HEAT_BEAT_PING:
 		//ping message -> send pong message
@@ -111,10 +111,11 @@ func (c *SocketClient) OnEvent(event int32, message []byte) error {
 		variable.WEB_RTC,
 		variable.MSG_ACK,
 
-		variable.SFU_CONNECT,
-		variable.SFU_ICE,
-		variable.SFU_CONSUM,
-		variable.SFU_CLOSE:
+		variable.SFU_EVENT_CONNECT,
+		variable.SFU_EVENT_ICE,
+		variable.SFU_EVENT_CONSUM,
+		variable.SFU_EVENT_GET_PRODUCERS,
+		variable.SFU_EVENT_CLOSE:
 		c.server.MulticastMessage(message)
 		break
 	case variable.ALL:

@@ -150,7 +150,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 	} else {
 		//Or communicate with server?
 		switch socketMessage.EventType {
-		case variable.SFU_CONNECT:
+		case variable.SFU_EVENT_CONNECT:
 			var joinRoomData types.SFUJoinRoomReq
 			jsonString := socketMessage.Content //Can be a json string?
 			userId := socketMessage.FromUUID
@@ -201,7 +201,6 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 							}
 
 							resp := types.SFUResponse{
-								Type: variable.SFU_EVENT_NEW_PRODUCER,
 								Data: userId,
 							}
 
@@ -215,7 +214,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 								ToUUID:      socketMessage.FromUUID,
 								Content:     string(respStr),
 								ContentType: variable.SFU,
-								EventType:   variable.SFU_NEW_PRODUCER, //join room.
+								EventType:   variable.SFU_EVENT_SEND_NEW_PRODUCER,
 							}
 
 							msgBytes, err := json.MarshalIndent(msg, "", "\t")
@@ -243,7 +242,6 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 							}
 
 							resp := types.SFUResponse{
-								Type: variable.SFU_EVENT_PRODUCER_CLOSE,
 								Data: userId,
 							}
 
@@ -257,7 +255,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 								ToUUID:      socketMessage.FromUUID,
 								Content:     string(respStr),
 								ContentType: variable.SFU,
-								EventType:   variable.SFU_PRODUCER_CLOSE, //join room.
+								EventType:   variable.SFU_EVENT_SEND_PRODUCER_CLOSE, //join room.
 							}
 
 							msgBytes, err := json.MarshalIndent(msg, "", "\t")
@@ -282,7 +280,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			}
 
 			break
-		case variable.SFU_CONSUM:
+		case variable.SFU_EVENT_CONSUM:
 			//MARK: Same as Create?
 			consumeReq := types.SFUConsumeReq{}
 			jsonString := socketMessage.Content //Can be a json string?
@@ -318,8 +316,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				break
 			}
 			break
-
-		case variable.SFU_GET_RPODUCERS:
+		case variable.SFU_EVENT_GET_PRODUCERS:
 			//MARK: Get All producer -> return a list of producerUserId
 			getProducersReq := types.SFUGetProducerReq{}
 			jsonString := socketMessage.Content //Can be a json string?
@@ -345,7 +342,6 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			respList, err := jsonx.Marshal(producersList)
 
 			resp := types.SFUResponse{
-				Type: variable.SFU_EVENT_PRODUCER,
 				Data: string(respList),
 			}
 
@@ -359,7 +355,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				ToUUID:      socketMessage.FromUUID,
 				Content:     string(respStr),
 				ContentType: variable.SFU,
-				EventType:   variable.SFU_GET_RPODUCERS, //join room.
+				EventType:   variable.SFU_EVENT_GET_PRODUCERS, //join room.
 			}
 
 			msgBytes, err := json.MarshalIndent(msg, "", "\t")
@@ -371,7 +367,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			c.SendMessage(websocket.BinaryMessage, msgBytes)
 
 			break
-		case variable.SFU_ICE:
+		case variable.SFU_EVENT_ICE:
 			//Add to ice candindate info into the peer connection that data is provided
 			//MARK: Get All producer -> return a list of producerUserId
 			iceCandindateReq := types.SFUIceCandindateReq{}
@@ -412,7 +408,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				}
 			}
 			break
-		case variable.SFU_CLOSE:
+		case variable.SFU_EVENT_CLOSE:
 			closeConnReq := types.SFUCloseReq{}
 			jsonString := socketMessage.Content //Can be a json string?
 			userId := socketMessage.FromUUID
@@ -445,7 +441,6 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 					}
 
 					closeResp := types.SFUProducerClosedResp{
-						Type:       variable.SFU_EVENT_CLOSE,
 						ProducerId: userId,
 					}
 
@@ -459,7 +454,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 						ToUUID:      clientId,
 						Content:     string(respStr),
 						ContentType: variable.SFU,
-						EventType:   variable.SFU_CLOSE,
+						EventType:   variable.SFU_EVENT_CLOSE,
 					}
 
 					msgBytes, err := json.MarshalIndent(msg, "", "\t")

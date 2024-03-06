@@ -56,7 +56,6 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdp string, onConne
 	}
 
 	sfuResp := types.SFUResponse{
-		Type: variable.SFU_EVENT_SDP,
 		Data: string(ansStr),
 	}
 
@@ -70,7 +69,7 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdp string, onConne
 		Content:     string(resp),
 		ContentType: variable.SFU,
 		MessageType: variable.MESSAGE_TYPE_GROUPCHAT,
-		EventType:   variable.SFU_ANS,
+		EventType:   variable.SFU_EVENT_SEND_SDP,
 	}
 
 	msgBytes, err := json.MarshalIndent(sfuMsg, "", "\t")
@@ -108,7 +107,6 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdp stri
 	}
 
 	sfuResp := types.SFUConsumeResp{
-		Type:       variable.SFU_EVENT_SDP,
 		ProducerId: clientId,
 		Data:       string(ansStr),
 	}
@@ -123,7 +121,7 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdp stri
 		Content:     string(resp),
 		ContentType: variable.SFU,
 		MessageType: variable.MESSAGE_TYPE_GROUPCHAT,
-		EventType:   variable.SFU_ANS,
+		EventType:   variable.SFU_EVENT_SEND_SDP,
 	}
 
 	msgBytes, err := json.MarshalIndent(sfuMsg, "", "\t")
@@ -162,7 +160,6 @@ func (tc *TransportClient) connectionEventHandler(conn *webrtc.PeerConnection, o
 		}
 
 		resp := types.SFUResponse{
-			Type: variable.SFU_EVENT_ICE,
 			Data: string(iceStr),
 		}
 
@@ -175,7 +172,7 @@ func (tc *TransportClient) connectionEventHandler(conn *webrtc.PeerConnection, o
 			ToUUID:      tc.clientId,
 			Content:     string(respStr),
 			ContentType: variable.SFU,
-			EventType:   variable.SFU_ICE, //join room.
+			EventType:   variable.SFU_EVENT_ICE, //join room.
 		}
 
 		msgBytes, err := json.MarshalIndent(msg, "", "\t")
