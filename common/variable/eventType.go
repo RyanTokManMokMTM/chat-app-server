@@ -14,7 +14,9 @@ const (
 	SFU_ANS
 	SFU_ICE
 	SFU_GET_RPODUCERS
+	SFU_NEW_PRODUCER
 	SFU_CONSUM
+	SFU_PRODUCER_CLOSE
 	SFU_CLOSE
 
 	ALL //For multiple communication

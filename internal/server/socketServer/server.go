@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/gorilla/websocket"
+	"github.com/pion/webrtc/v3"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/rtcSFU/sessionManager"
@@ -152,13 +153,13 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 		case variable.SFU_CONNECT:
 			var joinRoomData types.SFUJoinRoomReq
 			jsonString := socketMessage.Content //Can be a json string?
+			userId := socketMessage.FromUUID
 			if err := jsonx.Unmarshal([]byte(jsonString), &joinRoomData); err != nil {
 				logx.Error("json unmarshal error", err)
 				break
 			}
 
-			clientId := socketMessage.FromUUID
-			c, err := s.GetOneClient(clientId)
+			c, err := s.GetOneClient(userId)
 			if err != nil {
 				logx.Error("SocketClient not found")
 				break
@@ -175,11 +176,106 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			logx.Info("Current session Id : ", session.SessionId)
 
 			//Create transport client
-			tc := transportClient.NewTransportClient(clientId, c)
-			logx.Info("Created transport client for ", clientId)
+			tc := transportClient.NewTransportClient(userId, c)
+			logx.Info("Created transport client for ", userId)
 
 			//Create the SFU connection
-			err = tc.NewConnection(c.SvcCtx.Config.IceServer.Urls, joinRoomData.Offer)
+			err = tc.NewConnection(c.SvcCtx.Config.IceServer.Urls, joinRoomData.Offer, func(state webrtc.PeerConnectionState) {
+				switch state {
+				case webrtc.PeerConnectionStateNew:
+					logx.Info("Connection State Change : New Connection")
+					break
+				case webrtc.PeerConnectionStateConnecting:
+					logx.Info("Connection State Change : Connecting")
+					break
+				case webrtc.PeerConnectionStateConnected:
+					logx.Info("Connection State Change : Connected")
+					//TODO: send a signal to all client in the session
+					clients := session.GetSessionClients()
+					for _, c := range clients {
+						if c != userId {
+							receiver, err := s.GetOneClient(c)
+							if err != nil {
+								logx.Error(err)
+								continue
+							}
+
+							resp := types.SFUResponse{
+								Type: variable.SFU_EVENT_NEW_PRODUCER,
+								Data: userId,
+							}
+
+							respStr, err := jsonx.Marshal(resp)
+							if err != nil {
+								logx.Error("resp marshal error : ", err)
+								break
+							}
+
+							msg := socket_message.Message{
+								ToUUID:      socketMessage.FromUUID,
+								Content:     string(respStr),
+								ContentType: variable.SFU,
+								EventType:   variable.SFU_NEW_PRODUCER, //join room.
+							}
+
+							msgBytes, err := json.MarshalIndent(msg, "", "\t")
+							if err != nil {
+								logx.Error(err)
+								break
+							}
+
+							receiver.SendMessage(websocket.BinaryMessage, msgBytes)
+
+						}
+					}
+					break
+				case webrtc.PeerConnectionStateDisconnected:
+				case webrtc.PeerConnectionStateClosed:
+					logx.Info("Connection State Change : Disconnected")
+					//TODO: send a signal to all client in the session
+					clients := session.GetSessionClients()
+					for _, c := range clients {
+						if c != userId {
+							receiver, err := s.GetOneClient(c)
+							if err != nil {
+								logx.Error(err)
+								continue
+							}
+
+							resp := types.SFUResponse{
+								Type: variable.SFU_EVENT_PRODUCER_CLOSE,
+								Data: userId,
+							}
+
+							respStr, err := jsonx.Marshal(resp)
+							if err != nil {
+								logx.Error("resp marshal error : ", err)
+								break
+							}
+
+							msg := socket_message.Message{
+								ToUUID:      socketMessage.FromUUID,
+								Content:     string(respStr),
+								ContentType: variable.SFU,
+								EventType:   variable.SFU_PRODUCER_CLOSE, //join room.
+							}
+
+							msgBytes, err := json.MarshalIndent(msg, "", "\t")
+							if err != nil {
+								logx.Error(err)
+								break
+							}
+
+							receiver.SendMessage(websocket.BinaryMessage, msgBytes)
+
+						}
+					}
+					break
+				case webrtc.PeerConnectionStateFailed:
+					logx.Info("Connection State Change : Failed")
+					break
+				}
+			})
 			if err != nil {
 				logx.Error("Create ans error ", err)
 				break
@@ -215,7 +311,9 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				break
 			}
 
-			if err := transC.Consume(consumeReq.ConsumerId, c.SvcCtx.Config.IceServer.Urls, consumeReq.Offer); err != nil {
+			if err := transC.Consume(consumeReq.ConsumerId, c.SvcCtx.Config.IceServer.Urls, consumeReq.Offer, func(state webrtc.PeerConnectionState) {
+				logx.Error("consumer state : ", state)
+			}); err != nil {
 				logx.Errorf("Consume %s error %s", consumeReq.ConsumerId, err)
 				break
 			}

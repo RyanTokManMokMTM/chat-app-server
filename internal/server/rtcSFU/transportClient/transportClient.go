@@ -36,7 +36,7 @@ func NewTransportClient(clientId string, socketClient *socketClient.SocketClient
 	}
 }
 
-func (tc *TransportClient) NewConnection(iceServer []string, sdp string) error {
+func (tc *TransportClient) NewConnection(iceServer []string, sdp string, onConnectionState func(state webrtc.PeerConnectionState)) error {
 	if err := tc.transportProducer.NewConnection(iceServer); err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdp string) error {
 
 	conn := tc.transportProducer.GetPeerConnection()
 	if conn != nil {
-		tc.connectionEventHandler(conn)
+		tc.connectionEventHandler(conn, onConnectionState)
 	}
 
 	ansStr, err := jsonx.Marshal(ans)
@@ -83,7 +83,7 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdp string) error {
 	return nil
 }
 
-func (tc *TransportClient) Consume(clientId string, iceServer []string, sdp string) error {
+func (tc *TransportClient) Consume(clientId string, iceServer []string, sdp string, onConnectionState func(state webrtc.PeerConnectionState)) error {
 	//TODO: Create consumer...
 	newConsumer := consumer.NewConsumer(
 		clientId,
@@ -99,7 +99,7 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdp stri
 
 	tc.addConsumer(clientId, newConsumer)
 	if conn != nil {
-		tc.connectionEventHandler(conn)
+		tc.connectionEventHandler(conn, onConnectionState)
 	}
 
 	ansStr, err := jsonx.Marshal(ans)
@@ -136,7 +136,7 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdp stri
 	return nil
 }
 
-func (tc *TransportClient) connectionEventHandler(conn *webrtc.PeerConnection) {
+func (tc *TransportClient) connectionEventHandler(conn *webrtc.PeerConnection, onConnectionStatus func(webrtc.PeerConnectionState)) {
 	conn.OnICEConnectionStateChange(func(state webrtc.ICEConnectionState) {
 		logx.Info("Ice connection State change : ", state)
 	})
@@ -186,29 +186,8 @@ func (tc *TransportClient) connectionEventHandler(conn *webrtc.PeerConnection) {
 
 		tc.socketClient.SendMessage(websocket.BinaryMessage, msgBytes)
 	})
+	conn.OnConnectionStateChange(onConnectionStatus)
 
-	conn.OnConnectionStateChange(func(state webrtc.PeerConnectionState) {
-		switch state {
-		case webrtc.PeerConnectionStateNew:
-			logx.Info("Connection State Change : New Connection")
-			break
-		case webrtc.PeerConnectionStateConnecting:
-			logx.Info("Connection State Change : Connecting")
-			break
-		case webrtc.PeerConnectionStateConnected:
-			logx.Info("Connection State Change : Connected")
-			break
-		case webrtc.PeerConnectionStateDisconnected:
-			logx.Info("Connection State Change : Disconnected")
-			break
-		case webrtc.PeerConnectionStateFailed:
-			logx.Info("Connection State Change : Failed")
-			break
-		case webrtc.PeerConnectionStateClosed:
-			logx.Info("Connection State Change : Closed")
-			break
-		}
-	})
 }
 
 func (tc *TransportClient) addConsumer(clientId string, ic consumer.IConsumer) {
