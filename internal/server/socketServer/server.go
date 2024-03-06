@@ -113,7 +113,17 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 
 	if socketMessage.ToUUID != "" {
 		//TODO: Send it to someone with a specific Uuid
-		if socketMessage.ContentType >= variable.TEXT && socketMessage.ContentType <= variable.SYS {
+		switch socketMessage.ContentType {
+		case variable.TEXT:
+		case variable.IMAGE:
+		case variable.FILE:
+		case variable.AUDIO:
+		case variable.VIDEO:
+		case variable.STORY:
+		case variable.SYS:
+		case variable.REPLY:
+		case variable.STICKER:
+		case variable.SHARED:
 			//TODO: save message
 			conn, ok := s.Clients[socketMessage.FromUUID]
 			if ok && socketMessage.ContentType != variable.SYS {
@@ -145,6 +155,11 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				logx.Info("Sending Group Message")
 				s.sendGroupMessage(&socketMessage, s, conn.SvcCtx)
 			}
+
+			break
+		default:
+			logx.Error("Content type no supported")
+			break
 
 		}
 	} else {

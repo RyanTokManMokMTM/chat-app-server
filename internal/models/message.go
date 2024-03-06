@@ -28,7 +28,7 @@ type Message struct {
 	ToUserID             uint   `gorm:"index;comment:'receiver userID'"`
 	Content              string `gorm:"comment:'message content'"`
 	MessageType          uint   `gorm:"comment;'sent message types: 1:single ,2: group'"`
-	ContentType          uint   `gorm:"comment:'content types: 1: text, 2: file,3:audio,4:video'"`
+	ContentType          string `gorm:"comment:'content types : text,image,audio..."`
 	Url                  string `gorm:"comment:'image url path'"`
 	FileName             string `gorm:"comment:'file name'"`
 	FileSize             uint   `gorm:"comment:'file size'"`

@@ -349,7 +349,7 @@ type MessageUser struct {
 	FromID      uint   `json:"from_id"`
 	ToID        uint   `json:"to_id"`
 	Content     string `json:"content"`
-	ContentType uint   `json:"content_type"`
+	ContentType string   `json:"content_type"`
 	MessageType uint   `json:"message_type"`
 	Url         string `json:"url"`
 	FileName    string `json:"file_name"`
