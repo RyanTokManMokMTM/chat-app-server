@@ -29,11 +29,11 @@ package file
 //
 //func (l *UploadDocumentLogic) UploadDocument(req *types.UploadFildReq) (resp *types.UploadFileResp, err error) {
 //	// todo: add your logic here and delete this line
-//	if len(req.Data) == 0 {
+//	if len(req.Answer) == 0 {
 //		return nil, errx.NewCustomError(errx.REQ_PARAM_ERROR, "data can't be empty")
 //	}
 //
-//	path, err := uploadx.UploadFileByBase64(req.Data, req.FileName, l.svcCtx.Config.ResourcesPath)
+//	path, err := uploadx.UploadFileByBase64(req.Answer, req.FileName, l.svcCtx.Config.ResourcesPath)
 //	if err != nil {
 //		return nil, errx.NewCustomError(errx.SERVER_COMMON_ERROR, err.Error())
 //	}

@@ -20,16 +20,18 @@ import (
 type TransportClient struct {
 	sync.Mutex
 	clientId           string
+	sessionId          string
 	socketClient       *socketClient.SocketClient
 	trackLocalGroup    *trackGroup.TrackGroup
 	transportProducer  producer.IProducer
 	transportConsumers map[string]consumer.IConsumer // n-1 consumer.
 }
 
-func NewTransportClient(clientId string, socketClient *socketClient.SocketClient) *TransportClient {
+func NewTransportClient(clientId string, sessionId string, socketClient *socketClient.SocketClient) *TransportClient {
 	return &TransportClient{
 		clientId:           clientId,
 		socketClient:       socketClient,
+		sessionId:          sessionId,
 		trackLocalGroup:    trackGroup.NewTrackGroup(),
 		transportProducer:  producer.NewProducer(),
 		transportConsumers: make(map[string]consumer.IConsumer),
@@ -47,7 +49,7 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdp string, onConne
 
 	conn := tc.transportProducer.GetPeerConnection()
 	if conn != nil {
-		tc.connectionEventHandler(conn, onConnectionState)
+		tc.connectionEventHandler(conn, true, onConnectionState)
 	}
 
 	ansStr, err := jsonx.Marshal(ans)
@@ -55,8 +57,9 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdp string, onConne
 		return err
 	}
 
-	sfuResp := types.SFUResponse{
-		Data: string(ansStr),
+	sfuResp := types.SfuConnectSessionResp{
+		SessionId: tc.sessionId,
+		Answer:    string(ansStr),
 	}
 
 	resp, err := jsonx.Marshal(sfuResp)
@@ -98,7 +101,7 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdp stri
 
 	tc.addConsumer(clientId, newConsumer)
 	if conn != nil {
-		tc.connectionEventHandler(conn, onConnectionState)
+		tc.connectionEventHandler(conn, false, onConnectionState)
 	}
 
 	ansStr, err := jsonx.Marshal(ans)
@@ -106,9 +109,10 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdp stri
 		return err
 	}
 
-	sfuResp := types.SFUConsumeResp{
+	sfuResp := types.SFUConsumeProducerResp{
+		SessionId:  tc.sessionId,
 		ProducerId: clientId,
-		Data:       string(ansStr),
+		Answer:     string(ansStr),
 	}
 
 	resp, err := jsonx.Marshal(sfuResp)
@@ -134,7 +138,7 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdp stri
 	return nil
 }
 
-func (tc *TransportClient) connectionEventHandler(conn *webrtc.PeerConnection, onConnectionStatus func(webrtc.PeerConnectionState)) {
+func (tc *TransportClient) connectionEventHandler(conn *webrtc.PeerConnection, isProducer bool, onConnectionStatus func(webrtc.PeerConnectionState)) {
 	conn.OnICEConnectionStateChange(func(state webrtc.ICEConnectionState) {
 		logx.Info("Ice connection State change : ", state)
 	})
@@ -159,8 +163,11 @@ func (tc *TransportClient) connectionEventHandler(conn *webrtc.PeerConnection, o
 			return
 		}
 
-		resp := types.SFUResponse{
-			Data: string(iceStr),
+		resp := types.SFUSendIceCandindateReq{
+			SessionId:    tc.sessionId,
+			IsProducer:   isProducer,
+			ClientId:     tc.socketClient.UUID,
+			IceCandidate: string(iceStr),
 		}
 
 		respStr, err := jsonx.Marshal(resp)

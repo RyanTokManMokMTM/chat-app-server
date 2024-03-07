@@ -166,7 +166,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 		//Or communicate with server?
 		switch socketMessage.EventType {
 		case variable.SFU_EVENT_CONNECT:
-			var joinRoomData types.SFUJoinRoomReq
+			var joinRoomData types.SFUConnectSessionReq
 			jsonString := socketMessage.Content //Can be a json string?
 			userId := socketMessage.FromUUID
 			if err := jsonx.Unmarshal([]byte(jsonString), &joinRoomData); err != nil {
@@ -191,7 +191,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			logx.Info("Current session Id : ", session.SessionId)
 
 			//Create transport client
-			tc := transportClient.NewTransportClient(userId, c)
+			tc := transportClient.NewTransportClient(userId, joinRoomData.SessionId, c)
 			logx.Info("Created transport client for ", userId)
 
 			//Create the SFU connection
@@ -199,13 +199,6 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				switch state {
 				case webrtc.PeerConnectionStateNew:
 					logx.Info("Connection State Change : New Connection")
-					break
-				case webrtc.PeerConnectionStateConnecting:
-					logx.Info("Connection State Change : Connecting")
-					break
-				case webrtc.PeerConnectionStateConnected:
-					logx.Info("Connection State Change : Connected")
-					//TODO: send a signal to all client in the session
 					clients := session.GetSessionClients()
 					for _, c := range clients {
 						if c != userId {
@@ -215,8 +208,9 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 								continue
 							}
 
-							resp := types.SFUResponse{
-								Data: userId,
+							resp := types.SfuNewProducerResp{
+								SessionId:  session.SessionId,
+								ProducerId: userId,
 							}
 
 							respStr, err := jsonx.Marshal(resp)
@@ -243,6 +237,13 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 						}
 					}
 					break
+				case webrtc.PeerConnectionStateConnecting:
+					logx.Info("Connection State Change : Connecting")
+					break
+				case webrtc.PeerConnectionStateConnected:
+					logx.Info("Connection State Change : Connected")
+					//TODO: send a signal to all client in the session
+					break
 				case webrtc.PeerConnectionStateDisconnected:
 				case webrtc.PeerConnectionStateClosed:
 					logx.Info("Connection State Change : Disconnected")
@@ -256,8 +257,9 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 								continue
 							}
 
-							resp := types.SFUResponse{
-								Data: userId,
+							resp := types.SFUCloseConnectionResp{
+								SessionId:  session.SessionId,
+								ProducerId: userId,
 							}
 
 							respStr, err := jsonx.Marshal(resp)
@@ -297,7 +299,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			break
 		case variable.SFU_EVENT_CONSUM:
 			//MARK: Same as Create?
-			consumeReq := types.SFUConsumeReq{}
+			consumeReq := types.SFUConsumeProducerReq{}
 			jsonString := socketMessage.Content //Can be a json string?
 			userId := socketMessage.FromUUID
 
@@ -324,16 +326,16 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				break
 			}
 
-			if err := transC.Consume(consumeReq.ConsumerId, c.SvcCtx.Config.IceServer.Urls, consumeReq.Offer, func(state webrtc.PeerConnectionState) {
+			if err := transC.Consume(consumeReq.ProducerId, c.SvcCtx.Config.IceServer.Urls, consumeReq.Offer, func(state webrtc.PeerConnectionState) {
 				logx.Error("consumer state : ", state)
 			}); err != nil {
-				logx.Errorf("Consume %s error %s", consumeReq.ConsumerId, err)
+				logx.Errorf("Consume %s error %s", consumeReq.ProducerId, err)
 				break
 			}
 			break
 		case variable.SFU_EVENT_GET_PRODUCERS:
 			//MARK: Get All producer -> return a list of producerUserId
-			getProducersReq := types.SFUGetProducerReq{}
+			getProducersReq := types.SFUGetSessionProducerReq{}
 			jsonString := socketMessage.Content //Can be a json string?
 
 			c, err := s.GetOneClient(socketMessage.FromUUID)
@@ -354,10 +356,10 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			}
 
 			producersList := session.GetSessionClients()
-			respList, err := jsonx.Marshal(producersList)
 
-			resp := types.SFUResponse{
-				Data: string(respList),
+			resp := types.SfuGetSessionProducerResp{
+				SessionId:    session.SessionId,
+				ProducerList: producersList,
 			}
 
 			respStr, err := jsonx.Marshal(resp)
@@ -385,7 +387,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 		case variable.SFU_EVENT_ICE:
 			//Add to ice candindate info into the peer connection that data is provided
 			//MARK: Get All producer -> return a list of producerUserId
-			iceCandindateReq := types.SFUIceCandindateReq{}
+			iceCandindateReq := types.SFUSendIceCandindateReq{}
 			jsonString := socketMessage.Content //Can be a json string?
 
 			_, err := s.GetOneClient(socketMessage.FromUUID)
@@ -417,14 +419,14 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 					break
 				}
 			} else {
-				if err := transC.ExchangeIceCandindateForConsumers(iceCandindateReq.ToClientId, iceCandindateReq.IceCandidate); err != nil {
+				if err := transC.ExchangeIceCandindateForConsumers(iceCandindateReq.ClientId, iceCandindateReq.IceCandidate); err != nil {
 					logx.Error("Exchange ice candindate for consumer error,", err)
 					break
 				}
 			}
 			break
 		case variable.SFU_EVENT_CLOSE:
-			closeConnReq := types.SFUCloseReq{}
+			closeConnReq := types.SFUCloseConnectionReq{}
 			jsonString := socketMessage.Content //Can be a json string?
 			userId := socketMessage.FromUUID
 
@@ -455,7 +457,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 						continue
 					}
 
-					closeResp := types.SFUProducerClosedResp{
+					closeResp := types.SFUCloseConnectionResp{
 						ProducerId: userId,
 					}
 
