@@ -8,6 +8,7 @@ const (
 	MESSAGE        = "MESSAGE"
 	WEB_RTC        = "WEB_RTC"
 	MSG_ACK        = "MSG_ACK"
+	RECALL         = "RECALL"
 
 	//For SFU feature
 	SFU_EVENT_CONNECT       = "SFU_EVENT_CONNECT"
@@ -22,4 +23,5 @@ const (
 	SFU_EVENT_SEND_PRODUCER_CLOSE = "SFU_EVENT_SEND_PRODUCER_CLOSE"
 
 	ALL = "ALL" //For multiple communication
+
 )

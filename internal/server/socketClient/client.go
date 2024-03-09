@@ -108,8 +108,10 @@ func (c *SocketClient) OnEvent(event string, message []byte) error {
 		break
 	case
 		variable.SYSTEM,
+		variable.MESSAGE,
 		variable.WEB_RTC,
 		variable.MSG_ACK,
+		variable.RECALL, //recall the message need to update mesasge db?
 
 		variable.SFU_EVENT_CONNECT,
 		variable.SFU_EVENT_ICE,
@@ -193,14 +195,11 @@ func (c *SocketClient) Closed() {
 func (c *SocketClient) SendMessage(socketMessageType int, message []byte) {
 	switch socketMessageType {
 	case websocket.TextMessage:
-		logx.Info("websocket.TextMessage sending")
-		break
+		fallthrough
 	case websocket.BinaryMessage:
-		logx.Info("websocket.BinaryMessage sending")
-		break
+		fallthrough
 	case websocket.PingMessage:
-		logx.Info("websocket.PingMessage sending")
-		break
+		fallthrough
 	case websocket.PongMessage:
 		c.sendChannel <- message
 	case websocket.CloseMessage:

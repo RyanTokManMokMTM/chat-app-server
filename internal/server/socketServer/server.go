@@ -113,16 +113,26 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 
 	if socketMessage.ToUUID != "" {
 		//TODO: Send it to someone with a specific Uuid
+		logx.Infof("Sending message to %s and type %s", socketMessage.ToUUID, socketMessage.ContentType)
 		switch socketMessage.ContentType {
 		case variable.TEXT:
+			fallthrough
 		case variable.IMAGE:
+			fallthrough
 		case variable.FILE:
+			fallthrough
 		case variable.AUDIO:
+			fallthrough
 		case variable.VIDEO:
+			fallthrough
 		case variable.STORY:
+			fallthrough
 		case variable.SYS:
+			fallthrough
 		case variable.REPLY:
+			fallthrough
 		case variable.STICKER:
+			fallthrough
 		case variable.SHARED:
 			//TODO: save message
 			conn, ok := s.Clients[socketMessage.FromUUID]
@@ -138,11 +148,11 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			}
 
 			if socketMessage.MessageType == variable.MESSAGE_TYPE_USERCHAT {
-
 				client, ok := s.Clients[socketMessage.ToUUID]
 				if ok {
 					client.SendMessage(websocket.BinaryMessage, bytes)
 				} else {
+					logx.Info("User not connect.")
 					ctx := context.Background()
 					_, err := variable.RedisConnection.RPush(ctx, socketMessage.ToUUID, string(bytes)).Result()
 					if err != nil {
@@ -156,6 +166,12 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				s.sendGroupMessage(&socketMessage, s, conn.SvcCtx)
 			}
 
+			if socketMessage.ContentType != variable.SYS {
+				//MARK: system message no need to ack??
+				logx.Infof("Sending ack with seqId %s to userId :%s", socketMessage.MessageID, socketMessage.FromUUID)
+				s.sendAcknowledgement(socketMessage.MessageID, socketMessage.FromUUID)
+			}
+
 			break
 		default:
 			logx.Error("Content type no supported")
@@ -163,7 +179,6 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 
 		}
 	} else {
-		//Or communicate with server?
 		switch socketMessage.EventType {
 		case variable.SFU_EVENT_CONNECT:
 			var joinRoomData types.SFUConnectSessionReq
@@ -586,7 +601,7 @@ func (s *SocketServer) sendGroupMessage(message *socket_message.Message, server 
 
 		conn, ok := server.Clients[mem.MemberInfo.Uuid]
 
-		socketMessage := socket_message.Message{
+		socketMessage := &socket_message.Message{
 			Avatar:       message.Avatar,
 			FromUserName: message.FromUserName,
 			FromUUID:     message.ToUUID,   //From Group UUID
@@ -626,4 +641,27 @@ func (s *SocketServer) sendGroupMessage(message *socket_message.Message, server 
 func (s *SocketServer) saveMessage(svcCtx *svc.ServiceContext, message *socket_message.Message) {
 	//TODO : Save Message into db
 	svcCtx.DAO.InsertOneMessage(context.Background(), message)
+}
+
+func (s *SocketServer) sendAcknowledgement(seqID string, toUUID string) {
+	logx.Infof("Sending ack message with SeqID : %s", seqID)
+	acknowledgement := &socket_message.Message{
+		MessageID: seqID,
+		ToUUID:    toUUID,
+		EventType: variable.MSG_ACK,
+	}
+	ackMessage, err := json.MarshalIndent(acknowledgement, "", "\t")
+	if err != nil {
+		logx.Error(err)
+		return
+	}
+
+	client, ok := s.Clients[toUUID]
+	logx.Error(toUUID)
+	if ok {
+		client.SendMessage(websocket.BinaryMessage, ackMessage)
+	} else {
+		//TODO: Offline
+		logx.Info("user is offline -> ack failed")
+	}
 }

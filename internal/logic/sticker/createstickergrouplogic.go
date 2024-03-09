@@ -33,7 +33,7 @@ func (l *CreateStickerGroupLogic) CreateStickerGroup(req *types.CreateStickerGro
 	// todo: add your logic here and delete this line
 	stickerDir := fmt.Sprintf("%s/sticker", l.svcCtx.Config.ResourcesPath)
 	if _, err := os.Stat(stickerDir); os.IsNotExist(err) {
-		err := os.Mkdir(stickerDir, 666)
+		err := os.Mkdir(stickerDir, 0777)
 		if err != nil {
 			return nil, errx.NewCustomError(errx.SERVER_COMMON_ERROR, err.Error())
 		}
