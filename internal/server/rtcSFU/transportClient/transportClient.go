@@ -38,28 +38,40 @@ func NewTransportClient(clientId string, sessionId string, socketClient *socketC
 	}
 }
 
-func (tc *TransportClient) NewConnection(iceServer []string, sdp string, onConnectionState func(state webrtc.PeerConnectionState)) error {
+func (tc *TransportClient) NewConnection(iceServer []string, sdpType *types.Signaling, onConnectionState func(state webrtc.PeerConnectionState)) error {
 	if err := tc.transportProducer.NewConnection(iceServer); err != nil {
 		return err
 	}
-	ans, err := tc.transportProducer.CreateAnswers(sdp)
+
+	ans, err := tc.transportProducer.CreateAnswers(sdpType.SDP)
 	if err != nil {
 		return err
 	}
 
 	conn := tc.transportProducer.GetPeerConnection()
 	if conn != nil {
-		tc.connectionEventHandler(conn, true, onConnectionState)
+		tc.connectionEventHandler(conn, true, sdpType, onConnectionState)
+	}
+	ansStr := ans.SDP
+	//ansStr, err := jsonx.Marshal(ans)
+	//if err != nil {
+	//	return err
+	//}
+	//ansStr
+	sdpData := &types.Signaling{
+		Type: types.ANSWER, //ans
+		Call: sdpType.Call,
+		SDP:  ansStr,
 	}
 
-	ansStr, err := jsonx.Marshal(ans)
+	sdpResp, err := jsonx.Marshal(sdpData)
 	if err != nil {
 		return err
 	}
 
 	sfuResp := types.SfuConnectSessionResp{
 		SessionId: tc.sessionId,
-		Answer:    string(ansStr),
+		SDPType:   string(sdpResp),
 	}
 
 	resp, err := jsonx.Marshal(sfuResp)
@@ -67,7 +79,7 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdp string, onConne
 		return err
 	}
 
-	sfuMsg := socket_message.Message{
+	sfuMsg := &socket_message.Message{
 		ToUUID:      tc.clientId, //Back to the user.
 		Content:     string(resp),
 		ContentType: variable.SFU,
@@ -85,7 +97,7 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdp string, onConne
 	return nil
 }
 
-func (tc *TransportClient) Consume(clientId string, iceServer []string, sdp string, onConnectionState func(state webrtc.PeerConnectionState)) error {
+func (tc *TransportClient) Consume(clientId string, iceServer []string, sdpType *types.Signaling, onConnectionState func(state webrtc.PeerConnectionState)) error {
 	//TODO: Create consumer...
 	newConsumer := consumer.NewConsumer(
 		clientId,
@@ -96,12 +108,12 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdp stri
 	if err := newConsumer.CreateConnection(iceServer); err != nil {
 		return err
 	}
-	ans, err := newConsumer.CreateAnswer(sdp)
+	ans, err := newConsumer.CreateAnswer(sdpType.SDP)
 	conn := newConsumer.GetPeerConnection()
 
 	tc.addConsumer(clientId, newConsumer)
 	if conn != nil {
-		tc.connectionEventHandler(conn, false, onConnectionState)
+		tc.connectionEventHandler(conn, false, sdpType, onConnectionState)
 	}
 
 	ansStr, err := jsonx.Marshal(ans)
@@ -112,7 +124,7 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdp stri
 	sfuResp := types.SFUConsumeProducerResp{
 		SessionId:  tc.sessionId,
 		ProducerId: clientId,
-		Answer:     string(ansStr),
+		SDPType:    string(ansStr),
 	}
 
 	resp, err := jsonx.Marshal(sfuResp)
@@ -138,7 +150,12 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdp stri
 	return nil
 }
 
-func (tc *TransportClient) connectionEventHandler(conn *webrtc.PeerConnection, isProducer bool, onConnectionStatus func(webrtc.PeerConnectionState)) {
+func (tc *TransportClient) connectionEventHandler(
+	conn *webrtc.PeerConnection,
+	isProducer bool,
+	sdpType *types.Signaling,
+	onConnectionStatus func(webrtc.PeerConnectionState)) {
+
 	conn.OnICEConnectionStateChange(func(state webrtc.ICEConnectionState) {
 		logx.Info("Ice connection State change : ", state)
 	})
@@ -156,18 +173,32 @@ func (tc *TransportClient) connectionEventHandler(conn *webrtc.PeerConnection, i
 	})
 
 	conn.OnICECandidate(func(candidate *webrtc.ICECandidate) {
-		//Send the candidate to client.
-		iceStr, err := jsonx.Marshal(candidate)
+		//Change to the type
+		if candidate == nil {
+			logx.Error("Candidate is null")
+			return
+		}
+
+		logx.Info("Received an candindate and sending to client..！！！！！！！！！！！！.")
+		sdpCandidate := candidate.ToJSON().Candidate
+
+		signaling := types.Signaling{
+			Type: types.CANDIDATE,
+			Call: sdpType.Call,
+			SDP:  sdpCandidate,
+		}
+
+		candidateData, err := jsonx.Marshal(signaling)
 		if err != nil {
 			logx.Error("ICECandidate marshal error : ", err)
 			return
 		}
 
-		resp := types.SFUSendIceCandindateReq{
-			SessionId:    tc.sessionId,
-			IsProducer:   isProducer,
-			ClientId:     tc.socketClient.UUID,
-			IceCandidate: string(iceStr),
+		resp := types.SFUSendIceCandidateReq{
+			SessionId:        tc.sessionId,
+			IsProducer:       isProducer,
+			ClientId:         tc.socketClient.UUID,
+			IceCandidateType: string(candidateData),
 		}
 
 		respStr, err := jsonx.Marshal(resp)
@@ -175,7 +206,7 @@ func (tc *TransportClient) connectionEventHandler(conn *webrtc.PeerConnection, i
 			logx.Error("resp marshal error : ", err)
 			return
 		}
-		msg := socket_message.Message{
+		msg := &socket_message.Message{
 			ToUUID:      tc.clientId,
 			Content:     string(respStr),
 			ContentType: variable.SFU,
@@ -190,6 +221,7 @@ func (tc *TransportClient) connectionEventHandler(conn *webrtc.PeerConnection, i
 
 		tc.socketClient.SendMessage(websocket.BinaryMessage, msgBytes)
 	})
+
 	conn.OnConnectionStateChange(onConnectionStatus)
 
 }
@@ -233,8 +265,11 @@ func (tc *TransportClient) GetClientId() string {
 	return tc.clientId
 }
 
-func (tc *TransportClient) ExchangeIceCandindateForProducer(iceData string) error {
-	return tc.transportProducer.UpdateIceCandindate([]byte(iceData))
+func (tc *TransportClient) ExchangeIceCandidateForProducer(iceData string) error {
+	if tc.transportProducer == nil {
+		return errors.New("producer not exist")
+	}
+	return tc.transportProducer.UpdateIceCandidate([]byte(iceData))
 }
 
 func (tc *TransportClient) CloseConsumer(clientId string) error {
@@ -246,10 +281,10 @@ func (tc *TransportClient) CloseConsumer(clientId string) error {
 	return errors.New("consumer not found")
 }
 
-func (tc *TransportClient) ExchangeIceCandindateForConsumers(consumerId, iceData string) error {
+func (tc *TransportClient) ExchangeIceCandidateForConsumers(consumerId, iceData string) error {
 	c, err := tc.getConsumer(consumerId)
 	if err != nil {
 		return err
 	}
-	return c.UpdateIceCandindate([]byte(iceData))
+	return c.UpdateIceCandidate([]byte(iceData))
 }

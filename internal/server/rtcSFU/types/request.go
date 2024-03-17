@@ -2,7 +2,7 @@ package types
 
 type SFUConnectSessionReq struct {
 	SessionId string `json:"session_id"` //RoomId
-	Offer     string `json:"offer"`      //Connection WebRTC Offer
+	SDPType   string `json:"SDPType"`    //Connection WebRTC Offer
 }
 
 type SFUGetSessionProducerReq struct {
@@ -12,15 +12,15 @@ type SFUGetSessionProducerReq struct {
 type SFUConsumeProducerReq struct {
 	SessionId  string `json:"session_id"`
 	ProducerId string `json:"producer_id"` //To produce who
-	Offer      string `json:"offer"`
+	SDPType    string `json:"SDPType"`
 }
 
 // No need to response back to the user
-type SFUSendIceCandindateReq struct {
-	SessionId    string `json:"session_id"`
-	IsProducer   bool   `json:"is_producer"`
-	ClientId     string `json:"client_id"`
-	IceCandidate string `json:"ice_candidate"`
+type SFUSendIceCandidateReq struct {
+	SessionId        string `json:"session_id"`
+	IsProducer       bool   `json:"is_producer"`
+	ClientId         string `json:"client_id"`
+	IceCandidateType string `json:"ice_candidate_type"`
 }
 
 type SFUCloseConnectionReq struct {

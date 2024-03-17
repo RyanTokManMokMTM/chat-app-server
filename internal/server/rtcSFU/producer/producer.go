@@ -5,6 +5,7 @@ import (
 	"github.com/pion/webrtc/v3"
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
+	"log"
 )
 
 type Producer struct {
@@ -36,6 +37,15 @@ func (p *Producer) NewConnection(
 		return err
 	}
 	p.conn = peerConn
+	for _, typ := range []webrtc.RTPCodecType{webrtc.RTPCodecTypeVideo, webrtc.RTPCodecTypeAudio} {
+		if _, err := peerConn.AddTransceiverFromKind(typ, webrtc.RTPTransceiverInit{
+			Direction: webrtc.RTPTransceiverDirectionRecvonly,
+		}); err != nil {
+			log.Print(err)
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -44,9 +54,12 @@ func (p *Producer) CreateAnswers(sdp string) (*webrtc.SessionDescription, error)
 		return nil, errors.New("peer connection not yet created")
 	}
 
+	logx.Info("Remote SDP : \n", sdp)
 	err := p.conn.SetRemoteDescription(webrtc.SessionDescription{
-		SDP: sdp,
+		Type: webrtc.SDPTypeOffer, //currentSDP is an offer
+		SDP:  sdp,
 	})
+
 	if err != nil {
 		logx.Error("Set Remote Description err : ", err)
 		return nil, err
@@ -103,17 +116,19 @@ func (p *Producer) GetAudioSenderRTPTrack() webrtc.TrackLocal {
 	return p.audioRTCSender.Track()
 }
 
-func (p *Producer) UpdateIceCandindate(data []byte) error {
+func (p *Producer) UpdateIceCandidate(data []byte) error {
 	if p.conn == nil {
 		return errors.New("peer connection is nil")
 	}
-
-	var iceCandindate webrtc.ICECandidateInit
-	if err := jsonx.Unmarshal(data, &iceCandindate); err != nil {
+	iceCandidateType := webrtc.ICECandidateInit{}
+	logx.Info("Candidate data : ", string(data))
+	if err := jsonx.Unmarshal(data, &iceCandidateType); err != nil {
 		return err
 	}
 
-	if err := p.conn.AddICECandidate(iceCandindate); err != nil {
+	logx.Infof("Adding ice candidate form client %+v", iceCandidateType)
+
+	if err := p.conn.AddICECandidate(iceCandidateType); err != nil {
 		return err
 	}
 

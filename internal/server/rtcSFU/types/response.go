@@ -6,7 +6,7 @@ type SfuNewProducerResp struct {
 }
 type SfuConnectSessionResp struct {
 	SessionId string `json:"session_id"` //RoomId
-	Answer    string `json:"answer"`     //WebRTC Answer
+	SDPType   string `json:"SDPType"`    //WebRTC Answer
 }
 
 type SfuGetSessionProducerResp struct {
@@ -17,7 +17,7 @@ type SfuGetSessionProducerResp struct {
 type SFUConsumeProducerResp struct {
 	SessionId  string `json:"session_id"`
 	ProducerId string `json:"producer_id"`
-	Answer     string `json:"Answer"`
+	SDPType    string `json:"SDPType"`
 }
 
 type SFUCloseConnectionResp struct {

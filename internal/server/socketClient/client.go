@@ -145,7 +145,7 @@ func (c *SocketClient) WriteLoop() {
 
 			//TODO: Set WriteDeadLine
 			c.conn.SetWriteDeadline(time.Now().Add(time.Second * variable.WriteWait))
-			logx.Info("received a message")
+			//logx.Info("received a message")
 
 			w, err := c.conn.NextWriter(websocket.BinaryMessage)
 			if err != nil {

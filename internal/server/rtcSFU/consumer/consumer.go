@@ -3,8 +3,10 @@ package consumer
 import (
 	"errors"
 	"github.com/pion/webrtc/v3"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/rtcSFU/types"
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
+	"strconv"
 )
 
 var _ IConsumer = (*Consumer)(nil)
@@ -90,17 +92,27 @@ func (c *Consumer) ClientId() string {
 	return c.clientId
 }
 
-func (c *Consumer) UpdateIceCandindate(data []byte) error {
+func (c *Consumer) UpdateIceCandidate(data []byte) error {
 	if c.conn == nil {
 		return errors.New("peer connection is nil")
 	}
 
-	var iceCandindate webrtc.ICECandidateInit
-	if err := jsonx.Unmarshal(data, &iceCandindate); err != nil {
+	iceCandidateType := types.IceCandidateType{}
+	if err := jsonx.Unmarshal(data, &iceCandidateType); err != nil {
 		return err
 	}
-
-	if err := c.conn.AddICECandidate(iceCandindate); err != nil {
+	index, err := strconv.Atoi(iceCandidateType.SDPMLineIndex)
+	if err != nil {
+		logx.Error("sdp mLine index not a int type")
+		return err
+	}
+	sdpMinIndex := uint16(index)
+	iceCandidate := webrtc.ICECandidateInit{
+		Candidate:     iceCandidateType.Candidate,
+		SDPMid:        &iceCandidateType.SDPMid,
+		SDPMLineIndex: &sdpMinIndex,
+	}
+	if err := c.conn.AddICECandidate(iceCandidate); err != nil {
 		return err
 	}
 

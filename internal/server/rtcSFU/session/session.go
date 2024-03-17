@@ -3,6 +3,7 @@ package session
 import (
 	"errors"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/rtcSFU/transportClient"
+	"github.com/zeromicro/go-zero/core/logx"
 	"sync"
 )
 
@@ -23,6 +24,7 @@ func (s *Session) AddNewSessionClient(clientId string, client *transportClient.T
 	s.Lock()
 	defer s.Unlock()
 	s.sessionClients[clientId] = client
+	logx.Infof("Added %s to session", clientId)
 }
 
 func (s *Session) GetSessionClients() []string {
@@ -45,7 +47,7 @@ func (s *Session) RemoveSessionClient(clientId string) {
 
 func (s *Session) GetTransportClient(clientId string) (*transportClient.TransportClient, error) {
 	client, ok := s.sessionClients[clientId]
-	if ok {
+	if !ok {
 		return nil, errors.New("client not in the session")
 	}
 
