@@ -21,7 +21,7 @@ const (
 	SFU_EVENT_SEND_SDP            = "SFU_EVENT_SEND_SDP"
 	SFU_EVENT_SEND_NEW_PRODUCER   = "SFU_EVENT_SEND_NEW_PRODUCER"
 	SFU_EVENT_SEND_PRODUCER_CLOSE = "SFU_EVENT_SEND_PRODUCER_CLOSE"
-
-	ALL = "ALL" //For multiple communication
+	SFU_EVENT_SEND_CONSUMER_SDP   = "SFU_EVENT_SEND_CONSUMER_SDP"
+	ALL                           = "ALL" //For multiple communication
 
 )

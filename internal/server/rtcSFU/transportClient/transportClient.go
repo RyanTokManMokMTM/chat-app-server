@@ -137,7 +137,7 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdpType 
 		Content:     string(resp),
 		ContentType: variable.SFU,
 		MessageType: variable.MESSAGE_TYPE_GROUPCHAT,
-		EventType:   variable.SFU_EVENT_SEND_SDP,
+		EventType:   variable.SFU_EVENT_SEND_CONSUMER_SDP,
 	}
 
 	msgBytes, err := json.MarshalIndent(sfuMsg, "", "\t")
