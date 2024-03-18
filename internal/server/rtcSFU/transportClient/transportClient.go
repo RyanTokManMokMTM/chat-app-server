@@ -79,12 +79,12 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdpType *types.Sign
 		return err
 	}
 
-	sfuMsg := &socket_message.Message{
+	sfuMsg := &socket_message.Message{ //Send ans to producer
 		ToUUID:      tc.clientId, //Back to the user.
 		Content:     string(resp),
 		ContentType: variable.SFU,
 		MessageType: variable.MESSAGE_TYPE_GROUPCHAT,
-		EventType:   variable.SFU_EVENT_SEND_SDP,
+		EventType:   variable.SFU_EVENT_PRODUCER_SDP,
 	}
 
 	msgBytes, err := json.MarshalIndent(sfuMsg, "", "\t")
@@ -116,7 +116,14 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdpType 
 		tc.connectionEventHandler(conn, false, sdpType, onConnectionState)
 	}
 
-	ansStr, err := jsonx.Marshal(ans)
+	ansStr := ans.SDP
+	sdpData := &types.Signaling{
+		Type: types.ANSWER, //ans
+		Call: sdpType.Call,
+		SDP:  ansStr,
+	}
+
+	sdpResp, err := jsonx.Marshal(sdpData)
 	if err != nil {
 		return err
 	}
@@ -124,7 +131,7 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdpType 
 	sfuResp := types.SFUConsumeProducerResp{
 		SessionId:  tc.sessionId,
 		ProducerId: clientId,
-		SDPType:    string(ansStr),
+		SDPType:    string(sdpResp),
 	}
 
 	resp, err := jsonx.Marshal(sfuResp)
@@ -132,12 +139,12 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdpType 
 		return err
 	}
 
-	sfuMsg := socket_message.Message{
+	sfuMsg := &socket_message.Message{
 		ToUUID:      tc.clientId, //Back to the user.
 		Content:     string(resp),
 		ContentType: variable.SFU,
 		MessageType: variable.MESSAGE_TYPE_GROUPCHAT,
-		EventType:   variable.SFU_EVENT_SEND_CONSUMER_SDP,
+		EventType:   variable.SFU_EVENT_CONSUMER_SDP,
 	}
 
 	msgBytes, err := json.MarshalIndent(sfuMsg, "", "\t")
@@ -206,11 +213,16 @@ func (tc *TransportClient) connectionEventHandler(
 			logx.Error("resp marshal error : ", err)
 			return
 		}
+		eventType := variable.SFU_EVENT_PRODUCER_ICE
+		if !isProducer {
+			eventType = variable.SFU_EVENT_CONSUMER_ICE
+		}
+
 		msg := &socket_message.Message{
 			ToUUID:      tc.clientId,
 			Content:     string(respStr),
 			ContentType: variable.SFU,
-			EventType:   variable.SFU_EVENT_ICE, //join room.
+			EventType:   eventType, //join room.
 		}
 
 		msgBytes, err := json.MarshalIndent(msg, "", "\t")

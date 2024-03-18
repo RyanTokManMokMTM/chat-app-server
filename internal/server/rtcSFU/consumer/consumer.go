@@ -3,10 +3,9 @@ package consumer
 import (
 	"errors"
 	"github.com/pion/webrtc/v3"
-	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/rtcSFU/types"
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
-	"strconv"
+	"log"
 )
 
 var _ IConsumer = (*Consumer)(nil)
@@ -15,7 +14,6 @@ var _ IConsumer = (*Consumer)(nil)
 type Consumer struct {
 	clientId string
 	conn     *webrtc.PeerConnection
-	state    string
 
 	remoteAudioTrack webrtc.TrackLocal
 	remoteVideoTrack webrtc.TrackLocal
@@ -48,6 +46,15 @@ func (c *Consumer) CreateConnection(iceServer []string) error {
 		logx.Error("Create Peer connection err : ", err)
 		return err
 	}
+	for _, typ := range []webrtc.RTPCodecType{webrtc.RTPCodecTypeVideo, webrtc.RTPCodecTypeAudio} {
+		if _, err := peerConn.AddTransceiverFromKind(typ, webrtc.RTPTransceiverInit{
+			Direction: webrtc.RTPTransceiverDirectionSendonly,
+		}); err != nil {
+			log.Print(err)
+			return err
+		}
+	}
+
 	c.conn = peerConn
 	return nil
 }
@@ -58,7 +65,8 @@ func (c *Consumer) CreateAnswer(sdp string) (*webrtc.SessionDescription, error) 
 	}
 
 	err := c.conn.SetRemoteDescription(webrtc.SessionDescription{
-		SDP: sdp,
+		Type: webrtc.SDPTypeOffer, //currentSDP is an offer
+		SDP:  sdp,
 	})
 	if err != nil {
 		logx.Error("Set Remote Description err : ", err)
@@ -96,23 +104,15 @@ func (c *Consumer) UpdateIceCandidate(data []byte) error {
 	if c.conn == nil {
 		return errors.New("peer connection is nil")
 	}
-
-	iceCandidateType := types.IceCandidateType{}
+	iceCandidateType := webrtc.ICECandidateInit{}
+	logx.Info("Candidate data : ", string(data))
 	if err := jsonx.Unmarshal(data, &iceCandidateType); err != nil {
 		return err
 	}
-	index, err := strconv.Atoi(iceCandidateType.SDPMLineIndex)
-	if err != nil {
-		logx.Error("sdp mLine index not a int type")
-		return err
-	}
-	sdpMinIndex := uint16(index)
-	iceCandidate := webrtc.ICECandidateInit{
-		Candidate:     iceCandidateType.Candidate,
-		SDPMid:        &iceCandidateType.SDPMid,
-		SDPMLineIndex: &sdpMinIndex,
-	}
-	if err := c.conn.AddICECandidate(iceCandidate); err != nil {
+
+	logx.Infof("Adding ice candidate form client %+v", iceCandidateType)
+
+	if err := c.conn.AddICECandidate(iceCandidateType); err != nil {
 		return err
 	}
 

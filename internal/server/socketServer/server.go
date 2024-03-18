@@ -181,9 +181,9 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 
 		}
 	} else if socketMessage.ToUUID == "SFU" {
-		//logx.Info("SFU event... handing with type : ", socketMessage.EventType)
+
 		switch socketMessage.EventType {
-		case variable.SFU_EVENT_CONNECT:
+		case variable.SFU_EVENT_PRODUCER_SDP:
 			var joinRoomData types.SFUConnectSessionReq
 			jsonString := socketMessage.Content //Can be a json string?
 			userId := socketMessage.FromUUID
@@ -228,6 +228,8 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 					//TODO: send a signal to all client in the session
 					//Send current client info to client that is in the group
 					clients := session.GetSessionClients()
+
+					//Send a message to all connected producer.
 					for _, clientId := range clients {
 						if clientId != userId {
 							logx.Infof("Current user %s is Producer", clientId)
@@ -264,7 +266,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 								break
 							}
 
-							msg := socket_message.Message{
+							msg := &socket_message.Message{
 								FromUUID:    userId,
 								ToUUID:      clientId,
 								Content:     string(respStr),
@@ -287,44 +289,44 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				case webrtc.PeerConnectionStateClosed:
 					logx.Info("Connection State Change : Disconnected")
 					//TODO: send a signal to all client in the session
-					//clients := session.GetSessionClients()
+					clients := session.GetSessionClients()
 
-					//for _, c := range clients {
-					//	if c != userId {
-					//		receiver, err := s.GetOneClient(c)
-					//		if err != nil {
-					//			logx.Error(err)
-					//			continue
-					//		}
-					//
-					//		resp := types.SFUCloseConnectionResp{
-					//			SessionId:  session.SessionId,
-					//			ProducerId: userId,
-					//		}
-					//
-					//		respStr, err := jsonx.Marshal(resp)
-					//		if err != nil {
-					//			logx.Error("resp marshal error : ", err)
-					//			break
-					//		}
-					//
-					//		msg := socket_message.Message{
-					//			ToUUID:      socketMessage.FromUUID,
-					//			Content:     string(respStr),
-					//			ContentType: variable.SFU,
-					//			EventType:   variable.SFU_EVENT_SEND_PRODUCER_CLOSE, //join room.
-					//		}
-					//
-					//		msgBytes, err := json.MarshalIndent(msg, "", "\t")
-					//		if err != nil {
-					//			logx.Error(err)
-					//			break
-					//		}
-					//
-					//		receiver.SendMessage(websocket.BinaryMessage, msgBytes)
-					//
-					//	}
-					//}
+					for _, c := range clients {
+						if c != userId {
+							receiver, err := s.GetOneClient(c)
+							if err != nil {
+								logx.Error(err)
+								continue
+							}
+
+							resp := types.SFUCloseConnectionResp{
+								SessionId:  session.SessionId,
+								ProducerId: userId,
+							}
+
+							respStr, err := jsonx.Marshal(resp)
+							if err != nil {
+								logx.Error("resp marshal error : ", err)
+								break
+							}
+
+							msg := &socket_message.Message{
+								ToUUID:      socketMessage.FromUUID,
+								Content:     string(respStr),
+								ContentType: variable.SFU,
+								EventType:   variable.SFU_EVENT_CONSUMER_CLOSE, //producer is leave.
+							}
+
+							msgBytes, err := json.MarshalIndent(msg, "", "\t")
+							if err != nil {
+								logx.Error(err)
+								break
+							}
+
+							receiver.SendMessage(websocket.BinaryMessage, msgBytes)
+
+						}
+					}
 					break
 				case webrtc.PeerConnectionStateFailed:
 					logx.Info("Connection State Change : Failed")
@@ -344,7 +346,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			}
 
 			break
-		case variable.SFU_EVENT_CONSUM:
+		case variable.SFU_EVENT_CONSUMER_SDP:
 			//MARK: Same as Create?
 			consumeReq := types.SFUConsumeProducerReq{}
 			jsonString := socketMessage.Content //Can be a json string?
@@ -380,65 +382,33 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			}
 
 			if err := transC.Consume(consumeReq.ProducerId, c.SvcCtx.Config.IceServer.Urls, sdpType, func(state webrtc.PeerConnectionState) {
-				logx.Error("consumer state : ", state)
+				logx.Info("Connection State changed : ", state)
+				switch state {
+				case webrtc.PeerConnectionStateConnected:
+					logx.Info("Connection State Change : Connected")
+					break
+				case webrtc.PeerConnectionStateDisconnected:
+				case webrtc.PeerConnectionStateClosed:
+					logx.Info("Connection State Change : Disconnected")
+					break
+				case webrtc.PeerConnectionStateFailed:
+					logx.Info("Connection State Change : Failed")
+					//TODO: Close the connection when failed
+					if err := transC.CloseConsumer(consumeReq.ProducerId); err != nil {
+						log.Print(err)
+					}
+					break
+				default:
+					break
+				}
 			}); err != nil {
 				logx.Errorf("Consume %s error %s", consumeReq.ProducerId, err)
 				break
 			}
 			break
-		case variable.SFU_EVENT_GET_PRODUCERS:
-			//Send all info to client. User Name, User Avatar etc...
-			//MARK: Get All producer -> return a list of producerUserId
-			getProducersReq := types.SFUGetSessionProducerReq{}
-			jsonString := socketMessage.Content //Can be a json string?
-			logx.Infof("message %+v", socketMessage)
-			c, err := s.GetOneClient(socketMessage.FromUUID)
-			if err != nil {
-				logx.Error("SocketClient not found")
-				break
-			}
-
-			if err := jsonx.Unmarshal([]byte(jsonString), &getProducersReq); err != nil {
-				logx.Error("Unmarshal get producers request error : ", err)
-				break
-			}
-
-			session, err := s.sessionManager.GetOneSession(getProducersReq.SessionId)
-			if err != nil {
-				logx.Error(err)
-				break
-			}
-
-			producersList := session.GetSessionClients()
-
-			resp := types.SfuGetSessionProducerResp{
-				SessionId:    session.SessionId,
-				ProducerList: producersList,
-			}
-
-			respStr, err := jsonx.Marshal(resp)
-			if err != nil {
-				logx.Error("resp marshal error : ", err)
-				break
-			}
-
-			msg := socket_message.Message{
-				ToUUID:      socketMessage.FromUUID,
-				Content:     string(respStr),
-				ContentType: variable.SFU,
-				EventType:   variable.SFU_EVENT_GET_PRODUCERS, //join room.
-			}
-
-			msgBytes, err := json.MarshalIndent(msg, "", "\t")
-			if err != nil {
-				logx.Error(err)
-				break
-			}
-
-			c.SendMessage(websocket.BinaryMessage, msgBytes)
-
-			break
-		case variable.SFU_EVENT_ICE:
+		case variable.SFU_EVENT_CONSUMER_ICE: //same logic as SFU_EVENT_PRODUCER_ICE but is Prodcuer is false
+			fallthrough
+		case variable.SFU_EVENT_PRODUCER_ICE:
 			//Add to ice candindate info into the peer connection that data is provided
 			//MARK: Get All producer -> return a list of producerUserId
 			iceCandidateReq := types.SFUSendIceCandidateReq{}
@@ -483,7 +453,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				}
 			}
 			break
-		case variable.SFU_EVENT_CLOSE:
+		case variable.SFU_EVENT_PRODUCER_CLOSE:
 			closeConnReq := types.SFUCloseConnectionReq{}
 			jsonString := socketMessage.Content //Can be a json string?
 			userId := socketMessage.FromUUID
@@ -525,11 +495,11 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 						continue
 					}
 
-					msg := socket_message.Message{
+					msg := &socket_message.Message{
 						ToUUID:      clientId,
 						Content:     string(respStr),
 						ContentType: variable.SFU,
-						EventType:   variable.SFU_EVENT_CLOSE,
+						EventType:   variable.SFU_EVENT_CONSUMER_CLOSE, // a producer is left
 					}
 
 					msgBytes, err := json.MarshalIndent(msg, "", "\t")
@@ -567,6 +537,60 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			}
 
 			break
+
+			//Send from server when producer connected?
+		//case variable.SFU_EVENT_GET_PRODUCERS:
+		//	//Send all info to client. User Name, User Avatar etc...
+		//	//MARK: Get All producer -> return a list of producerUserId
+		//	getProducersReq := types.SFUGetSessionProducerReq{}
+		//	jsonString := socketMessage.Content //Can be a json string?
+		//
+		//	c, err := s.GetOneClient(socketMessage.FromUUID)
+		//	if err != nil {
+		//		logx.Error("SocketClient not found")
+		//		break
+		//	}
+		//
+		//	if err := jsonx.Unmarshal([]byte(jsonString), &getProducersReq); err != nil {
+		//		logx.Error("Unmarshal get producers request error : ", err)
+		//		break
+		//	}
+		//
+		//	session, err := s.sessionManager.GetOneSession(getProducersReq.SessionId)
+		//	if err != nil {
+		//		logx.Error(err)
+		//		break
+		//	}
+		//
+		//	producersList := session.GetSessionClients()
+		//
+		//	resp := types.SfuGetSessionProducerResp{
+		//		SessionId:    session.SessionId,
+		//		ProducerList: producersList,
+		//	}
+		//
+		//	respStr, err := jsonx.Marshal(resp)
+		//	if err != nil {
+		//		logx.Error("resp marshal error : ", err)
+		//		break
+		//	}
+		//
+		//	msg := &socket_message.Message{
+		//		ToUUID:      socketMessage.FromUUID,
+		//		Content:     string(respStr),
+		//		ContentType: variable.SFU,
+		//		EventType:   variable.SFU_EVENT_GET_PRODUCERS, //join room.
+		//	}
+		//
+		//	msgBytes, err := json.MarshalIndent(msg, "", "\t")
+		//	if err != nil {
+		//		logx.Error(err)
+		//		break
+		//	}
+		//
+		//	c.SendMessage(websocket.BinaryMessage, msgBytes)
+		//
+		//	break
 		//case variable.WEB_RTC:
 		//	//logx.Info("Testing RTC testing.")
 		//	content := socketMessage.Content

@@ -54,7 +54,6 @@ func (p *Producer) CreateAnswers(sdp string) (*webrtc.SessionDescription, error)
 		return nil, errors.New("peer connection not yet created")
 	}
 
-	logx.Info("Remote SDP : \n", sdp)
 	err := p.conn.SetRemoteDescription(webrtc.SessionDescription{
 		Type: webrtc.SDPTypeOffer, //currentSDP is an offer
 		SDP:  sdp,
