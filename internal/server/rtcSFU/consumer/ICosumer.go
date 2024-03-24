@@ -9,5 +9,7 @@ type IConsumer interface {
 	Close() error
 	ClientId() string
 
+	//SetTrackLocal(rtp *webrtc.TrackLocalStaticRTP) error
+	//WriteTrackData([]byte) error
 	GetPeerConnection() *webrtc.PeerConnection
 }

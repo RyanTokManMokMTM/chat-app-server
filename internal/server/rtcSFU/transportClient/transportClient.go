@@ -50,7 +50,7 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdpType *types.Sign
 
 	conn := tc.transportProducer.GetPeerConnection()
 	if conn != nil {
-		tc.connectionEventHandler(conn, true, sdpType, onConnectionState)
+		tc.connectionEventHandler(conn, tc.clientId, true, sdpType, onConnectionState)
 	}
 	ansStr := ans.SDP
 	//ansStr, err := jsonx.Marshal(ans)
@@ -97,12 +97,15 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdpType *types.Sign
 	return nil
 }
 
-func (tc *TransportClient) Consume(clientId string, iceServer []string, sdpType *types.Signaling, onConnectionState func(state webrtc.PeerConnectionState)) error {
+func (tc *TransportClient) Consume(
+	clientId string,
+	iceServer []string,
+	sdpType *types.Signaling,
+	producer producer.IProducer,
+	onConnectionState func(state webrtc.PeerConnectionState)) error {
 	//TODO: Create consumer...
 	newConsumer := consumer.NewConsumer(
 		clientId,
-		tc.transportProducer.GetAudioSenderRTPTrack(),
-		tc.transportProducer.GetVideoSenderRTPTrack(),
 	)
 
 	if err := newConsumer.CreateConnection(iceServer); err != nil {
@@ -111,9 +114,18 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdpType 
 	ans, err := newConsumer.CreateAnswer(sdpType.SDP)
 	conn := newConsumer.GetPeerConnection()
 
+	//Need to remote track of the Client Id
+	if producer.GetSenderRTPTrack() == nil{
+		return errors.New("producer sender RTP track is null")
+	}
+	if err := newConsumer.AddLocalTrack(producer.GetSenderRTPTrack()); err != nil {
+		logx.Error(err)
+		return err
+	}
+
 	tc.addConsumer(clientId, newConsumer)
 	if conn != nil {
-		tc.connectionEventHandler(conn, false, sdpType, onConnectionState)
+		tc.connectionEventHandler(conn, clientId, false, sdpType, onConnectionState)
 	}
 
 	ansStr := ans.SDP
@@ -159,6 +171,7 @@ func (tc *TransportClient) Consume(clientId string, iceServer []string, sdpType 
 
 func (tc *TransportClient) connectionEventHandler(
 	conn *webrtc.PeerConnection,
+	userId string,
 	isProducer bool,
 	sdpType *types.Signaling,
 	onConnectionStatus func(webrtc.PeerConnectionState)) {
@@ -200,11 +213,10 @@ func (tc *TransportClient) connectionEventHandler(
 			logx.Error("ICECandidate marshal error : ", err)
 			return
 		}
-
 		resp := types.SFUSendIceCandidateReq{
 			SessionId:        tc.sessionId,
 			IsProducer:       isProducer,
-			ClientId:         tc.socketClient.UUID,
+			ClientId:         userId,
 			IceCandidateType: string(candidateData),
 		}
 
@@ -235,6 +247,46 @@ func (tc *TransportClient) connectionEventHandler(
 	})
 
 	conn.OnConnectionStateChange(onConnectionStatus)
+
+	conn.OnTrack(func(remote *webrtc.TrackRemote, receiver *webrtc.RTPReceiver) {
+
+		logx.Info("On Receive Track... ", isProducer)
+		rtp, err := webrtc.NewTrackLocalStaticRTP(
+			remote.Codec().RTPCodecCapability,
+			remote.ID(),
+			remote.StreamID())
+		if err != nil {
+			logx.Error(err)
+			return
+		}
+
+		if err := tc.transportProducer.SetLocalTrack(rtp); err != nil {
+			logx.Error(err)
+			return
+		}
+
+		defer func() {
+			//ToDo remove the track.
+			logx.Error("On track function is ended for ", userId)
+
+		}()
+
+		//Write data to the track...
+		buf := make([]byte, 1500)
+		for {
+			i, _, err := remote.Read(buf) //get total size and set to buf
+			if err != nil {
+				logx.Error(err)
+				return
+			}
+
+			if err := tc.transportProducer.WriteBufferToTrack(buf[:i]); err != nil {
+				logx.Error(err)
+				return
+			}
+		}
+
+	})
 
 }
 
@@ -299,4 +351,11 @@ func (tc *TransportClient) ExchangeIceCandidateForConsumers(consumerId, iceData 
 		return err
 	}
 	return c.UpdateIceCandidate([]byte(iceData))
+}
+
+func (tc *TransportClient) GetProducer() (producer.IProducer, error) {
+	if tc.transportProducer == nil {
+		return nil, errors.New("producer not exist")
+	}
+	return tc.transportProducer, nil
 }

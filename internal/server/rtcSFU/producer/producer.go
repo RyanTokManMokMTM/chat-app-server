@@ -10,8 +10,7 @@ import (
 
 type Producer struct {
 	conn           *webrtc.PeerConnection
-	videoRTCSender *webrtc.RTPSender
-	audioRTCSender *webrtc.RTPSender
+	RTCSenderTrack *webrtc.TrackLocalStaticRTP
 	offer          string
 	state          string
 }
@@ -84,35 +83,20 @@ func (p *Producer) GetPeerConnection() *webrtc.PeerConnection {
 	return p.conn
 }
 
-func (p *Producer) SetLocalTrack(track *webrtc.TrackLocalStaticRTP, kind webrtc.MediaKind) error {
-	if kind == webrtc.MediaKindAudio {
-		audioSender, err := p.conn.AddTrack(track)
-		if err != nil {
-			logx.Error("Set local track error")
-			return err
-		}
-		p.audioRTCSender = audioSender
-	} else if kind == webrtc.MediaKindVideo {
-		videoSender, err := p.conn.AddTrack(track)
-		if err != nil {
-			logx.Error("Set local track error")
-			return err
-		}
-		p.videoRTCSender = videoSender
+func (p *Producer) SetLocalTrack(rtp *webrtc.TrackLocalStaticRTP) error {
+	if rtp == nil {
+		return errors.New("RTP track is nil")
 	}
-	return errors.New("kind not supported")
+	p.RTCSenderTrack = rtp
+	return nil
 }
 
 func (p *Producer) CloseConnection() error {
 	return p.conn.Close()
 }
 
-func (p *Producer) GetVideoSenderRTPTrack() webrtc.TrackLocal {
-	return p.videoRTCSender.Track()
-}
-
-func (p *Producer) GetAudioSenderRTPTrack() webrtc.TrackLocal {
-	return p.audioRTCSender.Track()
+func (p *Producer) GetSenderRTPTrack() webrtc.TrackLocal {
+	return p.RTCSenderTrack
 }
 
 func (p *Producer) UpdateIceCandidate(data []byte) error {
@@ -132,4 +116,13 @@ func (p *Producer) UpdateIceCandidate(data []byte) error {
 	}
 
 	return nil
+}
+
+func (p *Producer) WriteBufferToTrack(buf []byte) error {
+	if p.RTCSenderTrack == nil {
+		return errors.New("track is nil")
+	}
+
+	_, err := p.RTCSenderTrack.Write(buf)
+	return err
 }

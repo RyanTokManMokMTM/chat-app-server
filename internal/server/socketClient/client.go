@@ -117,8 +117,8 @@ func (c *SocketClient) OnEvent(event string, message []byte) error {
 		variable.SFU_EVENT_PRODUCER_ICE,
 		variable.SFU_EVENT_CONSUMER_SDP,
 		variable.SFU_EVENT_CONSUMER_ICE,
-		variable.SFU_EVENT_PRODUCER_CLOSE,
-		variable.SFU_EVENT_GET_PRODUCERS:
+		variable.SFU_EVENT_PRODUCER_CLOSE:
+		//variable.SFU_EVENT_GET_PRODUCERS:
 		c.server.MulticastMessage(message)
 		break
 	case variable.ALL:

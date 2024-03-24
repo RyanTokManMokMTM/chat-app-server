@@ -228,10 +228,24 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 					//TODO: send a signal to all client in the session
 					//Send current client info to client that is in the group
 					clients := session.GetSessionClients()
+					sessionProducersList := make([]types.SFUProducerUserInfo, 0)
 
 					//Send a message to all connected producer.
+					ctx := context.Background()
+					currentUser, err := c.SvcCtx.DAO.FindOneUserByUUID(ctx, userId)
+					if err != nil {
+						logx.Error("Get User Info err : ", err)
+						break
+					}
+
+					currentUserInfo := types.SFUProducerUserInfo{
+						ProducerUserId:     currentUser.Uuid,
+						ProducerUserName:   currentUser.NickName,
+						ProducerUserAvatar: currentUser.Avatar,
+					}
 					for _, clientId := range clients {
 						if clientId != userId {
+							//sessionProducersList = append(sessionProducersList, clientId)
 							logx.Infof("Current user %s is Producer", clientId)
 							curClient, err := s.GetOneClient(clientId)
 							if err != nil {
@@ -241,23 +255,25 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 							logx.Info("Getting user info")
 							//TODO: Get Current client info
 							ctx := context.Background()
-							userInfo, err := curClient.SvcCtx.DAO.FindOneUserByUUID(ctx, clientId)
+							producerInfo, err := curClient.SvcCtx.DAO.FindOneUserByUUID(ctx, clientId)
 							if err != nil {
 								logx.Error("Get User Info err : ", err)
 								continue
 							}
-
-							logx.Info("user info", userInfo)
-
+					
 							producerUserInfo := types.SFUProducerUserInfo{
-								ProducerUserId:     userInfo.Uuid,
-								ProducerUserName:   userInfo.NickName,
-								ProducerUserAvatar: userInfo.Avatar,
+								ProducerUserId:     producerInfo.Uuid,
+								ProducerUserName:   producerInfo.NickName,
+								ProducerUserAvatar: producerInfo.Avatar,
 							}
+
+							//add to session producers list
+							sessionProducersList = append(sessionProducersList, producerUserInfo)
 
 							resp := types.SfuNewProducerResp{
 								SessionId:    session.SessionId,
-								ProducerInfo: producerUserInfo,
+								ProducerId:   currentUserInfo.ProducerUserId,
+								ProducerInfo: currentUserInfo,
 							}
 
 							respStr, err := jsonx.Marshal(resp)
@@ -283,6 +299,33 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 							curClient.SendMessage(websocket.BinaryMessage, msgBytes)
 						}
 					}
+
+					//Response to producer.
+					resp := types.SFUConnectSessionResp{
+						SessionId:        session.SessionId,
+						ProducerId:       socketMessage.FromUUID,
+						SessionProducers: sessionProducersList,
+					}
+
+					respStr, err := jsonx.Marshal(resp)
+					if err != nil {
+						logx.Error("resp marshal error : ", err)
+						break
+					}
+
+					msg := &socket_message.Message{
+						ToUUID:      socketMessage.FromUUID,
+						Content:     string(respStr),
+						ContentType: variable.SFU,
+						EventType:   variable.SFU_EVENT_PRODUCER_CONNECTED, //join room.
+					}
+
+					msgBytes, err := json.MarshalIndent(msg, "", "\t")
+					if err != nil {
+						logx.Error(err)
+						break
+					}
+					c.SendMessage(websocket.BinaryMessage, msgBytes)
 
 					break
 				case webrtc.PeerConnectionStateDisconnected:
@@ -362,6 +405,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				logx.Error("Unmarshal error")
 				break
 			}
+			logx.Info("Receive offer for consumer : Producer Id : ", consumeReq.ProducerId)
 
 			sdpType := &types.Signaling{}
 			if err := jsonx.Unmarshal([]byte(consumeReq.SDPType), &sdpType); err != nil {
@@ -381,27 +425,44 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				break
 			}
 
-			if err := transC.Consume(consumeReq.ProducerId, c.SvcCtx.Config.IceServer.Urls, sdpType, func(state webrtc.PeerConnectionState) {
-				logx.Info("Connection State changed : ", state)
-				switch state {
-				case webrtc.PeerConnectionStateConnected:
-					logx.Info("Connection State Change : Connected")
-					break
-				case webrtc.PeerConnectionStateDisconnected:
-				case webrtc.PeerConnectionStateClosed:
-					logx.Info("Connection State Change : Disconnected")
-					break
-				case webrtc.PeerConnectionStateFailed:
-					logx.Info("Connection State Change : Failed")
-					//TODO: Close the connection when failed
-					if err := transC.CloseConsumer(consumeReq.ProducerId); err != nil {
-						log.Print(err)
+			producerClient, err := session.GetTransportClient(consumeReq.ProducerId)
+			if err != nil {
+				logx.Error(err)
+				break
+			}
+
+			producer, err := producerClient.GetProducer()
+			if err != nil {
+				logx.Error(err)
+				break
+			}
+			logx.Info("Consuming....")
+			if err := transC.Consume(
+				consumeReq.ProducerId,
+				c.SvcCtx.Config.IceServer.Urls,
+				sdpType,
+				producer,
+				func(state webrtc.PeerConnectionState) {
+					logx.Info("(Consumer)Connection State changed : ", state)
+					switch state {
+					case webrtc.PeerConnectionStateConnected:
+						logx.Info("(Consumer)Connection State Change : Connected")
+						break
+					case webrtc.PeerConnectionStateDisconnected:
+					case webrtc.PeerConnectionStateClosed:
+						logx.Info("(Consumer)Connection State Change : Disconnected")
+						break
+					case webrtc.PeerConnectionStateFailed:
+						logx.Info("(Consumer)Connection State Change : Failed")
+						//TODO: Close the connection when failed
+						if err := transC.CloseConsumer(consumeReq.ProducerId); err != nil {
+							log.Print(err)
+						}
+						break
+					default:
+						break
 					}
-					break
-				default:
-					break
-				}
-			}); err != nil {
+				}); err != nil {
 				logx.Errorf("Consume %s error %s", consumeReq.ProducerId, err)
 				break
 			}

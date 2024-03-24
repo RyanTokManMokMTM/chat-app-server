@@ -8,9 +8,9 @@ type IProducer interface {
 	CloseConnection() error
 	UpdateIceCandidate([]byte) error
 
-	SetLocalTrack(*webrtc.TrackLocalStaticRTP, webrtc.MediaKind) error
-	GetVideoSenderRTPTrack() webrtc.TrackLocal
-	GetAudioSenderRTPTrack() webrtc.TrackLocal
+	SetLocalTrack(rtp *webrtc.TrackLocalStaticRTP) error
+	GetSenderRTPTrack() webrtc.TrackLocal
+	WriteBufferToTrack(buf []byte) error //from remote
 
 	GetPeerConnection() *webrtc.PeerConnection
 }

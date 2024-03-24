@@ -15,22 +15,14 @@ type Consumer struct {
 	clientId string
 	conn     *webrtc.PeerConnection
 
-	remoteAudioTrack webrtc.TrackLocal
-	remoteVideoTrack webrtc.TrackLocal
-
-	videoRTCSender *webrtc.RTPSender
-	audioRTCSender *webrtc.RTPSender
+	trackLocal *webrtc.TrackLocalStaticRTP
 }
 
 func NewConsumer(
 	clientId string,
-	remoteAudioTrack webrtc.TrackLocal,
-	remoteVideoTrack webrtc.TrackLocal,
 ) *Consumer {
 	return &Consumer{
-		clientId:         clientId,
-		remoteVideoTrack: remoteVideoTrack,
-		remoteAudioTrack: remoteAudioTrack,
+		clientId: clientId,
 	}
 }
 
@@ -117,4 +109,9 @@ func (c *Consumer) UpdateIceCandidate(data []byte) error {
 	}
 
 	return nil
+}
+
+func (c *Consumer) AddLocalTrack(track webrtc.TrackLocal) error {
+	_, err := c.conn.AddTrack(track)
+	return err
 }

@@ -3,7 +3,14 @@ package types
 type SfuNewProducerResp struct {
 	SessionId string `json:"session_id"` //RoomId
 	//ProducerId   string              `json:"producer_id"` //WebRTC Answer
+	ProducerId   string              `json:"producer_id"`
 	ProducerInfo SFUProducerUserInfo `json:"producer_info"`
+}
+
+type SFUConnectSessionResp struct {
+	SessionId        string                `json:"session_id"` //RoomId
+	ProducerId       string                `json:"producer_id"`
+	SessionProducers []SFUProducerUserInfo `json:"session_producers"`
 }
 
 type SFUProducerUserInfo struct {
