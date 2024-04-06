@@ -5,20 +5,25 @@ import (
 	"github.com/pion/webrtc/v3"
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
-	"log"
+	"sync"
+	"time"
 )
 
 type Producer struct {
-	conn           *webrtc.PeerConnection
-	RTCSenderTrack *webrtc.TrackLocalStaticRTP
-	offer          string
-	state          string
+	sync.Mutex
+
+	conn            *webrtc.PeerConnection
+	RTCSenderTracks []*webrtc.TrackLocalStaticRTP
+	offer           string
+	state           string
 }
 
 var _ IProducer = (*Producer)(nil)
 
 func NewProducer() *Producer {
-	return &Producer{}
+	return &Producer{
+		RTCSenderTracks: make([]*webrtc.TrackLocalStaticRTP, 0),
+	}
 }
 
 func (p *Producer) NewConnection(
@@ -30,19 +35,65 @@ func (p *Producer) NewConnection(
 				URLs: iceServer,
 			},
 		},
+		SDPSemantics: webrtc.SDPSemanticsUnifiedPlan,
 	})
 	if err != nil {
 		logx.Error("Create Peer connection err : ", err)
 		return err
 	}
+
+	if err != nil {
+		logx.Error(err)
+		return err
+	}
+
 	p.conn = peerConn
-	for _, typ := range []webrtc.RTPCodecType{webrtc.RTPCodecTypeVideo, webrtc.RTPCodecTypeAudio} {
-		if _, err := peerConn.AddTransceiverFromKind(typ, webrtc.RTPTransceiverInit{
-			Direction: webrtc.RTPTransceiverDirectionRecvonly,
-		}); err != nil {
-			log.Print(err)
-			return err
+	//for _, typ := range []webrtc.RTPCodecType{webrtc.RTPCodecTypeVideo, webrtc.RTPCodecTypeAudio} {
+	//	if _, err := peerConn.AddTransceiverFromKind(typ, webrtc.RTPTransceiverInit{
+	//		Direction: webrtc.RTPTransceiverDirectionSendrecv,
+	//	}); err != nil {
+	//		log.Print(err)
+	//		return err
+	//	}
+	//}
+	return nil
+}
+
+func (p *Producer) NewDataChannel(label string, id uint16) error {
+	//negotiated := true
+	//ordered := false
+	channel, err := p.conn.CreateDataChannel(label, &webrtc.DataChannelInit{
+		//Ordered:    &ordered,
+		//Negotiated: &negotiated,
+		//ID:         &id,
+	})
+
+	channel.OnOpen(func() {
+		logx.Info("data channel opened")
+		for range time.NewTicker(1000 * time.Millisecond).C {
+			_ = channel.Send([]byte("Testing"))
 		}
+	})
+
+	channel.OnError(func(err error) {
+		logx.Error("channel err ", err)
+	})
+
+	channel.OnMessage(func(msg webrtc.DataChannelMessage) {
+		logx.Info("Received an message : ", string(msg.Data))
+
+	})
+
+	channel.OnClose(func() {
+		logx.Info("Channel closed")
+	})
+
+	channel.OnDial(func() {
+		logx.Info("dial")
+	})
+
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -83,21 +134,31 @@ func (p *Producer) GetPeerConnection() *webrtc.PeerConnection {
 	return p.conn
 }
 
-func (p *Producer) SetLocalTrack(rtp *webrtc.TrackLocalStaticRTP) error {
-	if rtp == nil {
-		return errors.New("RTP track is nil")
-	}
-	p.RTCSenderTrack = rtp
-	return nil
+//func (p *Producer) SetLocalTrack(rtp *webrtc.TrackLocalStaticRTP) error {
+//	if rtp == nil {
+//		return errors.New("RTP track is nil")
+//	}
+//	p.RTCSenderTrack = rtp
+//	return nil
+//}
+
+func (p *Producer) SetLocalTracks(rtp *webrtc.TrackLocalStaticRTP) {
+	p.Lock()
+	defer p.Unlock()
+	p.RTCSenderTracks = append(p.RTCSenderTracks, rtp)
+}
+
+func (p *Producer) GetSenderRTPTracks() []*webrtc.TrackLocalStaticRTP {
+	return p.RTCSenderTracks
 }
 
 func (p *Producer) CloseConnection() error {
 	return p.conn.Close()
 }
 
-func (p *Producer) GetSenderRTPTrack() webrtc.TrackLocal {
-	return p.RTCSenderTrack
-}
+//func (p *Producer) GetSenderRTPTrack() *webrtc.TrackLocalStaticRTP {
+//	return p.RTCSenderTrack
+//}
 
 func (p *Producer) UpdateIceCandidate(data []byte) error {
 	if p.conn == nil {
@@ -118,11 +179,11 @@ func (p *Producer) UpdateIceCandidate(data []byte) error {
 	return nil
 }
 
-func (p *Producer) WriteBufferToTrack(buf []byte) error {
-	if p.RTCSenderTrack == nil {
-		return errors.New("track is nil")
-	}
-
-	_, err := p.RTCSenderTrack.Write(buf)
-	return err
-}
+//func (p *Producer) WriteBufferToTrack(buf []byte) error {
+//	if p.RTCSenderTrack == nil {
+//		return errors.New("track is nil")
+//	}
+//
+//	_, err := p.RTCSenderTrack.Write(buf)
+//	return err
+//}

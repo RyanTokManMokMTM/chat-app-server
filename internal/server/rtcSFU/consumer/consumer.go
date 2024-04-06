@@ -97,7 +97,7 @@ func (c *Consumer) UpdateIceCandidate(data []byte) error {
 		return errors.New("peer connection is nil")
 	}
 	iceCandidateType := webrtc.ICECandidateInit{}
-	logx.Info("Candidate data : ", string(data))
+	//logx.Info("Candidate data : ", string(data))
 	if err := jsonx.Unmarshal(data, &iceCandidateType); err != nil {
 		return err
 	}
@@ -111,7 +111,23 @@ func (c *Consumer) UpdateIceCandidate(data []byte) error {
 	return nil
 }
 
-func (c *Consumer) AddLocalTrack(track webrtc.TrackLocal) error {
-	_, err := c.conn.AddTrack(track)
-	return err
+func (c *Consumer) AddLocalTrack(track *webrtc.TrackLocalStaticRTP) error {
+	if track == nil {
+		return errors.New("track is nil")
+	}
+	logx.Infof("Add Track")
+	sender, err := c.conn.AddTrack(track)
+	if err != nil {
+		return err
+	}
+	go func() {
+		b := make([]byte, 1600)
+		for {
+			if _, _, err := sender.Read(b); err != nil {
+				logx.Error(err)
+				return
+			}
+		}
+	}()
+	return nil
 }

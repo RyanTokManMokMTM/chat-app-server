@@ -225,6 +225,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				switch state {
 				case webrtc.PeerConnectionStateConnected:
 					logx.Info("Connection State Change : Connected")
+					tc.SignalProducerConnected()
 					//TODO: send a signal to all client in the session
 					//Send current client info to client that is in the group
 					clients := session.GetSessionClients()
@@ -260,7 +261,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 								logx.Error("Get User Info err : ", err)
 								continue
 							}
-					
+
 							producerUserInfo := types.SFUProducerUserInfo{
 								ProducerUserId:     producerInfo.Uuid,
 								ProducerUserName:   producerInfo.NickName,
@@ -476,7 +477,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			jsonString := socketMessage.Content //Can be a json string?
 			iceCandidateType := types.IceCandidateType{}
 			userId := socketMessage.FromUUID
-			logx.Info("Received ice candidate from client")
+			//logx.Info("Received ice candidate from client")
 			_, err := s.GetOneClient(userId)
 			if err != nil {
 				logx.Error("SocketClient not found")
@@ -518,6 +519,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			closeConnReq := types.SFUCloseConnectionReq{}
 			jsonString := socketMessage.Content //Can be a json string?
 			userId := socketMessage.FromUUID
+			logx.Error("Unmarshal get producers request error : ", err)
 
 			_, err := s.GetOneClient(socketMessage.FromUUID)
 			if err != nil {
@@ -526,7 +528,6 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			}
 
 			if err := jsonx.Unmarshal([]byte(jsonString), &closeConnReq); err != nil {
-				logx.Error("Unmarshal get producers request error : ", err)
 				break
 			}
 

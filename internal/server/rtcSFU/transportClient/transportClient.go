@@ -3,8 +3,12 @@ package transportClient
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/pion/webrtc/v3"
+	"github.com/pion/webrtc/v3/pkg/media"
+	"github.com/pion/webrtc/v3/pkg/media/oggreader"
+	"github.com/pion/webrtc/v4/pkg/media/h264reader"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/rtcSFU/consumer"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/rtcSFU/producer"
@@ -14,35 +18,199 @@ import (
 	socket_message "github.com/ryantokmanmokmtm/chat-app-server/socket-proto"
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
+	"io"
+	"os"
 	"sync"
+	"time"
 )
 
 type TransportClient struct {
 	sync.Mutex
-	clientId           string
-	sessionId          string
-	socketClient       *socketClient.SocketClient
-	trackLocalGroup    *trackGroup.TrackGroup
-	transportProducer  producer.IProducer
-	transportConsumers map[string]consumer.IConsumer // n-1 consumer.
+	clientId               string
+	sessionId              string
+	socketClient           *socketClient.SocketClient
+	trackLocalGroup        *trackGroup.TrackGroup
+	transportProducer      producer.IProducer
+	transportConsumers     map[string]consumer.IConsumer // n-1 consumer.
+	producerConnectedVideo chan struct{}
+	producerConnectedAudio chan struct{}
 }
 
 func NewTransportClient(clientId string, sessionId string, socketClient *socketClient.SocketClient) *TransportClient {
 	return &TransportClient{
-		clientId:           clientId,
-		socketClient:       socketClient,
-		sessionId:          sessionId,
-		trackLocalGroup:    trackGroup.NewTrackGroup(),
-		transportProducer:  producer.NewProducer(),
-		transportConsumers: make(map[string]consumer.IConsumer),
+		clientId:               clientId,
+		socketClient:           socketClient,
+		sessionId:              sessionId,
+		trackLocalGroup:        trackGroup.NewTrackGroup(),
+		transportProducer:      producer.NewProducer(),
+		transportConsumers:     make(map[string]consumer.IConsumer),
+		producerConnectedVideo: make(chan struct{}),
+		producerConnectedAudio: make(chan struct{}),
 	}
+}
+
+func (tc *TransportClient) setUpH256VideoTrack() {
+	if tc.transportProducer.GetPeerConnection() == nil {
+		logx.Error("Connection is null")
+		return
+	}
+	pc := tc.transportProducer.GetPeerConnection()
+
+	videoFileName := "/Users/jackson.tmm/Desktop/Projects/chat-app-server/output.h264"
+	h264FrameDuration := time.Millisecond * 33
+	_, err := os.Stat(videoFileName)
+	if err != nil || os.IsExist(err) {
+		panic(err)
+		return
+	}
+
+	track, err := webrtc.NewTrackLocalStaticSample(webrtc.RTPCodecCapability{
+		MimeType:  webrtc.MimeTypeH264,
+		ClockRate: 90000,
+	}, "video", "demo_pion")
+
+	if err != nil {
+		panic(err)
+		return
+	}
+	sender, err := pc.AddTrack(track)
+	if err != nil {
+		panic(err)
+	}
+
+	go func() {
+		buf := make([]byte, 1500)
+		for {
+			if _, _, err := sender.Read(buf); err != nil {
+				return
+			}
+		}
+	}()
+
+	//Write video track to track local
+	go func() {
+		v, err := os.Open(videoFileName)
+		if err != nil {
+			panic(err)
+		}
+
+		h264, err := h264reader.NewReader(v)
+		if err != nil {
+			panic(err)
+		}
+
+		<-tc.producerConnectedVideo
+		logx.Info("Connection Done........ Starting to send video stream data")
+		ticket := time.NewTicker(h264FrameDuration)
+		for ; true; <-ticket.C {
+			//logx.Info("Sending track./**/..")
+			nal, err := h264.NextNAL()
+			if errors.Is(err, io.EOF) {
+				fmt.Printf("All video frames parsed and sent")
+				return
+			}
+			if err != nil {
+				panic(err)
+			}
+
+			if err = track.WriteSample(media.Sample{
+				Data:     nal.Data,
+				Duration: h264FrameDuration,
+			}); err != nil {
+				panic(err)
+			}
+
+		}
+	}()
+}
+
+func (tc *TransportClient) setUpAudioTrack() {
+	if tc.transportProducer.GetPeerConnection() == nil {
+		logx.Error("Connection is null")
+		return
+	}
+	pc := tc.transportProducer.GetPeerConnection()
+
+	audioFileName := "/Users/jackson.tmm/Desktop/Projects/chat-app-server/output.ogg"
+	oggPageDuration := time.Millisecond * 20
+	_, err := os.Stat(audioFileName)
+	if err != nil || os.IsExist(err) {
+		panic(err)
+		return
+	}
+
+	track, err := webrtc.NewTrackLocalStaticSample(webrtc.RTPCodecCapability{
+		MimeType: webrtc.MimeTypeOpus,
+	}, "audio", "pion_audio")
+
+	if err != nil {
+		panic(err)
+		return
+	}
+	sender, err := pc.AddTrack(track)
+	if err != nil {
+		panic(err)
+	}
+
+	go func() {
+		buf := make([]byte, 1500)
+		for {
+			if _, _, err := sender.Read(buf); err != nil {
+				return
+			}
+		}
+	}()
+
+	//Write video track to track local
+	go func() {
+		v, err := os.Open(audioFileName)
+		if err != nil {
+			panic(err)
+		}
+		ogg, _, err := oggreader.NewWith(v)
+		if err != nil {
+			panic(err)
+		}
+		var lastGranule uint64
+		<-tc.producerConnectedAudio
+		logx.Info("Connection Done........ Starting to send audio stream data")
+		ticket := time.NewTicker(oggPageDuration)
+		for ; true; <-ticket.C {
+			//logx.Info("Sending track./**/..")
+			pageData, pageHeader, oggErr := ogg.ParseNextPage()
+			if errors.Is(oggErr, io.EOF) {
+				fmt.Printf("All audio pages parsed and sent")
+				os.Exit(0)
+			}
+
+			if oggErr != nil {
+				panic(oggErr)
+			}
+
+			// The amount of samples is the difference between the last and current timestamp
+			sampleCount := float64(pageHeader.GranulePosition - lastGranule)
+			lastGranule = pageHeader.GranulePosition
+			sampleDuration := time.Duration((sampleCount/48000)*1000) * time.Millisecond
+
+			if oggErr = track.WriteSample(media.Sample{Data: pageData, Duration: sampleDuration}); oggErr != nil {
+				panic(oggErr)
+			}
+
+		}
+	}()
 }
 
 func (tc *TransportClient) NewConnection(iceServer []string, sdpType *types.Signaling, onConnectionState func(state webrtc.PeerConnectionState)) error {
 	if err := tc.transportProducer.NewConnection(iceServer); err != nil {
 		return err
 	}
+	if err := tc.transportProducer.NewDataChannel("WebRTCData", 1); err != nil {
+		return err
+	}
 
+	//Dummy testing -> sending a mp4
+	tc.setUpH256VideoTrack()
+	tc.setUpAudioTrack()
 	ans, err := tc.transportProducer.CreateAnswers(sdpType.SDP)
 	if err != nil {
 		return err
@@ -111,17 +279,20 @@ func (tc *TransportClient) Consume(
 	if err := newConsumer.CreateConnection(iceServer); err != nil {
 		return err
 	}
+	//producerLocalTracks := producer.GetPeerConnection().GetSenders()
+	//for _, recevier := range producerLocalTracks {
+	//	if recevier == nil {
+	//		continue
+	//	}
+	//
+	//	if err := newConsumer.AddLocalTrack(|| recevier.Track()); err != nil {
+	//		logx.Error(err)
+	//		return err
+	//	}
+	//
+	//}
 	ans, err := newConsumer.CreateAnswer(sdpType.SDP)
 	conn := newConsumer.GetPeerConnection()
-
-	//Need to remote track of the Client Id
-	if producer.GetSenderRTPTrack() == nil{
-		return errors.New("producer sender RTP track is null")
-	}
-	if err := newConsumer.AddLocalTrack(producer.GetSenderRTPTrack()); err != nil {
-		logx.Error(err)
-		return err
-	}
 
 	tc.addConsumer(clientId, newConsumer)
 	if conn != nil {
@@ -176,6 +347,32 @@ func (tc *TransportClient) connectionEventHandler(
 	sdpType *types.Signaling,
 	onConnectionStatus func(webrtc.PeerConnectionState)) {
 
+	conn.OnDataChannel(func(channel *webrtc.DataChannel) {
+
+		channel.OnOpen(func() {
+			logx.Info("data channel opened")
+			for range time.NewTicker(1000 * time.Millisecond).C {
+				_ = channel.Send([]byte(time.Now().String()))
+			}
+		})
+
+		channel.OnError(func(err error) {
+			logx.Error("channel err ", err)
+		})
+
+		channel.OnMessage(func(msg webrtc.DataChannelMessage) {
+			logx.Info("Received an message : ", string(msg.Data))
+		})
+
+		channel.OnClose(func() {
+			logx.Info("Channel closed")
+		})
+
+		channel.OnDial(func() {
+			logx.Info("dial")
+		})
+	})
+
 	conn.OnICEConnectionStateChange(func(state webrtc.ICEConnectionState) {
 		logx.Info("Ice connection State change : ", state)
 	})
@@ -199,7 +396,7 @@ func (tc *TransportClient) connectionEventHandler(
 			return
 		}
 
-		logx.Info("Received an candindate and sending to client..！！！！！！！！！！！！.")
+		//logx.Info("Received an candindate and sending to client..！！！！！！！！！！！！.")
 		sdpCandidate := candidate.ToJSON().Candidate
 
 		signaling := types.Signaling{
@@ -248,43 +445,55 @@ func (tc *TransportClient) connectionEventHandler(
 
 	conn.OnConnectionStateChange(onConnectionStatus)
 
-	conn.OnTrack(func(remote *webrtc.TrackRemote, receiver *webrtc.RTPReceiver) {
-
-		logx.Info("On Receive Track... ", isProducer)
-		rtp, err := webrtc.NewTrackLocalStaticRTP(
-			remote.Codec().RTPCodecCapability,
-			remote.ID(),
-			remote.StreamID())
-		if err != nil {
-			logx.Error(err)
+	conn.OnTrack(func(t *webrtc.TrackRemote, receiver *webrtc.RTPReceiver) {
+		if t == nil {
+			logx.Info("Track is nil")
 			return
 		}
-
-		if err := tc.transportProducer.SetLocalTrack(rtp); err != nil {
-			logx.Error(err)
-			return
-		}
-
-		defer func() {
-			//ToDo remove the track.
-			logx.Error("On track function is ended for ", userId)
-
-		}()
-
-		//Write data to the track...
-		buf := make([]byte, 1500)
-		for {
-			i, _, err := remote.Read(buf) //get total size and set to buf
-			if err != nil {
-				logx.Error(err)
-				return
-			}
-
-			if err := tc.transportProducer.WriteBufferToTrack(buf[:i]); err != nil {
-				logx.Error(err)
-				return
-			}
-		}
+		logx.Info(t.StreamID())
+		logx.Info(t.Codec().MimeType)
+		logx.Info(t.Codec().RTPCodecCapability)
+		//trackLocal, err := webrtc.NewTrackLocalStaticRTP(t.Codec().RTPCodecCapability, fmt.Sprintf("%s_%s", t.Kind().String(), t.ID()), fmt.Sprintf("STREAM_%s_%s", t.Kind().String(), t.StreamID()))
+		//if err != nil {
+		//	logx.Error(err)
+		//	return
+		//}
+		//
+		//if isProducer {
+		//	p, err := tc.GetProducer()
+		//	if err != nil {
+		//		logx.Error(err)
+		//		return
+		//	}
+		//
+		//	p.SetLocalTracks(trackLocal)
+		//}
+		//
+		//sender, err := conn.AddTrack(trackLocal)
+		//if err != nil {
+		//	logx.Error(err)
+		//	return
+		//}
+		//
+		//go func() {
+		//	rtcBuf := make([]byte, 1500)
+		//	for {
+		//		if _, _, err := sender.Read(rtcBuf); err != nil {
+		//			return
+		//		}
+		//	}
+		//}()
+		//
+		//for {
+		//	rtp, _, err := t.ReadRTP()
+		//	if err != nil {
+		//		panic(err)
+		//	}
+		//
+		//	if err := trackLocal.WriteRTP(rtp); err != nil {
+		//		panic(err)
+		//	}
+		//}
 
 	})
 
@@ -358,4 +567,9 @@ func (tc *TransportClient) GetProducer() (producer.IProducer, error) {
 		return nil, errors.New("producer not exist")
 	}
 	return tc.transportProducer, nil
+}
+
+func (tc *TransportClient) SignalProducerConnected() {
+	tc.producerConnectedVideo <- struct{}{}
+	tc.producerConnectedAudio <- struct{}{}
 }
