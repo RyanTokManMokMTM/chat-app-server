@@ -18,26 +18,23 @@ func NewSessionManager() *SessionManager {
 }
 func (sm *SessionManager) CreateOneSession(sid string) *session.Session {
 	s := session.NewSession(sid)
-	sm.addSession(sid, s)
-	return s
-}
-func (sm *SessionManager) GetOneSession(sid string) (*session.Session, error) {
-	if s, ok := sm.sessionMap[sid]; ok {
-		return s, nil
-	}
-	return nil, errors.New("session not found")
-}
-
-func (sm *SessionManager) addSession(sid string, s *session.Session) {
 	sm.Lock()
 	defer sm.Unlock()
 	sm.sessionMap[sid] = s
+	return s
 }
 
-func (sm *SessionManager) removeSession(sid string) {
+func (sm *SessionManager) RemoveOneSession(sid string) {
 	sm.Lock()
 	defer sm.Unlock()
 	if _, ok := sm.sessionMap[sid]; ok {
 		delete(sm.sessionMap, sid)
 	}
+}
+
+func (sm *SessionManager) GetOneSession(sid string) (*session.Session, error) {
+	if s, ok := sm.sessionMap[sid]; ok {
+		return s, nil
+	}
+	return nil, errors.New("session not found")
 }

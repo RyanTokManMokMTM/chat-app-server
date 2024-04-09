@@ -6,14 +6,14 @@ import (
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
 	"sync"
-	"time"
 )
 
 type Producer struct {
 	sync.Mutex
-
+	audioTrackLocal *webrtc.TrackLocalStaticRTP
+	videoTrackLocal *webrtc.TrackLocalStaticRTP
 	conn            *webrtc.PeerConnection
-	RTCSenderTracks []*webrtc.TrackLocalStaticRTP
+	RTCSenderTracks []webrtc.TrackLocal
 	offer           string
 	state           string
 }
@@ -22,7 +22,7 @@ var _ IProducer = (*Producer)(nil)
 
 func NewProducer() *Producer {
 	return &Producer{
-		RTCSenderTracks: make([]*webrtc.TrackLocalStaticRTP, 0),
+		RTCSenderTracks: make([]webrtc.TrackLocal, 0),
 	}
 }
 
@@ -70,9 +70,7 @@ func (p *Producer) NewDataChannel(label string, id uint16) error {
 
 	channel.OnOpen(func() {
 		logx.Info("data channel opened")
-		for range time.NewTicker(1000 * time.Millisecond).C {
-			_ = channel.Send([]byte("Testing"))
-		}
+		//
 	})
 
 	channel.OnError(func(err error) {
@@ -134,31 +132,30 @@ func (p *Producer) GetPeerConnection() *webrtc.PeerConnection {
 	return p.conn
 }
 
-//func (p *Producer) SetLocalTrack(rtp *webrtc.TrackLocalStaticRTP) error {
-//	if rtp == nil {
-//		return errors.New("RTP track is nil")
-//	}
-//	p.RTCSenderTrack = rtp
-//	return nil
-//}
-
-func (p *Producer) SetLocalTracks(rtp *webrtc.TrackLocalStaticRTP) {
-	p.Lock()
-	defer p.Unlock()
-	p.RTCSenderTracks = append(p.RTCSenderTracks, rtp)
+func (p *Producer) SetLocalTracks(kind webrtc.RTPCodecType, rtp *webrtc.TrackLocalStaticRTP) {
+	if kind == webrtc.RTPCodecTypeAudio {
+		p.audioTrackLocal = rtp
+	} else if kind == webrtc.RTPCodecTypeVideo {
+		p.videoTrackLocal = rtp
+	}
 }
 
-func (p *Producer) GetSenderRTPTracks() []*webrtc.TrackLocalStaticRTP {
-	return p.RTCSenderTracks
+func (p *Producer) RemoveLocalTracks(rtp *webrtc.TrackLocalStaticRTP) {
+	//TODO: If pc's track has been removed, then update the list
 }
 
+func (p *Producer) GetSenderRTPTracks(kind webrtc.RTPCodecType) (*webrtc.TrackLocalStaticRTP, error) {
+	if kind == webrtc.RTPCodecTypeAudio {
+		return p.audioTrackLocal, nil
+	} else if kind == webrtc.RTPCodecTypeVideo {
+		return p.videoTrackLocal, nil
+	}
+	return nil, errors.New("media kind not support")
+}
 func (p *Producer) CloseConnection() error {
+
 	return p.conn.Close()
 }
-
-//func (p *Producer) GetSenderRTPTrack() *webrtc.TrackLocalStaticRTP {
-//	return p.RTCSenderTrack
-//}
 
 func (p *Producer) UpdateIceCandidate(data []byte) error {
 	if p.conn == nil {
@@ -178,12 +175,3 @@ func (p *Producer) UpdateIceCandidate(data []byte) error {
 
 	return nil
 }
-
-//func (p *Producer) WriteBufferToTrack(buf []byte) error {
-//	if p.RTCSenderTrack == nil {
-//		return errors.New("track is nil")
-//	}
-//
-//	_, err := p.RTCSenderTrack.Write(buf)
-//	return err
-//}

@@ -8,7 +8,9 @@ type IConsumer interface {
 	UpdateIceCandidate(data []byte) error
 	Close() error
 	ClientId() string
-	AddLocalTrack(rtp *webrtc.TrackLocalStaticRTP) error
+
+	AddLocalTrack(track *webrtc.TrackLocalStaticRTP) error
+	RemoveLocal(track *webrtc.TrackLocalStaticRTP) error
 
 	GetPeerConnection() *webrtc.PeerConnection
 }

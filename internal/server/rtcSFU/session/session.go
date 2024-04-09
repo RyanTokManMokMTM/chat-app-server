@@ -36,6 +36,13 @@ func (s *Session) GetSessionClients() []string {
 	return sessionClient
 }
 
+func (s *Session) IsEmpty() bool {
+	if len(s.sessionClients) == 0 {
+		return true
+	}
+	return false
+}
+
 func (s *Session) RemoveSessionClient(clientId string) {
 	s.Lock()
 	defer s.Unlock()

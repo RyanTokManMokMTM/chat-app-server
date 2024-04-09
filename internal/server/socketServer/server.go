@@ -225,9 +225,10 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				switch state {
 				case webrtc.PeerConnectionStateConnected:
 					logx.Info("Connection State Change : Connected")
-					tc.SignalProducerConnected()
+					//tc.SignalProducerConnected()
 					//TODO: send a signal to all client in the session
 					//Send current client info to client that is in the group
+
 					clients := session.GetSessionClients()
 					sessionProducersList := make([]types.SFUProducerUserInfo, 0)
 
@@ -247,7 +248,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 					for _, clientId := range clients {
 						if clientId != userId {
 							//sessionProducersList = append(sessionProducersList, clientId)
-							logx.Infof("Current user %s is Producer", clientId)
+							//logx.Infof("Current user %s is Producer", clientId)
 							curClient, err := s.GetOneClient(clientId)
 							if err != nil {
 								logx.Error("Get client err : ", err)
@@ -333,44 +334,44 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				case webrtc.PeerConnectionStateClosed:
 					logx.Info("Connection State Change : Disconnected")
 					//TODO: send a signal to all client in the session
-					clients := session.GetSessionClients()
-
-					for _, c := range clients {
-						if c != userId {
-							receiver, err := s.GetOneClient(c)
-							if err != nil {
-								logx.Error(err)
-								continue
-							}
-
-							resp := types.SFUCloseConnectionResp{
-								SessionId:  session.SessionId,
-								ProducerId: userId,
-							}
-
-							respStr, err := jsonx.Marshal(resp)
-							if err != nil {
-								logx.Error("resp marshal error : ", err)
-								break
-							}
-
-							msg := &socket_message.Message{
-								ToUUID:      socketMessage.FromUUID,
-								Content:     string(respStr),
-								ContentType: variable.SFU,
-								EventType:   variable.SFU_EVENT_CONSUMER_CLOSE, //producer is leave.
-							}
-
-							msgBytes, err := json.MarshalIndent(msg, "", "\t")
-							if err != nil {
-								logx.Error(err)
-								break
-							}
-
-							receiver.SendMessage(websocket.BinaryMessage, msgBytes)
-
-						}
-					}
+					//clients := session.GetSessionClients()
+					//
+					//for _, c := range clients {
+					//	if c != userId {
+					//		receiver, err := s.GetOneClient(c)
+					//		if err != nil {
+					//			logx.Error(err)
+					//			continue
+					//		}
+					//
+					//		resp := types.SFUCloseConnectionResp{
+					//			SessionId:  session.SessionId,
+					//			ProducerId: userId,
+					//		}
+					//
+					//		respStr, err := jsonx.Marshal(resp)
+					//		if err != nil {
+					//			logx.Error("resp marshal error : ", err)
+					//			break
+					//		}
+					//
+					//		msg := &socket_message.Message{
+					//			ToUUID:      socketMessage.FromUUID,
+					//			Content:     string(respStr),
+					//			ContentType: variable.SFU,
+					//			EventType:   variable.SFU_EVENT_CONSUMER_CLOSE, //producer is leave.
+					//		}
+					//
+					//		msgBytes, err := json.MarshalIndent(msg, "", "\t")
+					//		if err != nil {
+					//			logx.Error(err)
+					//			break
+					//		}
+					//
+					//		receiver.SendMessage(websocket.BinaryMessage, msgBytes)
+					//
+					//	}
+					//}
 					break
 				case webrtc.PeerConnectionStateFailed:
 					logx.Info("Connection State Change : Failed")
@@ -452,6 +453,9 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 					case webrtc.PeerConnectionStateDisconnected:
 					case webrtc.PeerConnectionStateClosed:
 						logx.Info("(Consumer)Connection State Change : Disconnected")
+						if err := transC.CloseConsumer(consumeReq.ProducerId); err != nil {
+							logx.Error(err)
+						}
 						break
 					case webrtc.PeerConnectionStateFailed:
 						logx.Info("(Consumer)Connection State Change : Failed")
@@ -519,7 +523,6 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			closeConnReq := types.SFUCloseConnectionReq{}
 			jsonString := socketMessage.Content //Can be a json string?
 			userId := socketMessage.FromUUID
-			logx.Error("Unmarshal get producers request error : ", err)
 
 			_, err := s.GetOneClient(socketMessage.FromUUID)
 			if err != nil {
@@ -528,6 +531,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			}
 
 			if err := jsonx.Unmarshal([]byte(jsonString), &closeConnReq); err != nil {
+				logx.Error("Unmarshal get producers request error : ", err)
 				break
 			}
 
@@ -596,6 +600,14 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			if err := transC.Close(); err != nil {
 				logx.Error("Close connection error ,", err)
 				break
+			}
+
+			//Remove Current Client from Session
+			session.RemoveSessionClient(socketMessage.FromUUID)
+
+			if session.IsEmpty() {
+				logx.Info("Session is empty --- removing.....")
+				s.sessionManager.RemoveOneSession(session.SessionId)
 			}
 
 			break

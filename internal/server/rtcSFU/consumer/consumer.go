@@ -5,7 +5,6 @@ import (
 	"github.com/pion/webrtc/v3"
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
-	"log"
 )
 
 var _ IConsumer = (*Consumer)(nil)
@@ -33,19 +32,20 @@ func (c *Consumer) CreateConnection(iceServer []string) error {
 				URLs: iceServer,
 			},
 		},
+		SDPSemantics: webrtc.SDPSemanticsUnifiedPlan,
 	})
 	if err != nil {
 		logx.Error("Create Peer connection err : ", err)
 		return err
 	}
-	for _, typ := range []webrtc.RTPCodecType{webrtc.RTPCodecTypeVideo, webrtc.RTPCodecTypeAudio} {
-		if _, err := peerConn.AddTransceiverFromKind(typ, webrtc.RTPTransceiverInit{
-			Direction: webrtc.RTPTransceiverDirectionSendonly,
-		}); err != nil {
-			log.Print(err)
-			return err
-		}
-	}
+	//for _, typ := range []webrtc.RTPCodecType{webrtc.RTPCodecTypeVideo, webrtc.RTPCodecTypeAudio} {
+	//	if _, err := peerConn.AddTransceiverFromKind(typ, webrtc.RTPTransceiverInit{
+	//		Direction: webrtc.RTPTransceiverDirectionSendonly,
+	//	}); err != nil {
+	//		log.Print(err)
+	//		return err
+	//	}
+	//}
 
 	c.conn = peerConn
 	return nil
@@ -113,10 +113,12 @@ func (c *Consumer) UpdateIceCandidate(data []byte) error {
 
 func (c *Consumer) AddLocalTrack(track *webrtc.TrackLocalStaticRTP) error {
 	if track == nil {
+		logx.Error("Track is nil...")
 		return errors.New("track is nil")
 	}
-	logx.Infof("Add Track")
+
 	sender, err := c.conn.AddTrack(track)
+	logx.Info("Adding track into consumer with kind : ", track.Kind())
 	if err != nil {
 		return err
 	}
@@ -129,5 +131,9 @@ func (c *Consumer) AddLocalTrack(track *webrtc.TrackLocalStaticRTP) error {
 			}
 		}
 	}()
+	return nil
+}
+
+func (c *Consumer) RemoveLocal(track *webrtc.TrackLocalStaticRTP) error {
 	return nil
 }
