@@ -26,3 +26,10 @@ type SFUSendIceCandidateReq struct {
 type SFUCloseConnectionReq struct {
 	SessionId string `json:"session_id"`
 }
+
+type SFUProducerMediaStatusReq struct {
+	SessionId string `json:"session_id"`
+	ClientId  string `json:"client_id"`
+	MediaType string `json:"media_type"`
+	IsOn      bool   `json:"is_on"`
+}

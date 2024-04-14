@@ -628,229 +628,48 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			break
 
 			//Send from server when producer connected?
-		//case variable.SFU_EVENT_GET_PRODUCERS:
-		//	//Send all info to client. User Name, User Avatar etc...
-		//	//MARK: Get All producer -> return a list of producerUserId
-		//	getProducersReq := types.SFUGetSessionProducerReq{}
-		//	jsonString := socketMessage.Content //Can be a json string?
-		//
-		//	c, err := s.GetOneClient(socketMessage.FromUUID)
-		//	if err != nil {
-		//		logx.Error("SocketClient not found")
-		//		break
-		//	}
-		//
-		//	if err := jsonx.Unmarshal([]byte(jsonString), &getProducersReq); err != nil {
-		//		logx.Error("Unmarshal get producers request error : ", err)
-		//		break
-		//	}
-		//
-		//	session, err := s.sessionManager.GetOneSession(getProducersReq.SessionId)
-		//	if err != nil {
-		//		logx.Error(err)
-		//		break
-		//	}
-		//
-		//	producersList := session.GetSessionClients()
-		//
-		//	resp := types.SfuGetSessionProducerResp{
-		//		SessionId:    session.SessionId,
-		//		ProducerList: producersList,
-		//	}
-		//
-		//	respStr, err := jsonx.Marshal(resp)
-		//	if err != nil {
-		//		logx.Error("resp marshal error : ", err)
-		//		break
-		//	}
-		//
-		//	msg := &socket_message.Message{
-		//		ToUUID:      socketMessage.FromUUID,
-		//		Content:     string(respStr),
-		//		ContentType: variable.SFU,
-		//		EventType:   variable.SFU_EVENT_GET_PRODUCERS, //join room.
-		//	}
-		//
-		//	msgBytes, err := json.MarshalIndent(msg, "", "\t")
-		//	if err != nil {
-		//		logx.Error(err)
-		//		break
-		//	}
-		//
-		//	c.SendMessage(websocket.BinaryMessage, msgBytes)
-		//
-		//	break
-		//case variable.WEB_RTC:
-		//	//logx.Info("Testing RTC testing.")
-		//	content := socketMessage.Content
-		//	sdp := types.Signaling{}
-		//	err := jsonx.Unmarshal([]byte(content), &sdp)
-		//	if err != nil {
-		//		logx.Error(err)
-		//		break
-		//	}
-		//
-		//	client, err := s.GetOneClient(socketMessage.FromUUID)
-		//	if err != nil {
-		//		logx.Error(err)
-		//		break
-		//	}
-		//	switch sdp.Type {
-		//	case "candidate":
-		//		candidate := webrtc.ICECandidateInit{}
-		//
-		//		err = jsonx.Unmarshal([]byte(content), &candidate)
-		//		if err != nil {
-		//			logx.Error(err)
-		//			break
-		//		}
-		//
-		//		if err := s.testConn.AddICECandidate(candidate); err != nil {
-		//			logx.Error(err)
-		//		}
-		//		break
-		//	case "offer":
-		//		conn, err := webrtc.NewPeerConnection(webrtc.Configuration{
-		//			ICEServers: []webrtc.ICEServer{
-		//				{
-		//					URLs: []string{
-		//						"stun:stun.l.google.com:19302",
-		//						"stun:stun1.l.google.com:19302",
-		//						"stun:stun2.l.google.com:19302",
-		//						"stun:stun3.l.google.com:19302",
-		//						"stun:stun4.l.google.com:19302",
-		//					},
-		//				},
-		//			},
-		//		})
-		//
-		//		if err != nil {
-		//			logx.Error(err)
-		//			break
-		//		}
-		//		s.testConn = conn
-		//		for _, typ := range []webrtc.RTPCodecType{webrtc.RTPCodecTypeVideo, webrtc.RTPCodecTypeAudio} {
-		//			if _, err := conn.AddTransceiverFromKind(typ, webrtc.RTPTransceiverInit{
-		//				Direction: webrtc.RTPTransceiverDirectionRecvonly,
-		//			}); err != nil {
-		//				logx.Error(err)
-		//				break
-		//			}
-		//		}
-		//
-		//		err = conn.SetRemoteDescription(webrtc.SessionDescription{
-		//			Type: webrtc.SDPTypeOffer, //currentSDP is an offer
-		//			SDP:  sdp.SDP,
-		//		})
-		//
-		//		if err != nil {
-		//			logx.Error(err)
-		//			return err
-		//		}
-		//
-		//		conn.OnICECandidate(func(candidate *webrtc.ICECandidate) {
-		//			//logx.Info("Receieving an candindate")
-		//			if candidate == nil {
-		//				return
-		//			}
-		//			sdpStr := candidate.ToJSON().Candidate
-		//
-		//			resp := types.Signaling{
-		//				Type: types.CANDIDATE,
-		//				Call: sdp.Call,
-		//				SDP:  sdpStr,
-		//			}
-		//
-		//			data, err := jsonx.Marshal(resp)
-		//
-		//			sfuMsg := &socket_message.Message{
-		//				ToUUID:      socketMessage.FromUUID, //Back to the user.
-		//				Content:     string(data),
-		//				ContentType: variable.SYS,
-		//				MessageType: variable.MESSAGE_TYPE_USERCHAT,
-		//				EventType:   variable.WEB_RTC,
-		//			}
-		//
-		//			msgBytes, err := json.MarshalIndent(sfuMsg, "", "\t")
-		//			if err != nil {
-		//				logx.Error(err)
-		//				return
-		//			}
-		//
-		//			client.SendMessage(websocket.BinaryMessage, msgBytes)
-		//		})
-		//
-		//		conn.OnConnectionStateChange(func(state webrtc.PeerConnectionState) {
-		//			logx.Info("Connection State changed : ", state)
-		//		})
-		//
-		//		conn.OnICEConnectionStateChange(func(state webrtc.ICEConnectionState) {
-		//			logx.Info("Ice Candidate State changed : ", state)
-		//		})
-		//
-		//		conn.OnTrack(func(remote *webrtc.TrackRemote, receiver *webrtc.RTPReceiver) {
-		//			logx.Info("Received tracks from Client ......... waiting for handing a new track.")
-		//		})
-		//
-		//		conn.OnICEGatheringStateChange(func(state webrtc.ICEGathererState) {
-		//			logx.Info("Ice Gathering State changed : ", state)
-		//		})
-		//
-		//		conn.OnNegotiationNeeded(func() {
-		//			logx.Info("Negotiation Needed State changed")
-		//		})
-		//
-		//		ansDesc, err := conn.CreateAnswer(&webrtc.AnswerOptions{})
-		//		if err != nil {
-		//			logx.Error(err)
-		//			break
-		//		}
-		//
-		//		if err := conn.SetLocalDescription(ansDesc); err != nil {
-		//			logx.Error(err)
-		//			break
-		//		}
-		//
-		//		ans := ansDesc.SDP
-		//
-		//		data := types.Signaling{
-		//			Type: types.ANSWER,
-		//			Call: sdp.Call,
-		//			SDP:  ans,
-		//		}
-		//
-		//		resp, err := json.Marshal(data)
-		//		if err != nil {
-		//			logx.Error(err)
-		//			return err
-		//		}
-		//		sfuMsg := &socket_message.Message{
-		//			ToUUID:      socketMessage.FromUUID, //Back to the user.
-		//			Content:     string(resp),
-		//			ContentType: variable.SYS,
-		//			MessageType: variable.MESSAGE_TYPE_USERCHAT,
-		//			EventType:   variable.WEB_RTC,
-		//		}
-		//
-		//		msgBytes, err := json.MarshalIndent(sfuMsg, "", "\t")
-		//		if err != nil {
-		//			logx.Error(err)
-		//			return err
-		//		}
-		//
-		//		client.SendMessage(websocket.BinaryMessage, msgBytes)
-		//		break
-		//	case "answer":
-		//		logx.Info("Answer")
-		//		break
-		//	case "bye":
-		//		logx.Info("bye")
-		//		break
-		//	default:
-		//		break
-		//
-		//	}
+		case variable.SFU_EVENT_PRODUCER_MEDIA_STATUS:
+			logx.Info("Event : SFU_EVENT_PRODUCER_MEIDA_STATUS")
+			mediaStatusReq := types.SFUProducerMediaStatusReq{}
+			jsonString := socketMessage.Content //Can be a json string?
+			userId := socketMessage.FromUUID
 
+			if err := jsonx.Unmarshal([]byte(jsonString), &mediaStatusReq); err != nil {
+				logx.Error("Unmarshal get producers request error : ", err)
+				break
+			}
+
+			session, err := s.sessionManager.GetOneSession(mediaStatusReq.SessionId)
+			if err != nil {
+				logx.Error("Get one session error , ", err)
+				break
+			}
+
+			//Send the message to all client in the room
+			for _, clientId := range session.GetSessionClients() {
+				if clientId != userId {
+					sessionClient, err := s.GetOneClient(clientId)
+					if err != nil {
+						logx.Error("Socket client error : ", err)
+						continue
+					}
+
+					msg := &socket_message.Message{
+						ToUUID:      clientId,
+						Content:     jsonString,
+						ContentType: variable.SFU,
+						EventType:   variable.SFU_EVENT_PRODUCER_MEDIA_STATUS, // a producer is left
+					}
+
+					msgBytes, err := json.MarshalIndent(msg, "", "\t")
+					if err != nil {
+						logx.Error(err)
+						break
+					}
+
+					sessionClient.SendMessage(websocket.BinaryMessage, msgBytes)
+				}
+			}
 		default:
 			logx.Infof("Event Type not support")
 		}
