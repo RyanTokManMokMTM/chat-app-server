@@ -2,13 +2,19 @@ package sessionManager
 
 import (
 	"errors"
+	"github.com/pion/webrtc/v3"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/rtcSFU/session"
 	"sync"
 )
 
 type SessionManager struct {
 	sync.Mutex
-	sessionMap map[string]*session.Session
+	sessionMap           map[string]*session.Session
+	newTrackLoadReceived chan struct {
+		clientId  string
+		sessionId string
+		track     *webrtc.TrackLocalStaticRTP
+	}
 }
 
 func NewSessionManager() *SessionManager {
@@ -16,12 +22,20 @@ func NewSessionManager() *SessionManager {
 		sessionMap: make(map[string]*session.Session),
 	}
 }
+
 func (sm *SessionManager) CreateOneSession(sid string) *session.Session {
 	s := session.NewSession(sid)
+	go func() {
+		sm.onListingSessionNewTrack(s)
+	}()
 	sm.Lock()
 	defer sm.Unlock()
 	sm.sessionMap[sid] = s
 	return s
+}
+
+func (sm *SessionManager) onListingSessionNewTrack(s *session.Session) {
+	s.OnListingNewTrack()
 }
 
 func (sm *SessionManager) RemoveOneSession(sid string) {

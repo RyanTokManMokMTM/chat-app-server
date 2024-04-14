@@ -38,14 +38,6 @@ func (c *Consumer) CreateConnection(iceServer []string) error {
 		logx.Error("Create Peer connection err : ", err)
 		return err
 	}
-	//for _, typ := range []webrtc.RTPCodecType{webrtc.RTPCodecTypeVideo, webrtc.RTPCodecTypeAudio} {
-	//	if _, err := peerConn.AddTransceiverFromKind(typ, webrtc.RTPTransceiverInit{
-	//		Direction: webrtc.RTPTransceiverDirectionSendonly,
-	//	}); err != nil {
-	//		log.Print(err)
-	//		return err
-	//	}
-	//}
 
 	c.conn = peerConn
 	return nil
@@ -112,8 +104,8 @@ func (c *Consumer) UpdateIceCandidate(data []byte) error {
 }
 
 func (c *Consumer) AddLocalTrack(track *webrtc.TrackLocalStaticRTP) error {
+	logx.Info("Adding track into consumer.")
 	if track == nil {
-		logx.Error("Track is nil...")
 		return errors.New("track is nil")
 	}
 
@@ -122,6 +114,7 @@ func (c *Consumer) AddLocalTrack(track *webrtc.TrackLocalStaticRTP) error {
 	if err != nil {
 		return err
 	}
+
 	go func() {
 		b := make([]byte, 1600)
 		for {

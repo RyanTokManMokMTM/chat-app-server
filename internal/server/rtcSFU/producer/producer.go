@@ -10,10 +10,10 @@ import (
 
 type Producer struct {
 	sync.Mutex
-	audioTrackLocal *webrtc.TrackLocalStaticRTP
-	videoTrackLocal *webrtc.TrackLocalStaticRTP
+	//audioTrackLocal *webrtc.TrackLocalStaticRTP
+	//videoTrackLocal *webrtc.TrackLocalStaticRTP
 	conn            *webrtc.PeerConnection
-	RTCSenderTracks []webrtc.TrackLocal
+	RTCSenderTracks []*webrtc.TrackLocalStaticRTP
 	offer           string
 	state           string
 }
@@ -22,7 +22,7 @@ var _ IProducer = (*Producer)(nil)
 
 func NewProducer() *Producer {
 	return &Producer{
-		RTCSenderTracks: make([]webrtc.TrackLocal, 0),
+		RTCSenderTracks: make([]*webrtc.TrackLocalStaticRTP, 0),
 	}
 }
 
@@ -132,26 +132,29 @@ func (p *Producer) GetPeerConnection() *webrtc.PeerConnection {
 	return p.conn
 }
 
-func (p *Producer) SetLocalTracks(kind webrtc.RTPCodecType, rtp *webrtc.TrackLocalStaticRTP) {
-	if kind == webrtc.RTPCodecTypeAudio {
-		p.audioTrackLocal = rtp
-	} else if kind == webrtc.RTPCodecTypeVideo {
-		p.videoTrackLocal = rtp
-	}
+func (p *Producer) SetLocalTracks(rtp *webrtc.TrackLocalStaticRTP) {
+	p.Lock()
+	defer p.Unlock()
+	p.RTCSenderTracks = append(p.RTCSenderTracks, rtp)
+}
+
+func (p *Producer) GetLocalTracks() []*webrtc.TrackLocalStaticRTP {
+	return p.RTCSenderTracks
 }
 
 func (p *Producer) RemoveLocalTracks(rtp *webrtc.TrackLocalStaticRTP) {
 	//TODO: If pc's track has been removed, then update the list
 }
 
-func (p *Producer) GetSenderRTPTracks(kind webrtc.RTPCodecType) (*webrtc.TrackLocalStaticRTP, error) {
-	if kind == webrtc.RTPCodecTypeAudio {
-		return p.audioTrackLocal, nil
-	} else if kind == webrtc.RTPCodecTypeVideo {
-		return p.videoTrackLocal, nil
-	}
-	return nil, errors.New("media kind not support")
-}
+//func (p *Producer) GetSenderRTPTracks(kind webrtc.RTPCodecType) (*webrtc.TrackLocalStaticRTP, error) {
+//	if kind == webrtc.RTPCodecTypeAudio {
+//		return p.audioTrackLocal, nil
+//	} else if kind == webrtc.RTPCodecTypeVideo {
+//		return p.videoTrackLocal, nil
+//	}
+//	return nil, errors.New("media kind not support")
+//}
+
 func (p *Producer) CloseConnection() error {
 
 	return p.conn.Close()

@@ -22,8 +22,9 @@ import (
 
 type TransportClient struct {
 	sync.Mutex
-	clientId               string
-	sessionId              string
+	clientId  string
+	sessionId string
+	//session                *session.Session
 	socketClient           *socketClient.SocketClient
 	trackLocalGroup        *trackGroup.TrackGroup
 	transportProducer      producer.IProducer
@@ -34,14 +35,13 @@ type TransportClient struct {
 
 func NewTransportClient(clientId string, sessionId string, socketClient *socketClient.SocketClient) *TransportClient {
 	return &TransportClient{
-		clientId:               clientId,
-		socketClient:           socketClient,
-		sessionId:              sessionId,
-		trackLocalGroup:        trackGroup.NewTrackGroup(),
-		transportProducer:      producer.NewProducer(),
-		transportConsumers:     make(map[string]consumer.IConsumer),
-		producerConnectedVideo: make(chan struct{}),
-		producerConnectedAudio: make(chan struct{}),
+		clientId:     clientId,
+		socketClient: socketClient,
+		sessionId:    sessionId,
+		//session:            session,
+		trackLocalGroup:    trackGroup.NewTrackGroup(),
+		transportProducer:  producer.NewProducer(),
+		transportConsumers: make(map[string]consumer.IConsumer),
 	}
 }
 
@@ -197,7 +197,9 @@ func NewTransportClient(clientId string, sessionId string, socketClient *socketC
 //	}()
 //}
 
-func (tc *TransportClient) NewConnection(iceServer []string, sdpType *types.Signaling, onConnectionState func(state webrtc.PeerConnectionState)) error {
+func (tc *TransportClient) NewConnection(iceServer []string, sdpType *types.Signaling,
+	onConnectionState func(state webrtc.PeerConnectionState),
+	onNewTrackReceived func(clientId string, track *webrtc.TrackLocalStaticRTP)) error {
 	if err := tc.transportProducer.NewConnection(iceServer); err != nil {
 		return err
 	}
@@ -215,7 +217,7 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdpType *types.Sign
 
 	conn := tc.transportProducer.GetPeerConnection()
 	if conn != nil {
-		tc.connectionEventHandler(conn, tc.clientId, true, sdpType, onConnectionState)
+		tc.connectionEventHandler(conn, tc.clientId, true, sdpType, onConnectionState, onNewTrackReceived)
 	}
 	ansStr := ans.SDP
 	//ansStr, err := jsonx.Marshal(ans)
@@ -267,7 +269,8 @@ func (tc *TransportClient) Consume(
 	iceServer []string,
 	sdpType *types.Signaling,
 	producer producer.IProducer,
-	onConnectionState func(state webrtc.PeerConnectionState)) error {
+	onConnectionState func(state webrtc.PeerConnectionState),
+	onNewTrackReceived func(clientId string, track *webrtc.TrackLocalStaticRTP)) error {
 	//TODO: Create consumer...
 	newConsumer := consumer.NewConsumer(
 		clientId,
@@ -277,22 +280,11 @@ func (tc *TransportClient) Consume(
 		return err
 	}
 
-	//add producer track to consumer.
-	audioTrack, err := producer.GetSenderRTPTracks(webrtc.RTPCodecTypeAudio)
-
-	if err != nil {
-		panic(err)
-	}
-	if err := newConsumer.AddLocalTrack(audioTrack); err != nil {
-		logx.Error(err)
-	}
-
-	videoTrack, err := producer.GetSenderRTPTracks(webrtc.RTPCodecTypeVideo)
-	if err != nil {
-		panic(err)
-	}
-	if err := newConsumer.AddLocalTrack(videoTrack); err != nil {
-		logx.Error(err)
+	for _, t := range producer.GetLocalTracks() {
+		logx.Info("Current producer tracks : Kind: ", t.Kind())
+		if err := newConsumer.AddLocalTrack(t); err != nil {
+			logx.Error(err)
+		}
 	}
 
 	ans, err := newConsumer.CreateAnswer(sdpType.SDP)
@@ -300,7 +292,7 @@ func (tc *TransportClient) Consume(
 
 	tc.addConsumer(clientId, newConsumer)
 	if conn != nil {
-		tc.connectionEventHandler(conn, clientId, false, sdpType, onConnectionState)
+		tc.connectionEventHandler(conn, clientId, false, sdpType, onConnectionState, onNewTrackReceived)
 	}
 
 	ansStr := ans.SDP
@@ -349,7 +341,8 @@ func (tc *TransportClient) connectionEventHandler(
 	userId string,
 	isProducer bool,
 	sdpType *types.Signaling,
-	onConnectionStatus func(webrtc.PeerConnectionState)) {
+	onConnectionStatus func(webrtc.PeerConnectionState),
+	onNewTrackReceived func(clientId string, track *webrtc.TrackLocalStaticRTP)) {
 
 	conn.OnDataChannel(func(channel *webrtc.DataChannel) {
 
@@ -475,7 +468,10 @@ func (tc *TransportClient) connectionEventHandler(
 			return
 		}
 
-		p.SetLocalTracks(t.Kind(), trackLocal)
+		p.SetLocalTracks(trackLocal)
+
+		//MARK: Announce any consumer in the session that producer has a new track.
+		onNewTrackReceived(userId, trackLocal)
 
 		//TODO: Write track data to track.
 		go func() {
@@ -562,7 +558,7 @@ func (tc *TransportClient) CloseConsumer(clientId string) error {
 		tc.removeConsumer(clientId)
 		return nil
 	}
-	return errors.New("consumer not found")
+	return errors.New("consumer not found while closing the connection")
 }
 
 func (tc *TransportClient) ExchangeIceCandidateForConsumers(consumerId, iceData string) error {
@@ -578,4 +574,13 @@ func (tc *TransportClient) GetProducer() (producer.IProducer, error) {
 		return nil, errors.New("producer not exist")
 	}
 	return tc.transportProducer, nil
+}
+
+func (tc *TransportClient) GetConsumerById(consumerId string) (consumer.IConsumer, error) {
+	c, ok := tc.transportConsumers[consumerId]
+	if !ok {
+		return nil, errors.New("consumer not exist")
+	}
+
+	return c, nil
 }

@@ -20,6 +20,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 )
 
 var Upgrader = websocket.Upgrader{
@@ -218,6 +219,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 			logx.Info("Created transport client for ", userId)
 
 			session.AddNewSessionClient(userId, tc)
+
 			//logx.Info("Offer : ", sdpType.SDP)
 			//Create the SFU connection
 			err = tc.NewConnection(c.SvcCtx.Config.IceServer.Urls, sdpType, func(state webrtc.PeerConnectionState) {
@@ -245,6 +247,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 						ProducerUserName:   currentUser.NickName,
 						ProducerUserAvatar: currentUser.Avatar,
 					}
+					time.Sleep(1 * time.Second)
 					for _, clientId := range clients {
 						if clientId != userId {
 							//sessionProducersList = append(sessionProducersList, clientId)
@@ -384,6 +387,13 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 					break
 				}
 
+			}, func(clientId string, track *webrtc.TrackLocalStaticRTP) {
+				logx.Infof("Producer %s new track comes in : Kind %s", userId, track.Kind())
+				if track == nil {
+					logx.Error("Track is nil - new track listener")
+					return
+				}
+				session.OnNewTrack(userId, track)
 			})
 			if err != nil {
 				logx.Error("Create ans error ", err)
@@ -438,7 +448,7 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 				logx.Error(err)
 				break
 			}
-			logx.Info("Consuming....")
+			logx.Info("Consuming ID ,", producerClient.GetClientId())
 			if err := transC.Consume(
 				consumeReq.ProducerId,
 				c.SvcCtx.Config.IceServer.Urls,
@@ -467,6 +477,11 @@ func (s *SocketServer) multicastMessageHandler(message []byte) error {
 					default:
 						break
 					}
+				}, func(clientId string, track *webrtc.TrackLocalStaticRTP) {
+					if track == nil {
+						return
+					}
+					logx.Infof("Consumer %s new track comes in , Kind %s", userId, track.Kind())
 				}); err != nil {
 				logx.Errorf("Consume %s error %s", consumeReq.ProducerId, err)
 				break
