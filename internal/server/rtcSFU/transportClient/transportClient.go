@@ -281,7 +281,6 @@ func (tc *TransportClient) Consume(
 	}
 
 	for _, t := range producer.GetLocalTracks() {
-		logx.Info("Current producer tracks : Kind: ", t.Kind())
 		if err := newConsumer.AddLocalTrack(t); err != nil {
 			logx.Error(err)
 		}
