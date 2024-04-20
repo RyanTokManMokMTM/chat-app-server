@@ -64,18 +64,19 @@ func (s *Session) OnListingNewTrack() {
 				}
 
 				//Check consumer existing current track.
-				for _, receiver := range c.GetPeerConnection().GetSenders() {
-					t := receiver.Track()
 
-					if t == nil {
-						logx.Error("(receiver)Track is nil")
-						continue
-					}
-					logx.Infof("(receiver)Current track with Kind %s, Id : %s, streamId :%s", t.Kind(), t.ID(), t.StreamID())
-					if info.track.StreamID() == t.StreamID() {
-						return
-					}
-				}
+				//for _, trans := range c.GetPeerConnection().GetTransceivers() {
+				//	logx.Info("Current c : trans")
+				//	s := trans.Sender()
+				//	if s == nil {
+				//		logx.Info("Sender is nil")
+				//	}
+				//	t := trans.Receiver()
+				//	if t == nil {
+				//		logx.Info("Reveiver is nil")
+				//	}
+				//
+				//}
 
 				if err := c.AddLocalTrack(info.track); err != nil {
 					logx.Error(err)

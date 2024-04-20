@@ -288,7 +288,6 @@ func (tc *TransportClient) Consume(
 
 	ans, err := newConsumer.CreateAnswer(sdpType.SDP)
 	conn := newConsumer.GetPeerConnection()
-
 	tc.addConsumer(clientId, newConsumer)
 	if conn != nil {
 		tc.connectionEventHandler(conn, clientId, false, sdpType, onConnectionState, onNewTrackReceived)

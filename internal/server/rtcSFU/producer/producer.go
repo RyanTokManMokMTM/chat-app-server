@@ -41,6 +41,14 @@ func (p *Producer) NewConnection(
 		logx.Error("Create Peer connection err : ", err)
 		return err
 	}
+	//for _, typ := range []webrtc.RTPCodecType{webrtc.RTPCodecTypeVideo, webrtc.RTPCodecTypeAudio} {
+	//	if _, err := peerConn.AddTransceiverFromKind(typ, webrtc.RTPTransceiverInit{
+	//		Direction: webrtc.RTPTransceiverDirectionRecvonly, //Receive only
+	//	}); err != nil {
+	//		logx.Error(err)
+	//		return err
+	//	}
+	//}
 
 	if err != nil {
 		logx.Error(err)
@@ -48,14 +56,6 @@ func (p *Producer) NewConnection(
 	}
 
 	p.conn = peerConn
-	//for _, typ := range []webrtc.RTPCodecType{webrtc.RTPCodecTypeVideo, webrtc.RTPCodecTypeAudio} {
-	//	if _, err := peerConn.AddTransceiverFromKind(typ, webrtc.RTPTransceiverInit{
-	//		Direction: webrtc.RTPTransceiverDirectionSendrecv,
-	//	}); err != nil {
-	//		log.Print(err)
-	//		return err
-	//	}
-	//}
 	return nil
 }
 

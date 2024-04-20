@@ -39,6 +39,10 @@ func (c *Consumer) CreateConnection(iceServer []string) error {
 		return err
 	}
 
+	if err != nil {
+		return err
+	}
+
 	c.conn = peerConn
 	return nil
 }
@@ -109,21 +113,21 @@ func (c *Consumer) AddLocalTrack(track *webrtc.TrackLocalStaticRTP) error {
 		return errors.New("track is nil")
 	}
 
-	_, err := c.conn.AddTrack(track)
+	sender, err := c.conn.AddTrack(track)
 	logx.Info("Adding track into consumer with kind : ", track.Kind())
 	if err != nil {
 		return err
 	}
 
-	//go func() {
-	//	b := make([]byte, 1600)
-	//	for {
-	//		if _, _, err := sender.Read(b); err != nil {
-	//			logx.Error(err)
-	//			return
-	//		}
-	//	}
-	//}()
+	go func() {
+		b := make([]byte, 1600)
+		for {
+			if _, _, err := sender.Read(b); err != nil {
+				logx.Error(err)
+				return
+			}
+		}
+	}()
 	return nil
 }
 
