@@ -60,6 +60,7 @@ func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUU
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
+
 	return &types.GetGroupInfoByUUIDResp{
 		Code: uint(http.StatusOK),
 		Result: types.FullGroupInfo{

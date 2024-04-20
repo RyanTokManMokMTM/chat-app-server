@@ -71,7 +71,7 @@ func (g *Group) UpdateOneAvatar(ctx context.Context, db *gorm.DB) error {
 
 func (g *Group) SearchGroup(ctx context.Context, db *gorm.DB, query string) ([]*Group, error) {
 	var groups []*Group
-	if err := db.WithContext(ctx).Debug().Model(g).Where("group_name like ?", "%"+query+"%").Find(&groups).Error; err != nil {
+	if err := db.WithContext(ctx).Debug().Model(g).Where("group_name like ?", "%"+query+"%").Preload("LeadInfo").Find(&groups).Error; err != nil {
 		return nil, err
 	}
 	return groups, nil

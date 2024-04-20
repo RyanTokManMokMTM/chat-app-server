@@ -11,6 +11,7 @@ import (
 type Session struct {
 	sync.Mutex
 	SessionId            string //roomId
+	CallType             string
 	sessionClients       map[string]*transportClient.TransportClient
 	newTrackLoadReceived chan struct {
 		clientId string
@@ -18,7 +19,7 @@ type Session struct {
 	}
 }
 
-func NewSession(SessionId string) *Session {
+func NewSession(SessionId, callType string) *Session {
 	return &Session{
 		SessionId:      SessionId,
 		sessionClients: make(map[string]*transportClient.TransportClient),
@@ -26,6 +27,7 @@ func NewSession(SessionId string) *Session {
 			clientId string
 			track    *webrtc.TrackLocalStaticRTP
 		}),
+		CallType: callType,
 	}
 }
 

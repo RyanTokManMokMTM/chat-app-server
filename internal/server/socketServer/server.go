@@ -1,8 +1,11 @@
 package socketServer
 
+import "C"
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/pion/webrtc/v3"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
@@ -207,6 +210,7 @@ func (s *SocketServer) sendAcknowledgement(seqID string, toUUID string) {
 }
 
 func (s *SocketServer) onHandleNormalMessage(msg *socket_message.Message) error {
+	logx.Info("Normal message handling")
 	switch msg.ContentType {
 	case variable.TEXT:
 		fallthrough
@@ -285,6 +289,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 			logx.Error("json unmarshal error", err)
 			return err
 		}
+		logx.Info(joinRoomData)
 		sdpType := &types.Signaling{}
 		if err := jsonx.Unmarshal([]byte(joinRoomData.SDPType), &sdpType); err != nil {
 			logx.Error("json unmarshal error(sdp type)", err)
@@ -299,10 +304,12 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 		logx.Info("Joining to session : ", joinRoomData.SessionId)
 
 		//Find a session
+		isNewRoom := false
 		session, err := s.sessionManager.GetOneSession(joinRoomData.SessionId)
 		if err != nil {
 			logx.Info("Session not found")
-			session = s.sessionManager.CreateOneSession(joinRoomData.SessionId)
+			session = s.sessionManager.CreateOneSession(joinRoomData.SessionId, joinRoomData.CallType)
+			isNewRoom = true
 		}
 
 		logx.Info("Current session Id : ", session.SessionId)
@@ -317,17 +324,66 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 			logx.Info("Connection State changed : ", state)
 			switch state {
 			case webrtc.PeerConnectionStateConnected:
-				time.Sleep(2 * time.Second) //waiting for 2 sec to received all the track from producer.
+				//Send a message to all client in that room
+
+				ctx := context.Background()
 
 				clients := session.GetSessionClients()
 				sessionProducersList := make([]types.SFUProducerUserInfo, 0)
-				ctx := context.Background()
+
 				currentUser, err := c.SvcCtx.DAO.FindOneUserByUUID(ctx, userId)
 				if err != nil {
 					logx.Error("Get User Info err : ", err)
 					break
 				}
 
+				if isNewRoom {
+					logx.Info("Sending a new session message.")
+					group, err := c.SvcCtx.DAO.FindOneGroupByUUID(ctx, session.SessionId)
+					if err != nil {
+						logx.Error(err.Error())
+						return
+					}
+
+					//TODO: Get All Group Members
+					members, err := c.SvcCtx.DAO.FindOneGroupMembers(ctx, group.Id)
+					if err != nil {
+						logx.Error(err.Error())
+						return
+
+					}
+
+					for _, member := range members {
+						newMessage := &socket_message.Message{
+							MessageID:    uuid.NewString(),
+							FromUserName: currentUser.NickName,
+							FromUUID:     session.SessionId,      //From Group UUID
+							ToUUID:       member.MemberInfo.Uuid, //To Member UUID
+							Content:      fmt.Sprintf("%s started a group %s's call", currentUser.NickName, joinRoomData.CallType),
+							ContentType:  variable.TEXT,
+							MessageType:  variable.MESSAGE_TYPE_GROUPCHAT,
+							EventType:    variable.MESSAGE,
+							GroupName:    group.GroupName,
+							GroupAvatar:  group.GroupAvatar,
+						}
+
+						messageBytes, err := json.MarshalIndent(newMessage, "", "\t")
+						if err != nil {
+							logx.Error(err)
+							continue
+						}
+
+						memberClient, err := s.GetOneClient(member.MemberInfo.Uuid)
+						if err != nil {
+							logx.Error("Client not exist")
+							continue
+						}
+
+						memberClient.SendMessage(websocket.BinaryMessage, messageBytes)
+					}
+				}
+
+				time.Sleep(2 * time.Second) //waiting for 2 sec to received all the track from producer.
 				currentUserInfo := types.SFUProducerUserInfo{
 					ProducerUserId:     currentUser.Uuid,
 					ProducerUserName:   currentUser.NickName,
@@ -590,7 +646,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 		jsonString := msg.Content //Can be a json string?
 		userId := msg.FromUUID
 
-		_, err := s.GetOneClient(msg.FromUUID)
+		c, err := s.GetOneClient(msg.FromUUID)
 		if err != nil {
 			logx.Error("SocketClient not found")
 			return err
@@ -674,6 +730,57 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 		if session.IsEmpty() {
 			logx.Info("Session is empty --- removing.....")
 			s.sessionManager.RemoveOneSession(session.SessionId)
+			ctx := context.Background()
+
+			currentUser, err := c.SvcCtx.DAO.FindOneUserByUUID(ctx, userId)
+			if err != nil {
+				logx.Error("Get User Info err : ", err)
+				break
+			}
+
+			group, err := c.SvcCtx.DAO.FindOneGroupByUUID(ctx, session.SessionId)
+			if err != nil {
+				logx.Error(err.Error())
+				break
+			}
+
+			//TODO: Get All Group Members
+			members, err := c.SvcCtx.DAO.FindOneGroupMembers(ctx, group.Id)
+			if err != nil {
+				logx.Error(err.Error())
+				break
+
+			}
+
+			for _, member := range members {
+				newMessage := &socket_message.Message{
+					MessageID:    uuid.NewString(),
+					FromUserName: currentUser.NickName,
+					FromUUID:     session.SessionId,      //From Group UUID
+					ToUUID:       member.MemberInfo.Uuid, //To Member UUID
+					Content:      fmt.Sprintf("%s ended a group %s's call", currentUser.NickName, session.CallType),
+					ContentType:  variable.TEXT,
+					MessageType:  variable.MESSAGE_TYPE_GROUPCHAT,
+					EventType:    variable.MESSAGE,
+					GroupName:    group.GroupName,
+					GroupAvatar:  group.GroupAvatar,
+				}
+
+				messageBytes, err := json.MarshalIndent(newMessage, "", "\t")
+				if err != nil {
+					logx.Error(err)
+					continue
+				}
+
+				memberClient, err := s.GetOneClient(member.MemberInfo.Uuid)
+				if err != nil {
+					logx.Error("Client not exist")
+					continue
+				}
+
+				memberClient.SendMessage(websocket.BinaryMessage, messageBytes)
+			}
+
 		}
 
 		break

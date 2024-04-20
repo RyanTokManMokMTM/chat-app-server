@@ -73,9 +73,10 @@ func (l *SearchGroupLogic) SearchGroup(req *types.SearchGroupReq) (resp *types.S
 				Avatar:    group.GroupAvatar,
 				CreatedAt: uint(group.CreatedAt.Unix()),
 			},
-			Members:  uint(count),
-			IsJoined: isJoined,
-			IsOwner:  group.GroupLead == userID,
+			Members:   uint(count),
+			IsJoined:  isJoined,
+			CreatedBy: group.LeadInfo.NickName,
+			IsOwner:   group.GroupLead == userID,
 		})
 	}
 	return &types.SearchGroupResp{

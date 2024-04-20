@@ -3,6 +3,7 @@ package types
 type SFUConnectSessionReq struct {
 	SessionId string `json:"session_id"` //RoomId
 	SDPType   string `json:"SDPType"`    //Connection WebRTC Offer
+	CallType  string `json:"callType"`
 }
 
 type SFUGetSessionProducerReq struct {

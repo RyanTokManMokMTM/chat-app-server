@@ -23,8 +23,8 @@ func NewSessionManager() *SessionManager {
 	}
 }
 
-func (sm *SessionManager) CreateOneSession(sid string) *session.Session {
-	s := session.NewSession(sid)
+func (sm *SessionManager) CreateOneSession(sid string, callType string) *session.Session {
+	s := session.NewSession(sid, callType)
 	go func() {
 		sm.onListingSessionNewTrack(s)
 	}()
