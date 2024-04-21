@@ -1,34 +1,26 @@
 # ChatApp Server
-![UI](./demo/full-app.png)
-#### FrontEnd Tech
-* SwiftUI
-* CoreData
-
-#### Backend Tech
+![UI](./demo/updated-2024-0420.png)
+#### Tech
 * GoZero - Web Server
 * Websocket
 * MySQL
 * Gorm
 * Redis
+* Pion WebRTC - Streaming
 
-#### Deploy
-* Github Action for CI/CD
-* Docker
-* Kubernetes
-* AWS
 
-### TODO List
-| Apis | Status      |
-|------|-------------|
-| User APIs | ✅           |
-| File APIs | ✅           |
-| Group APIs | ✅           |
-| Friend APIs | ✅           |
-| Friend APIs | ✅           |
-| Instance Story APIs | ✅           |
-|  Websocket Logic | In Progress |
-
+### Apis List
+| Apis                                | Status     |
+|-------------------------------------|------------|
+| User APIs                           | ✅          |
+| File APIs                           | ✅          |
+| Group APIs                          | ✅          |
+| Friend APIs                         | ✅          |
+| Instance Story APIs                 | ✅          |
+| Sticker APIs                        | ✅          |
+| Websocket - Pull&Push Message Event |  ✅ |
+| WebRTC - SFU(Not stable)            |  ✅ |
 
 ### Demo
-[Demo Video](https://www.youtube.com/watch?v=bo7lJhMwsc0)
+~~[Demo Video(Old)](https://www.youtube.com/watch?v=bo7lJhMwsc0)~~
 
