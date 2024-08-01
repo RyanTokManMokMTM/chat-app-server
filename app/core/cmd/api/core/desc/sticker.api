@@ -1,0 +1,73 @@
+syntax = "v1"
+
+info(
+    title: "Sticker API"
+    desc: "Sticker Resource using in Message"
+    author: "jackson.tmm"
+    version: "v1"
+)
+
+
+type (
+    // TODO: add members here and delete this comment
+    CreateStickerGroupReq{
+        StickerName string `form:"sticker_name"`
+    }
+    CreateStickerGroupResp{
+        Code uint `json:"code"`
+        StickerGroupUUID string `json:"sticker_group_id"`
+    }
+
+    GetStickerResourcesReq {
+        StickerGroupUUID string `path:"sticker_group_uuid"`
+    }
+
+    GetStickerResourcesResp {
+        Code uint `json:"code"`
+        StickerId string `json:"sticker_id"`
+        ResourcesPath []string `json:"resources_path"`
+    }
+
+    GetStickerInfoReq {
+        StickerUUID string `path:"sticker_uuid"`
+    }
+
+    GetStickerInfoResp {
+        Code uint `json:"code"`
+        StickerInfo StickerInfo `json:"sticker_info"`
+    }
+
+    GetStickerListReq{}
+
+    GetStickerListResp {
+        Code uint `json:"code"`
+        Stickers []StickerInfo `json:"stickers"`
+    }
+
+)
+
+type (
+    StickerInfo {
+        StickerID string `json:"sticker_id"`
+        StickerName string `json:"sticker_name"`
+        StickerThum string `json:"sticker_thum"`
+    }
+)
+
+@server(
+    group: sticker
+    prefix: /api/v1
+)
+service CoreAPI {
+    @handler CreateStickerGroup
+    post /sticker(CreateStickerGroupReq) returns (CreateStickerGroupResp)
+
+    @handler GetStickerGroupResources
+    get /sticker/resources/:sticker_group_uuid(GetStickerResourcesReq) returns (GetStickerResourcesResp)
+
+    @handler GetStickerGroupInfo
+    get /sticker/:sticker_uuid(GetStickerInfoReq) returns (GetStickerInfoResp)
+
+    @handler GetStickerGroupList
+    get /sticker/list(GetStickerListReq) returns (GetStickerListResp)
+}

@@ -1,0 +1,51 @@
+syntax = "v1"
+
+info(
+    title: "types title here"
+    desc: "types desc here"
+    author: "types author here"
+    email: "types email here"
+    version: "types version here"
+)
+
+type (
+    UploadImageReq {
+        ImageType string `json:"image_type"`
+        Data string `json:"data"`
+    }
+    UploadImageResp {
+        Code uint `json:"code"`
+        Path string `json:"path"`
+    }
+
+    UploadImagesReq {
+
+    }
+    UploadImagesResp {}
+
+
+    UploadFileReq {}
+    UploadFileResp {
+        Code uint `json:"code"`
+        Path string `json:"path"`
+    }
+)
+
+@server (
+    group: assets
+    prefix: /api/v1
+)
+service AssetsAPI {
+    @doc (
+        summary: "Upload only image"
+    )
+    @handler UploadImage
+    post  /file/image/upload (UploadImageReq) returns (UploadImageResp);
+
+    @doc (
+        summary: "Upload any file"
+    )
+    @handler UploadFile
+    post  /file/upload (UploadFileReq) returns (UploadFileResp);
+
+}

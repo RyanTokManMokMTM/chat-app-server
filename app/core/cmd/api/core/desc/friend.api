@@ -1,0 +1,86 @@
+syntax = "v1"
+
+info(
+    title: "types title here"
+    desc: "types desc here"
+    author: "types author here"
+    email: "types email here"
+    version: "types version here"
+)
+
+type (
+    AddFriendReq {
+        userID uint `json:"user_id"`
+    }
+    AddFriendResp {
+        Code uint `json:"code"`
+    }
+
+    DeleteFriendReq {
+        userID uint `json:"user_id"`
+    }
+    DeleteFriendResp {
+        Code uint `json:"code"`
+    }
+
+    GetFriendListReq {
+        Page uint `form:"page,default=1"`
+        Limit uint `form:"limit,default=20"`
+    }
+    GetFriendListResp {
+        Code uint `json:"code"`
+        PageableInfo
+        FriendList []CommonUserInfo `json:"friends"`
+    }
+
+    GetFriendInfoReq{
+        uuid string `path:"uuid"`
+    }
+    GetFriendInfoResp{
+        Code uint `json:"code"`
+        FriendInfo FriendInfo `json:"friend_info"`
+    }
+
+)
+
+type (
+    FriendInfo {
+        ID            uint   `json:"id,omitempty"`
+        Uuid          string `json:"uuid,omitempty"`
+        NickName      string `json:"name,omitempty"`
+        Avatar        string `json:"avatar,omitempty"`
+    }
+)
+
+
+
+@server (
+    group: friend
+    prefix: /api/v1
+    jwt: Auth
+)
+service  CoreAPI {
+    @doc (
+        summary: "Add a new friend"
+    )
+    @handler AddFriend
+    post /user/friend(AddFriendReq) returns (AddFriendResp);
+
+    @doc (
+        summary: "Delete a friend"
+    )
+    @handler DeleteFriend
+    delete /user/friend(DeleteFriendReq) returns (DeleteFriendResp);
+
+    @doc (
+        summary: "Get all user friends"
+    )
+    @handler GetFriendList
+    get /user/friends(GetFriendListReq) returns (GetFriendListResp)
+
+    @doc (
+        summary: "Get one friend information"
+    )
+    @handler GetFriendInformation
+    get /user/friend/:uuid(GetFriendInfoReq) returns (GetFriendInfoResp)
+}

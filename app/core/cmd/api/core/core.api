@@ -1,0 +1,50 @@
+syntax = "v1"
+
+import "desc/user.api"
+import "desc/friend.api"
+import "desc/group.api"
+import "desc/story.api"
+import "desc/sticker.api"
+
+info (
+	title:   "CoreAPI"
+	desc:    "A router for a CoreAPI"
+	author:  "Jackson.tmm"
+	email:   "ryantokmanmokmtm@hotmail.com"
+	version: "v1"
+)
+
+type (
+	HealthCheckResp {
+		Resp string `json:"resp"`
+	}
+)
+
+type (
+	PageableInfo {
+		TotalPage uint `json:"total_page"`
+		Page      uint `json:"current_page"`
+	}
+)
+
+type (
+	CommonUserInfo {
+		ID            uint   `json:"id,omitempty"`
+		Uuid          string `json:"uuid,omitempty"`
+		NickName      string `json:"name,omitempty"`
+		Avatar        string `json:"avatar,omitempty"`
+		Email         string `json:"email,omitempty"`
+		Cover         string `json:"cover,omitempty"`
+		StatusMessage string `json:"status"`
+	}
+)
+
+@server (
+	group:  health
+	prefix: /api/v1
+)
+service CoreAPI {
+	@handler HealthCheck
+	post /ping returns (HealthCheckResp)
+}
+

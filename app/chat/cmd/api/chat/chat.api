@@ -1,0 +1,44 @@
+syntax = "v1"
+
+info (
+	title:   "type title here"
+	desc:    "type desc here"
+	author:  "type author here"
+	email:   "type email here"
+	version: "type version here"
+)
+
+type (
+	HealthCheckResp {
+		Resp string `json:"resp"`
+	}
+)
+
+type (
+	PageableInfo {
+		TotalPage uint `json:"total_page"`
+		Page      uint `json:"current_page"`
+	}
+)
+
+type (
+	CommonUserInfo {
+		ID            uint   `json:"id,omitempty"`
+		Uuid          string `json:"uuid,omitempty"`
+		NickName      string `json:"name,omitempty"`
+		Avatar        string `json:"avatar,omitempty"`
+		Email         string `json:"email,omitempty"`
+		Cover         string `json:"cover,omitempty"`
+		StatusMessage string `json:"status"`
+	}
+)
+
+@server (
+	group:  health
+	prefix: /api/v1
+)
+service ChatAPI {
+	@handler HealthCheck
+	post /ping returns (HealthCheckResp)
+}
+

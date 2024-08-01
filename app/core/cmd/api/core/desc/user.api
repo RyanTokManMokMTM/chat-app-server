@@ -1,0 +1,225 @@
+syntax = "v1"
+
+info(
+    title: "types title here"
+    desc: "types desc here"
+    author: "types author here"
+    email: "types email here"
+    version: "types version here"
+)
+
+type (
+    SignUpReq {
+        Email string `json:"email" validate:"email,min=8,max=32"`
+        Name string `json:"name" validate:"min=4,max=16"`
+        Password string `json:"password" validate:"min=8,max=32"`
+    }
+    SignUpResp {
+        Code uint `json:"code"`
+        Token string `json:"token"`
+        ExpiredTime uint `json:"expired_time"`
+    }
+
+    SignInReq {
+        Email string `json:"email" validate:"email,min=8,max=32"`
+        Password string `json:"password" validate:"min=8,max=32"`
+    }
+    SignInResp {
+        Code uint `json:"code"`
+        Token string `json:"token"`
+        ExpiredTime uint `json:"expired_time"`
+        UserInfo CommonUserInfo `json:"user_info"`
+    }
+
+    GetUserInfoReq {
+        UserID uint `form:"id,optional"`
+        UUID string `form:"uuid,optional"`
+    }
+
+    GetUserInfoResp {
+        Code uint `json:"code"`
+        UUID string `json:"uuid"`
+        Name string `json:"name"`
+        Email string `json:"email"`
+        Avatar string `json:"avatar"`
+        Cover string `json:"cover"`
+        StatusMessage string `json:"status"`
+    }
+
+    GetUserFriendProfileReq {
+        UserID uint `form:"id,optional"`
+        UUID string `form:"uuid,optional"`
+    }
+    GetUserFriendProfileResp {
+        Code uint `json:"code"`
+        UserInfo CommonUserInfo `json:"user_info"`
+        IsFriend bool `json:"is_friend"`
+    }
+
+    UpdateUserStatusReq {
+        Status string `json:"status" validate:"max=50"`
+    }
+
+    UpdateUserStatusResp {
+        Code uint `json:"code"`
+    }
+
+    UpdateUserInfoReq {
+        Name string `json:"name" validate:"min=4,max=32"`
+        //        Password string `json:"password" validate:"min=8,max=32"`
+    }
+    UpdateUserInfoResp {
+        Code uint `json:"code"`
+    }
+
+    UploadUserAvatarReq {}
+    UploadUserAvatarResp {
+        Code uint `json:"code"`
+        Path string `json:"path"`
+    }
+
+    UploadUserCoverReq {}
+    UploadUserCoverResp {
+        Code uint `json:"code"`
+        Path string `json:"path"`
+    }
+
+
+    SearchUserReq {
+         qurey string `form:"query"`
+    }
+
+    SearchUserResp {
+        Code uint `json:"code"`
+        Results []SearchUserResult `json:"results"`
+    }
+
+    SearchUserResult {
+        UserInfo CommonUserInfo `json:"user_info"`
+        IsFriend bool `json:"is_friend"`
+    }
+
+    AddStickerReq{
+        StickerUUID string `json:"sticker_id"`
+    }
+    AddStickerResp {
+        Code uint `json:"code"`
+    }
+
+    DeleteStickerReq{
+        StickerUUID string `json:"sticker_id"`
+    }
+    DeleteStickerResp {
+        Code uint `json:"code"`
+    }
+
+    IsStickerExistReq{
+        StickerUUID string `path:"sticker_id"`
+    }
+    IsStickerExistResp {
+        Code uint `json:"code"`
+        IsExist bool `json:"is_exist"`
+    }
+
+    GetUserStickerReq{}
+    GetUserStickerResp {
+        Code uint `json:"code"`
+        Stickers []StickerInfo `json:"stickers"`
+    }
+
+)
+
+
+
+@server (
+    group: user
+    prefix: /api/v1
+)
+service CoreAPI{
+    @doc(
+        summary: "User accout sign up"
+    )
+    @handler UserSignUp
+    post /user/signup(SignUpReq) returns (SignUpResp)
+
+    @doc(
+        summary: "User account sign in"
+    )
+    @handler UserSignIn
+    post /user/signin(SignInReq) returns (SignInResp)
+
+    @doc(
+        summary: "Get User Profile - Other/Own"
+    )
+    @handler GetUserInfo
+    get /user/info(GetUserInfoReq) returns (GetUserInfoResp)
+
+}
+
+@server (
+    group: user
+    prefix: /api/v1
+    jwt: Auth
+)
+service CoreAPI{
+    @doc(
+        summary: "Get User Friend Profile - with `isFriend` data"
+    )
+    @handler GetUserFriendProfile
+    get /user/profile(GetUserFriendProfileReq) returns (GetUserFriendProfileResp)
+
+    @doc(
+        summary: "Update user profile"
+    )
+    @handler UpdateUserInfo
+    patch /user/info(UpdateUserInfoReq) returns (UpdateUserInfoResp)
+
+    @doc(
+        summary: "Update user message status"
+    )
+    @handler UpdateUserStatus
+    patch /user/status(UpdateUserStatusReq) returns (UpdateUserStatusResp)
+
+    @doc(
+        summary: "Upload and update user avatar"
+    )
+    @handler UploadUserAvatar
+    post /user/avatar(UploadUserAvatarReq) returns (UploadUserAvatarResp)
+
+    @doc(
+        summary: "Upload and update user cover"
+    )
+    @handler UploadUserCover
+    post /user/cover(UploadUserAvatarReq) returns (UploadUserAvatarResp)
+
+    @doc(
+        summary: "Search user by name"
+    )
+    @handler SearchUser
+    get /user/search(SearchUserReq) returns (SearchUserResp)
+
+    @doc(
+        summary:  "Add an existing sticker to user account"
+    )
+    @handler AddUserSticker
+    post /user/sticker(AddStickerReq) returns (AddStickerResp)
+
+    @doc(
+        summary:  "Remove the sticker is added"
+    )
+    @handler DeleteUserSticker
+    patch /user/sticker(DeleteStickerReq) returns (DeleteStickerResp)
+
+    @doc(
+        summary:  "Check an existing sticker has been added to user"
+    )
+    @handler IsStickerExist
+    get /user/sticker/:sticker_id(IsStickerExistReq) returns (IsStickerExistResp)
+
+    @doc(
+        summary:  "Get user sticker group"
+    )
+    @handler getUserStickers
+    get /user/sticker/list(GetUserStickerReq) returns (GetUserStickerResp)
+
+}
