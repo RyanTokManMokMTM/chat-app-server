@@ -1,0 +1,131 @@
+syntax = "proto3";
+
+package user;
+option go_package="./user_message";
+import "sticker/message.proto";
+import "common.proto";
+
+message SignUpReq{
+  string email = 1;
+  string name = 2;
+  string password = 3;
+}
+message SignUpResp{
+  int32 code = 1;
+  string token = 2;
+  int32 expiredTime = 3;
+}
+
+message SignInReq{
+  string email = 1;
+  string password = 3;
+}
+message SignInResp{
+  int32 code = 1;
+  string token = 2;
+  int32 expiredTime = 3;
+  optional common.UserInfo userInfo = 5;
+}
+
+message GetUserInfoReq{
+  optional int32 userId = 1;
+  optional string uuid = 2;
+}
+message GetUserInfoResp{
+  int32  code = 1;
+  string uuid = 2;
+  string name = 3;
+  string email = 4;
+  string avatar = 5;
+  string cover = 6;
+  string statusMessage = 7;
+}
+
+message GetUserFriendProfileReq{
+  optional int32 userId = 1;
+  optional string uuid = 2;
+}
+message GetUserFriendProfileResp{
+  int32 code = 1;
+  common.UserInfo userInfo = 2;
+  bool isFriend = 3;
+}
+
+message UpdateUserStatusReq{
+  int32 userId = 1;
+  string status = 2;
+}
+message UpdateUserStatusResp{
+  int32 code = 1;
+}
+
+message UpdateUserInfoReq{
+  int32 userId = 1;
+  string name = 2;
+}
+message UpdateUserInfoResp{
+  int32 code = 1;
+}
+
+message UploadUserAvatarReq{
+  int32 userId = 1;
+  bytes data = 2;
+}
+message UploadUserAvatarResp{
+  int32 code = 1;
+  string path = 2;
+}
+
+message UploadUserCoverReq{
+  int32 userId = 1;
+  bytes data = 2;
+}
+message UploadUserCoverResp{
+  int32 code = 1;
+  string path = 2;
+}
+
+message SearchUserReq{
+  int32 userId = 1;
+  string query = 2;
+}
+message SearchUserResp{
+  message result {
+    common.UserInfo userInfo = 1;
+    bool isFriend = 2;
+  }
+  int32 code = 1;
+  repeated result searchResults = 2;
+}
+
+message AddStickerReq{
+  int32 userId = 1;
+  string stickerUUID = 2;
+}
+message AddStickerResp{
+  int32 code = 1;
+}
+
+message DeleteStickerReq{
+  int32 userId = 1;
+  string stickerUUID = 2;
+}
+message DeleteStickerResp{
+  int32 code = 1;
+}
+
+message IsStickerExistReq{
+  int32 userId = 1;
+  string stickerUUID = 2;
+}
+message IsStickerExistResp{
+  int32 code = 1;
+  bool isExist = 2;
+}
+
+message GetUserStickerReq{}
+message GetUserStickerResp{
+  int32 code = 1;
+  repeated message.StickerInfo stickerInfo = 2;
+}
+

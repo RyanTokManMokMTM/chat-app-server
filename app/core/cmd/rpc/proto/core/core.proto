@@ -1,0 +1,467 @@
+syntax = "proto3";
+
+package core;
+option go_package="./core";
+import "sticker/message.proto";
+import "common/common.proto";
+import "story/message.proto";
+import "friend/message.proto";
+import "group/message.proto";
+
+//================MESSAGE============================
+//================USER MESSAGE============================
+message SignUpReq{
+  string email = 1;
+  string name = 2;
+  string password = 3;
+}
+message SignUpResp{
+  int32 code = 1;
+  string token = 2;
+  int32 expiredTime = 3;
+}
+
+message SignInReq{
+  string email = 1;
+  string password = 3;
+}
+message SignInResp{
+  int32 code = 1;
+  string token = 2;
+  int32 expiredTime = 3;
+  optional common.UserInfo userInfo = 5;
+}
+
+message GetUserInfoReq{
+  optional int32 userId = 1;
+  optional string uuid = 2;
+}
+message GetUserInfoResp{
+  int32  code = 1;
+  string uuid = 2;
+  string name = 3;
+  string email = 4;
+  string avatar = 5;
+  string cover = 6;
+  string statusMessage = 7;
+}
+
+message GetUserFriendProfileReq{
+  optional int32 userId = 1;
+  optional string uuid = 2;
+}
+message GetUserFriendProfileResp{
+  int32 code = 1;
+  common.UserInfo userInfo = 2;
+  bool isFriend = 3;
+}
+
+message UpdateUserStatusReq{
+  int32 userId = 1;
+  string status = 2;
+}
+message UpdateUserStatusResp{
+  int32 code = 1;
+}
+
+message UpdateUserInfoReq{
+  int32 userId = 1;
+  string name = 2;
+}
+message UpdateUserInfoResp{
+  int32 code = 1;
+}
+
+message UploadUserAvatarReq{
+  int32 userId = 1;
+  bytes data = 2;
+}
+message UploadUserAvatarResp{
+  int32 code = 1;
+  string path = 2;
+}
+
+message UploadUserCoverReq{
+  int32 userId = 1;
+  bytes data = 2;
+}
+message UploadUserCoverResp{
+  int32 code = 1;
+  string path = 2;
+}
+
+message SearchUserReq{
+  int32 userId = 1;
+  string query = 2;
+}
+message SearchUserResp{
+  message result {
+    common.UserInfo userInfo = 1;
+    bool isFriend = 2;
+  }
+  int32 code = 1;
+  repeated result searchResults = 2;
+}
+
+message AddStickerReq{
+  int32 userId = 1;
+  string stickerUUID = 2;
+}
+message AddStickerResp{
+  int32 code = 1;
+}
+
+message DeleteStickerReq{
+  int32 userId = 1;
+  string stickerUUID = 2;
+}
+message DeleteStickerResp{
+  int32 code = 1;
+}
+
+message IsStickerExistReq{
+  int32 userId = 1;
+  string stickerUUID = 2;
+}
+message IsStickerExistResp{
+  int32 code = 1;
+  bool isExist = 2;
+}
+
+message GetUserStickerReq{}
+message GetUserStickerResp{
+  int32 code = 1;
+  repeated sticker_message.StickerInfo stickerInfo = 2;
+}
+
+//================STORY MESSAGE============================
+//Story Message
+
+message AddStoryReq{
+  uint32 userId = 1;
+  bytes data = 2; //story image data.
+}
+message AddStoryResp{
+  uint32 code = 1;
+  story_message.StoryInfo info = 2;
+}
+
+message GetUserStoryReq{
+  uint32 userId = 1;
+  uint32 storyCreatedTime = 2;
+}
+message GetUserStoryResp{
+  uint32 code = 1;
+  repeated story_message.StoryInfo stories = 2;
+  uint32 lastStoryId = 3;
+}
+
+message GetActiveStoryReq{
+  uint32 userId = 1;
+  uint32 page = 2;
+  uint32 limit = 3;
+  uint32 latestID = 4;
+  uint32 storyCreatedTime = 5;
+}
+message GetActiveStoryResp{
+  uint32 code = 1;
+  common.PageableInfo pageInfo = 2;
+  uint32 currentStoryTime = 3;
+  repeated story_message.FriendStory friendStories = 4;
+}
+
+message DeleteStoryReq{
+  uint32 userId = 1;
+  uint32 storyId = 2;
+}
+message DeleteStoryResp{
+  uint32 code = 1;
+}
+
+message GetStoryInfoByIdRep{
+  uint32 storyId = 1;
+  uint32 userId = 2;
+}
+message GetStoryInfoByIdResp{
+  uint32 code = 1;
+  story_message.StoryInfo info = 2;
+  bool isLiked = 3;
+  uint32 totalSeenCount = 4;
+  uint32 createdAt = 5;
+  repeated story_message.StorySeenUserBasicInfo storySeenList = 6;
+}
+
+message UpdateStorySeenReq{
+  uint32 userId = 1;
+  uint32 storyId = 2;
+  uint32 friendId = 3;
+}
+message UpdateStorySeenResp{
+  uint32 code = 1;
+}
+
+message CreateStoryLikeReq{
+  uint32 userId = 1;
+  uint32 StoryId = 2;
+}
+message CreateStoryLikeResp{
+  uint32 code = 1;
+}
+
+message DeleteStoryLikeReq{
+  uint32 userId = 1;
+  uint32 storyId = 2;
+}
+message DeleteStoryLikeResp{
+  uint32 code = 1;
+}
+
+message GetStorySeenListReq{
+  uint32 userId = 1;
+  uint32 storyId = 2;
+}
+message GetStorySeenListResp{
+  uint32 code = 1;
+  uint32 totalSeen = 2;
+  repeated story_message.StorySeenInfo seenList = 3;
+}
+
+//================STICKER MESSAGE============================
+//Sticker Message
+
+message CreateStickerGroupReq{
+  int32 userId = 1;
+  string stickerName = 2;
+}
+message CreateStickerGroupResp{
+  int32 code = 1;
+  string stickerGroupUUID = 2;
+}
+
+message GetStickerResourcesReq{
+  string stickerGroupUUID = 1;
+}
+message GetStickerResourcesResp{
+  int32 code = 1;
+  string stickerId = 2;
+  repeated string paths = 3;
+}
+
+message GetStickerInfoReq{
+  string stickerGroupUUID = 1;
+}
+message GetStickerInfoResp{
+  int32 code = 1;
+  sticker_message.StickerInfo info = 2;
+}
+
+message GetStickerListReq{}
+message GetStickerListResp{
+  int32 code = 1;
+  repeated sticker_message.StickerInfo sticker = 2;
+}
+
+
+//================FRIEND MESSAGE============================
+//friend message
+message AddFriendReq{
+  uint32 userId = 1;
+  uint32 friendId = 2;
+}
+message AddFriendResp{
+  uint32 code = 1;
+}
+
+message DeleteFriendReq{
+  uint32 userId = 1;
+  uint32 friendId = 2;
+}
+message DeleteFriendResp{
+  uint32 code = 1;
+}
+
+message GetFriendListReq{
+  uint32 userId = 1;
+  uint32 page = 2;
+  uint32 limit = 3;
+}
+message GetFriendListResp{
+  uint32 code = 1;
+  common.PageableInfo pageInfo = 2;
+  repeated common.UserInfo friendList = 3;
+}
+
+message GetFriendInfoReq{
+  uint32 userId = 1;
+  string uuid = 2;
+}
+message GetFriendInfoResp{
+  uint32 code = 1;
+  friend_message.FriendInfo info = 2;
+}
+
+
+//================GROUP MESSAGE============================
+//group message
+message CreateGroupReq{
+  uint32 userId = 1;
+  string groupName = 2;
+  repeated uint32 groupMembers = 3;
+  string avatar = 4;
+}
+message CreateGroupResp{
+  uint32 code = 1;
+  string groupUUID = 2;
+  string avatar = 3;
+}
+
+message JoinGroupReq{
+  uint32 userId = 1;
+  uint32 groupId = 2;
+}
+message JoinGroupResp{
+  uint32 code = 1;
+}
+
+message LeaveGroupReq{
+  uint32 userId = 1;
+  uint32 groupId = 2;
+}
+message LeaveGroupResp{
+  uint32 code = 1;
+}
+
+message DeleteGroupReq{
+  uint32 userId = 1;
+  uint32 groupId = 2;
+}
+message DeleteGroupResp{
+  uint32 code = 1;
+}
+
+message GetGroupMembersReq{
+  uint32 userId = 1;
+  uint32 groupID = 2;
+  uint32 page = 3;
+  uint32 limit = 4;
+  uint32 latestId = 5;
+
+}
+message GetGroupMembersResp{
+  uint32 code = 1;
+  common.PageableInfo pageInfo = 2;
+  repeated group_message.GroupMemberInfo memberInfo = 3;
+}
+
+message UpdateGroupInfoReq{
+  uint32 userId = 1;
+  uint32 groupId = 2;
+  uint32 groupName = 3;
+  uint32 groupDesc = 4;
+}
+message UpdateGroupInfoResp{
+  uint32 code = 1;
+}
+
+message UploadGroupAvatarReq{
+  uint32 userId = 1;
+  uint32 groupId = 2;
+  bytes data = 3;
+}
+message UploadGroupAvatarResp{
+  uint32 code = 1;
+  string path = 2;
+}
+
+message GetUserGroupReq{
+  uint32 userId = 1;
+  uint32 page = 3;
+  uint32 limit = 4;
+  uint32 latestId = 5;
+}
+message GetUserGroupResp{
+  uint32 code = 1;
+  common.PageableInfo pageInfo = 2;
+  repeated group_message.GroupInfo groupInfo = 3;
+}
+
+message SearchGroupReq{
+  uint32 userId = 1;
+  string query = 2;
+}
+message SearchGroupResp{
+  uint32 code = 1;
+  repeated group_message.FullGroupInfo results = 2;
+}
+
+message GetGroupInfoByUUIDReq{
+  uint32 userId = 1;
+  string uuid = 2;
+}
+message GetGroupInfoByUUIDResp{
+  uint32 code = 1;
+  group_message.FullGroupInfo result = 2;
+}
+
+message CountUserGroupReq{
+  uint32 userId = 1;
+}
+message CountUserGroupResp{
+  uint32 code = 1;
+  uint32 total = 2;
+}
+//===================SERVICE=========================================
+//UserService
+service UserService {
+  rpc SignUp(SignUpReq) returns (SignUpResp);
+  rpc SignIn(SignInReq) returns (SignInResp);
+  rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoResp);
+
+  rpc GetUserFriendProfile(GetUserFriendProfileReq) returns (GetUserFriendProfileResp);
+  rpc UpdateUserInfo(UpdateUserInfoReq) returns (UpdateUserInfoResp);
+  rpc UpdateUserStatus(UpdateUserStatusReq) returns (UpdateUserStatusResp);
+  rpc UploadUserAvatar(stream UploadUserAvatarReq) returns (UploadUserAvatarResp);
+  rpc UploadUserCover(stream UploadUserCoverReq) returns (UploadUserCoverResp);
+  rpc SearchUser(SearchUserReq) returns (SearchUserResp);
+  rpc AddUserSticker(AddStickerReq) returns (AddStickerResp);
+  rpc DeleteUserSticker(DeleteStickerReq) returns (DeleteStickerResp);
+  rpc IsStickerExist(IsStickerExistReq) returns (IsStickerExistResp);
+  rpc getUserStickers(GetUserStickerReq) returns (GetUserStickerResp);
+}
+
+//Story Service
+service StoryService {
+  rpc AddStory(stream AddStoryReq) returns (AddStoryResp);
+  rpc DeleteStory(DeleteStoryReq) returns (DeleteStoryResp);
+  rpc GetUserStoriesByUserId(GetUserStoryReq) returns (GetUserStoryResp);
+  rpc GetActiveStories(GetActiveStoryReq) returns (GetActiveStoryResp);
+  rpc UpdateStorySeen(UpdateStorySeenReq) returns (UpdateStorySeenResp);
+  rpc CreateStoryLike(CreateStoryLikeReq) returns (CreateStoryLikeResp);
+  rpc DeleteStoryLike(DeleteStoryReq) returns (DeleteStoryLikeResp);
+  rpc GetStoryInfo(GetStoryInfoByIdRep) returns (GetStoryInfoByIdResp);
+  rpc GetStorySeenListInfo(GetStorySeenListReq) returns (GetStorySeenListResp);
+}
+
+//Group Service
+service GroupService {
+  rpc CreateGroup(CreateGroupReq) returns (CreateGroupResp);
+  rpc JoinGroup(JoinGroupReq) returns (JoinGroupResp);
+  rpc LeaveGroup(LeaveGroupReq) returns (LeaveGroupResp);
+  rpc DeleteGroup(DeleteGroupReq) returns (DeleteGroupResp);
+  rpc GetGroupMembers(GetGroupMembersReq) returns (GetGroupMembersResp);
+  rpc UploadGroupAvatar(stream UploadGroupAvatarReq) returns (UploadGroupAvatarResp);
+  rpc UpdateGroupInfo(UpdateGroupInfoReq) returns (UpdateGroupInfoResp);
+  rpc GetUserGroups(GetUserGroupReq) returns (GetUserGroupResp);
+  rpc SearchGroup(SearchGroupReq) returns (SearchGroupResp);
+  rpc GetGroupInfoByUUID(GetGroupInfoByUUIDReq) returns (GetGroupInfoByUUIDResp);
+  rpc CountUserGroup(CountUserGroupReq) returns (CountUserGroupResp);
+}
+
+//Friend Service
+service FriendService {
+  rpc AddFriend(AddFriendReq) returns (AddFriendResp);
+  rpc DeleteFriend(DeleteFriendReq) returns (DeleteFriendResp);
+  rpc GetFriendList(GetFriendListReq) returns (GetFriendListResp);
+  rpc GetFriendInformation(GetFriendInfoReq) returns (GetFriendInfoResp);
+}
+

@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package sticker_message;
+option go_package="./sticker_message";
+
+message StickerInfo{
+  string stickerId = 1;
+  string stickerName = 2;
+  string stickerThum = 3;
+}
+//
+//message CreateStickerGroupReq{
+//  int32 userId = 1;
+//  string stickerName = 2;
+//}
+//message CreateStickerGroupResp{
+//  int32 code = 1;
+//  string stickerGroupUUID = 2;
+//}
+//
+//message GetStickerResourcesReq{
+//  string stickerGroupUUID = 1;
+//}
+//message GetStickerResourcesResp{
+//  int32 code = 1;
+//  string stickerId = 2;
+//  repeated string paths = 3;
+//}
+//
+//message GetStickerInfoReq{
+//  string stickerGroupUUID = 1;
+//}
+//message GetStickerInfoResp{
+//  int32 code = 1;
+//  StickerInfo info = 2;
+//}
+//
+//message GetStickerListReq{}
+//message GetStickerListResp{
+//  int32 code = 1;
+//  repeated StickerInfo sticker = 2;
+//}

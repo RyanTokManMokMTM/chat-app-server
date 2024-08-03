@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+package story_message;
+option go_package="./story_message";
+
+message StoryInfo {
+  uint32 storyId = 1;
+  string storyUUID = 2;
+  string storyURL = 3;
+}
+
+message StorySeenUserBasicInfo{
+  uint32 Id = 1;
+  string avatar = 2;
+}
+message FriendStory{
+  uint32 userId = 1;
+  string uuid = 2;
+  string username = 3;
+  string avatar = 4;
+  bool isSeen = 5;
+  uint32 latestStoryTimeStamp = 6;
+}
+message StorySeenInfo{
+  uint32 userId = 1;
+  string uuid = 2;
+  string username = 3;
+  string avatar = 4;
+  bool isLiked = 5;
+  uint32 createdAt = 6;
+}
+//
+//message AddStoryReq{
+//  uint32 userId = 1;
+//  bytes data = 2; //story image data.
+//}
+//message AddStoryResp{
+//  uint32 code = 1;
+//  StoryInfo info = 2;
+//}
+//
+//message GetUserStoryReq{
+//  uint32 userId = 1;
+//  uint32 storyCreatedTime = 2;
+//}
+//message GetUserStoryResp{
+//  uint32 code = 1;
+//  repeated StoryInfo stories = 2;
+//  uint32 lastStoryId = 3;
+//}
+//
+//message GetActiveStoryReq{
+//  uint32 userId = 1;
+//  uint32 page = 2;
+//  uint32 limit = 3;
+//  uint32 latestID = 4;
+//  uint32 storyCreatedTime = 5;
+//}
+//message GetActiveStoryResp{
+//  uint32 code = 1;
+//  common.PageableInfo pageInfo = 2;
+//  uint32 currentStoryTime = 3;
+//  repeated FriendStory friendStories = 4;
+//}
+//
+//message DeleteStoryReq{
+//  uint32 userId = 1;
+//  uint32 storyId = 2;
+//}
+//message DeleteStoryResp{
+//  uint32 code = 1;
+//}
+//
+//message GetStoryInfoByIdRep{
+//  uint32 storyId = 1;
+//  uint32 userId = 2;
+//}
+//message GetStoryInfoByIdResp{
+//  uint32 code = 1;
+//  StoryInfo info = 2;
+//  bool isLiked = 3;
+//  uint32 totalSeenCount = 4;
+//  uint32 createdAt = 5;
+//  repeated StorySeenUserBasicInfo storySeenList = 6;
+//}
+//
+//message UpdateStorySeenReq{
+//  uint32 userId = 1;
+//  uint32 storyId = 2;
+//  uint32 friendId = 3;
+//}
+//message UpdateStorySeenResp{
+//  uint32 code = 1;
+//}
+//
+//message CreateStoryLikeReq{
+//  uint32 userId = 1;
+//  uint32 StoryId = 2;
+//}
+//message CreateStoryLikeResp{
+//  uint32 code = 1;
+//}
+//
+//message DeleteStoryLikeReq{
+//  uint32 userId = 1;
+//  uint32 storyId = 2;
+//}
+//message DeleteStoryLikeResp{
+//  uint32 code = 1;
+//}
+//
+//message GetStorySeenListReq{
+//  uint32 userId = 1;
+//  uint32 storyId = 2;
+//}
+//message GetStorySeenListResp{
+//  uint32 code = 1;
+//  uint32 totalSeen = 2;
+//  repeated StorySeenInfo seenList = 3;
+//}
+//

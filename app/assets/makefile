@@ -1,5 +1,7 @@
 api:
 	goctl api go -api ./cmd/api/assets/assets.api --dir=./cmd/api --home=../../tools
+rpc:
+	goctl rpc protoc ./cmd/rpc/proto/assets.proto --go_out=./cmd/rpc/types --go-grpc_out=./cmd/rpc/types --zrpc_out=./cmd/rpc
 run:
 	go run chatapp.go
 proto:

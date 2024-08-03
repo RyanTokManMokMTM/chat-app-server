@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package friend_message;
+option go_package="./friend_message";
+
+message FriendInfo{
+  uint32 id = 1;
+  string uuid = 2;
+  string nickName = 3;
+  string avatar = 4;
+}
+//
+//message AddFriendReq{
+//  uint32 userId = 1;
+//  uint32 friendId = 2;
+//}
+//message AddFriendResp{
+//  uint32 code = 1;
+//}
+//
+//message DeleteFriendReq{
+//  uint32 userId = 1;
+//  uint32 friendId = 2;
+//}
+//message DeleteFriendResp{
+//  uint32 code = 1;
+//}
+//
+//message GetFriendListReq{
+//  uint32 userId = 1;
+//  uint32 page = 2;
+//  uint32 limit = 3;
+//}
+//message GetFriendListResp{
+//  uint32 code = 1;
+//  common.PageableInfo pageInfo = 2;
+//  repeated common.UserInfo friendList = 3;
+//}
+//
+//message GetFriendInfoReq{
+//  uint32 userId = 1;
+//  string uuid = 2;
+//}
+//message GetFriendInfoResp{
+//  uint32 code = 1;
+//  FriendInfo info = 2;
+//}

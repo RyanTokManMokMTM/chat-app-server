@@ -64,6 +64,22 @@ func UploadFile(f multipart.File, header *multipart.FileHeader, filePath string)
 	return "/" + fileName, nil
 }
 
+func SaveBytesIntoFile(fileName string, bytes []byte, filePath string) (string, error) {
+	fileName = strings.ToLower(fileName)
+	tempFile, err := os.Create(path.Join(filePath, fileName))
+	if err != nil {
+		return "", err
+	}
+
+	defer tempFile.Close()
+
+	if _, err = tempFile.Write(bytes); err != nil {
+		return "", err
+	}
+
+	return "/" + fileName, nil
+}
+
 func UploadFileWithCustome(f multipart.File, header *multipart.FileHeader, filePath string) (string, error) {
 
 	tempFile, err := os.Create(path.Join(filePath, header.Filename))

@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package stream;
+option go_package="./assets_api";
+
+message UploadImageReq {
+  string type = 1;
+  string fileName =2;
+  bytes data = 3;
+}
+message UploadImageResp {
+  int32 code = 1;
+  string path = 3;
+}
+
+message UploadFileReq {
+  string type = 1;
+  string fileName =2;
+  bytes data = 3;
+}
+message UploadFileResp {
+  int32 code = 1;
+  string path = 2;
+}
+
+service AssetRPC {
+  rpc UploadImage(stream UploadImageReq) returns (UploadImageResp);
+  rpc UploadFile(stream UploadFileReq) returns (UploadFileResp);
+}
