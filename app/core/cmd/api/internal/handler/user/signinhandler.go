@@ -1,10 +1,14 @@
 package user
 
 import (
-	"api/app/common/errx"
+	"github.com/go-playground/locales/en"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
+	en_translations "github.com/go-playground/validator/v10/translations/en"
 	"github.com/pkg/errors"
-	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"google.golang.org/grpc/status"
+
 	"net/http"
 
 	"api/app/core/cmd/api/internal/logic/user"
@@ -13,7 +17,6 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-// User account sign in
 func SignInHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.SignInReq
@@ -22,10 +25,27 @@ func SignInHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
+		eng := en.New()
+		uti := ut.New(eng, eng)
+		trans, _ := uti.GetTranslator("en")
+		validate := validator.New()
+		err := en_translations.RegisterDefaultTranslations(validate, trans)
+		if err != nil {
+			commonErr := errx.NewCustomErrCode(errx.SERVER_COMMON_ERROR)
+			httpx.WriteJsonCtx(r.Context(), w, commonErr.StatusCode(), commonErr.ToJSON())
+			return
+		}
+		if err := validate.StructCtx(r.Context(), req); err != nil {
+			err := err.(validator.ValidationErrors)
+			commonErr := errx.NewCustomError(errx.REQ_PARAM_ERROR, err[0].Translate(trans))
+			httpx.WriteJsonCtx(r.Context(), w, commonErr.StatusCode(), commonErr.ToJSON())
+			return
+		}
+
 		l := user.NewSignInLogic(r.Context(), svcCtx)
 		resp, err := l.SignIn(&req)
 		if err != nil {
-			//RPC error or custom error
+			//convert to customError
 			reqError := errx.NewCustomErrCode(errx.SERVER_COMMON_ERROR)
 			errType := errors.Cause(err)
 			var e *errx.CustomError
@@ -42,8 +62,7 @@ func SignInHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 					}
 				}
 			}
-			logx.WithContext(r.Context()).Errorf("User Sign In error : %+v", reqError)
-			httpx.ErrorCtx(r.Context(), w, reqError)
+			httpx.WriteJsonCtx(r.Context(), w, reqError.StatusCode(), reqError.ToJSON())
 		} else {
 			httpx.OkJsonCtx(r.Context(), w, resp)
 		}
