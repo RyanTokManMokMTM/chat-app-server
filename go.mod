@@ -10,6 +10,7 @@ require (
 	github.com/pion/randutil v0.1.0
 	github.com/pion/rtcp v1.2.12
 	github.com/pion/webrtc/v3 v3.2.24
+	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/ryantokmanmokmtm/chat-app-server v0.0.0-20240421055810-afeacfdaed92
 	github.com/zeromicro/go-zero v1.7.0

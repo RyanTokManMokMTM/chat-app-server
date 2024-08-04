@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.25.3
-// source: core/core.proto
+// source: cmd/rpc/proto/core.proto
 
 package core
 
@@ -44,8 +44,8 @@ type UserServiceClient interface {
 	GetUserFriendProfile(ctx context.Context, in *GetUserFriendProfileReq, opts ...grpc.CallOption) (*GetUserFriendProfileResp, error)
 	UpdateUserInfo(ctx context.Context, in *UpdateUserInfoReq, opts ...grpc.CallOption) (*UpdateUserInfoResp, error)
 	UpdateUserStatus(ctx context.Context, in *UpdateUserStatusReq, opts ...grpc.CallOption) (*UpdateUserStatusResp, error)
-	UploadUserAvatar(ctx context.Context, opts ...grpc.CallOption) (UserService_UploadUserAvatarClient, error)
-	UploadUserCover(ctx context.Context, opts ...grpc.CallOption) (UserService_UploadUserCoverClient, error)
+	UploadUserAvatar(ctx context.Context, in *UploadUserAvatarReq, opts ...grpc.CallOption) (*UploadUserAvatarResp, error)
+	UploadUserCover(ctx context.Context, in *UploadUserCoverReq, opts ...grpc.CallOption) (*UploadUserCoverResp, error)
 	SearchUser(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*SearchUserResp, error)
 	AddUserSticker(ctx context.Context, in *AddStickerReq, opts ...grpc.CallOption) (*AddStickerResp, error)
 	DeleteUserSticker(ctx context.Context, in *DeleteStickerReq, opts ...grpc.CallOption) (*DeleteStickerResp, error)
@@ -115,72 +115,22 @@ func (c *userServiceClient) UpdateUserStatus(ctx context.Context, in *UpdateUser
 	return out, nil
 }
 
-func (c *userServiceClient) UploadUserAvatar(ctx context.Context, opts ...grpc.CallOption) (UserService_UploadUserAvatarClient, error) {
-	stream, err := c.cc.NewStream(ctx, &UserService_ServiceDesc.Streams[0], UserService_UploadUserAvatar_FullMethodName, opts...)
+func (c *userServiceClient) UploadUserAvatar(ctx context.Context, in *UploadUserAvatarReq, opts ...grpc.CallOption) (*UploadUserAvatarResp, error) {
+	out := new(UploadUserAvatarResp)
+	err := c.cc.Invoke(ctx, UserService_UploadUserAvatar_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &userServiceUploadUserAvatarClient{stream}
-	return x, nil
+	return out, nil
 }
 
-type UserService_UploadUserAvatarClient interface {
-	Send(*UploadUserAvatarReq) error
-	CloseAndRecv() (*UploadUserAvatarResp, error)
-	grpc.ClientStream
-}
-
-type userServiceUploadUserAvatarClient struct {
-	grpc.ClientStream
-}
-
-func (x *userServiceUploadUserAvatarClient) Send(m *UploadUserAvatarReq) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *userServiceUploadUserAvatarClient) CloseAndRecv() (*UploadUserAvatarResp, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(UploadUserAvatarResp)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *userServiceClient) UploadUserCover(ctx context.Context, opts ...grpc.CallOption) (UserService_UploadUserCoverClient, error) {
-	stream, err := c.cc.NewStream(ctx, &UserService_ServiceDesc.Streams[1], UserService_UploadUserCover_FullMethodName, opts...)
+func (c *userServiceClient) UploadUserCover(ctx context.Context, in *UploadUserCoverReq, opts ...grpc.CallOption) (*UploadUserCoverResp, error) {
+	out := new(UploadUserCoverResp)
+	err := c.cc.Invoke(ctx, UserService_UploadUserCover_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &userServiceUploadUserCoverClient{stream}
-	return x, nil
-}
-
-type UserService_UploadUserCoverClient interface {
-	Send(*UploadUserCoverReq) error
-	CloseAndRecv() (*UploadUserCoverResp, error)
-	grpc.ClientStream
-}
-
-type userServiceUploadUserCoverClient struct {
-	grpc.ClientStream
-}
-
-func (x *userServiceUploadUserCoverClient) Send(m *UploadUserCoverReq) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *userServiceUploadUserCoverClient) CloseAndRecv() (*UploadUserCoverResp, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(UploadUserCoverResp)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 func (c *userServiceClient) SearchUser(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*SearchUserResp, error) {
@@ -238,8 +188,8 @@ type UserServiceServer interface {
 	GetUserFriendProfile(context.Context, *GetUserFriendProfileReq) (*GetUserFriendProfileResp, error)
 	UpdateUserInfo(context.Context, *UpdateUserInfoReq) (*UpdateUserInfoResp, error)
 	UpdateUserStatus(context.Context, *UpdateUserStatusReq) (*UpdateUserStatusResp, error)
-	UploadUserAvatar(UserService_UploadUserAvatarServer) error
-	UploadUserCover(UserService_UploadUserCoverServer) error
+	UploadUserAvatar(context.Context, *UploadUserAvatarReq) (*UploadUserAvatarResp, error)
+	UploadUserCover(context.Context, *UploadUserCoverReq) (*UploadUserCoverResp, error)
 	SearchUser(context.Context, *SearchUserReq) (*SearchUserResp, error)
 	AddUserSticker(context.Context, *AddStickerReq) (*AddStickerResp, error)
 	DeleteUserSticker(context.Context, *DeleteStickerReq) (*DeleteStickerResp, error)
@@ -270,11 +220,11 @@ func (UnimplementedUserServiceServer) UpdateUserInfo(context.Context, *UpdateUse
 func (UnimplementedUserServiceServer) UpdateUserStatus(context.Context, *UpdateUserStatusReq) (*UpdateUserStatusResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserStatus not implemented")
 }
-func (UnimplementedUserServiceServer) UploadUserAvatar(UserService_UploadUserAvatarServer) error {
-	return status.Errorf(codes.Unimplemented, "method UploadUserAvatar not implemented")
+func (UnimplementedUserServiceServer) UploadUserAvatar(context.Context, *UploadUserAvatarReq) (*UploadUserAvatarResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UploadUserAvatar not implemented")
 }
-func (UnimplementedUserServiceServer) UploadUserCover(UserService_UploadUserCoverServer) error {
-	return status.Errorf(codes.Unimplemented, "method UploadUserCover not implemented")
+func (UnimplementedUserServiceServer) UploadUserCover(context.Context, *UploadUserCoverReq) (*UploadUserCoverResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UploadUserCover not implemented")
 }
 func (UnimplementedUserServiceServer) SearchUser(context.Context, *SearchUserReq) (*SearchUserResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchUser not implemented")
@@ -412,56 +362,40 @@ func _UserService_UpdateUserStatus_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_UploadUserAvatar_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(UserServiceServer).UploadUserAvatar(&userServiceUploadUserAvatarServer{stream})
-}
-
-type UserService_UploadUserAvatarServer interface {
-	SendAndClose(*UploadUserAvatarResp) error
-	Recv() (*UploadUserAvatarReq, error)
-	grpc.ServerStream
-}
-
-type userServiceUploadUserAvatarServer struct {
-	grpc.ServerStream
-}
-
-func (x *userServiceUploadUserAvatarServer) SendAndClose(m *UploadUserAvatarResp) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *userServiceUploadUserAvatarServer) Recv() (*UploadUserAvatarReq, error) {
-	m := new(UploadUserAvatarReq)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
+func _UserService_UploadUserAvatar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UploadUserAvatarReq)
+	if err := dec(in); err != nil {
 		return nil, err
 	}
-	return m, nil
+	if interceptor == nil {
+		return srv.(UserServiceServer).UploadUserAvatar(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UploadUserAvatar_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UploadUserAvatar(ctx, req.(*UploadUserAvatarReq))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_UploadUserCover_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(UserServiceServer).UploadUserCover(&userServiceUploadUserCoverServer{stream})
-}
-
-type UserService_UploadUserCoverServer interface {
-	SendAndClose(*UploadUserCoverResp) error
-	Recv() (*UploadUserCoverReq, error)
-	grpc.ServerStream
-}
-
-type userServiceUploadUserCoverServer struct {
-	grpc.ServerStream
-}
-
-func (x *userServiceUploadUserCoverServer) SendAndClose(m *UploadUserCoverResp) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *userServiceUploadUserCoverServer) Recv() (*UploadUserCoverReq, error) {
-	m := new(UploadUserCoverReq)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
+func _UserService_UploadUserCover_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UploadUserCoverReq)
+	if err := dec(in); err != nil {
 		return nil, err
 	}
-	return m, nil
+	if interceptor == nil {
+		return srv.(UserServiceServer).UploadUserCover(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UploadUserCover_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UploadUserCover(ctx, req.(*UploadUserCoverReq))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _UserService_SearchUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -586,6 +520,14 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_UpdateUserStatus_Handler,
 		},
 		{
+			MethodName: "UploadUserAvatar",
+			Handler:    _UserService_UploadUserAvatar_Handler,
+		},
+		{
+			MethodName: "UploadUserCover",
+			Handler:    _UserService_UploadUserCover_Handler,
+		},
+		{
 			MethodName: "SearchUser",
 			Handler:    _UserService_SearchUser_Handler,
 		},
@@ -606,19 +548,8 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_GetUserStickers_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "UploadUserAvatar",
-			Handler:       _UserService_UploadUserAvatar_Handler,
-			ClientStreams: true,
-		},
-		{
-			StreamName:    "UploadUserCover",
-			Handler:       _UserService_UploadUserCover_Handler,
-			ClientStreams: true,
-		},
-	},
-	Metadata: "core/core.proto",
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "cmd/rpc/proto/core.proto",
 }
 
 const (
@@ -1039,7 +970,7 @@ var StoryService_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "core/core.proto",
+	Metadata: "cmd/rpc/proto/core.proto",
 }
 
 const (
@@ -1534,7 +1465,7 @@ var GroupService_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "core/core.proto",
+	Metadata: "cmd/rpc/proto/core.proto",
 }
 
 const (
@@ -1735,5 +1666,5 @@ var FriendService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "core/core.proto",
+	Metadata: "cmd/rpc/proto/core.proto",
 }

@@ -37,6 +37,9 @@ type (
 	DeleteStoryLikeResp      = core.DeleteStoryLikeResp
 	DeleteStoryReq           = core.DeleteStoryReq
 	DeleteStoryResp          = core.DeleteStoryResp
+	FriendInfo               = core.FriendInfo
+	FriendStory              = core.FriendStory
+	FullGroupInfo            = core.FullGroupInfo
 	GetActiveStoryReq        = core.GetActiveStoryReq
 	GetActiveStoryResp       = core.GetActiveStoryResp
 	GetFriendInfoReq         = core.GetFriendInfoReq
@@ -67,12 +70,15 @@ type (
 	GetUserStickerResp       = core.GetUserStickerResp
 	GetUserStoryReq          = core.GetUserStoryReq
 	GetUserStoryResp         = core.GetUserStoryResp
+	GroupInfo                = core.GroupInfo
+	GroupMemberInfo          = core.GroupMemberInfo
 	IsStickerExistReq        = core.IsStickerExistReq
 	IsStickerExistResp       = core.IsStickerExistResp
 	JoinGroupReq             = core.JoinGroupReq
 	JoinGroupResp            = core.JoinGroupResp
 	LeaveGroupReq            = core.LeaveGroupReq
 	LeaveGroupResp           = core.LeaveGroupResp
+	PageableInfo             = core.PageableInfo
 	SearchGroupReq           = core.SearchGroupReq
 	SearchGroupResp          = core.SearchGroupResp
 	SearchUserReq            = core.SearchUserReq
@@ -82,6 +88,10 @@ type (
 	SignInResp               = core.SignInResp
 	SignUpReq                = core.SignUpReq
 	SignUpResp               = core.SignUpResp
+	StickerInfo              = core.StickerInfo
+	StoryInfo                = core.StoryInfo
+	StorySeenInfo            = core.StorySeenInfo
+	StorySeenUserBasicInfo   = core.StorySeenUserBasicInfo
 	UpdateGroupInfoReq       = core.UpdateGroupInfoReq
 	UpdateGroupInfoResp      = core.UpdateGroupInfoResp
 	UpdateStorySeenReq       = core.UpdateStorySeenReq
@@ -96,6 +106,7 @@ type (
 	UploadUserAvatarResp     = core.UploadUserAvatarResp
 	UploadUserCoverReq       = core.UploadUserCoverReq
 	UploadUserCoverResp      = core.UploadUserCoverResp
+	UserInfo                 = core.UserInfo
 
 	GroupService interface {
 		CreateGroup(ctx context.Context, in *CreateGroupReq, opts ...grpc.CallOption) (*CreateGroupResp, error)

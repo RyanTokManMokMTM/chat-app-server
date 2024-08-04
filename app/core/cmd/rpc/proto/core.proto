@@ -2,11 +2,85 @@ syntax = "proto3";
 
 package core;
 option go_package="./core";
-import "sticker/message.proto";
-import "common/common.proto";
-import "story/message.proto";
-import "friend/message.proto";
-import "group/message.proto";
+
+message PageableInfo {
+  uint32  totalPage = 1;
+  uint32  page    = 2;
+}
+
+message UserInfo{
+ uint32 id = 1;
+ string uuid = 2;
+ string name = 3;
+ string avatar = 4;
+ string email = 5;
+ string cover = 6;
+ string statusMessage = 7;
+}
+
+message FriendInfo{
+  uint32 id = 1;
+  string uuid = 2;
+  string nickName = 3;
+  string avatar = 4;
+}
+
+
+message GroupMemberInfo {
+  UserInfo userInfo = 1;
+  bool isGroupLead = 2;
+}
+
+message GroupInfo {
+  uint32 id = 1;
+  string uuid = 2;
+  string name = 3;
+  string avatar = 4;
+  string desc = 5;
+  uint32 createdAt = 6;
+}
+
+message FullGroupInfo {
+  GroupInfo info = 1;
+  uint32 members = 2;
+  bool isJoined = 3;
+  bool isOwner = 4;
+  uint32 createdBy= 5;
+}
+
+message StickerInfo{
+  string stickerId = 1;
+  string stickerName = 2;
+  string stickerThum = 3;
+}
+
+
+message StoryInfo {
+  uint32 storyId = 1;
+  string storyUUID = 2;
+  string storyURL = 3;
+}
+
+message StorySeenUserBasicInfo{
+  uint32 Id = 1;
+  string avatar = 2;
+}
+message FriendStory{
+  uint32 userId = 1;
+  string uuid = 2;
+  string username = 3;
+  string avatar = 4;
+  bool isSeen = 5;
+  uint32 latestStoryTimeStamp = 6;
+}
+message StorySeenInfo{
+  uint32 userId = 1;
+  string uuid = 2;
+  string username = 3;
+  string avatar = 4;
+  bool isLiked = 5;
+  uint32 createdAt = 6;
+}
 
 //================MESSAGE============================
 //================USER MESSAGE============================
@@ -29,7 +103,7 @@ message SignInResp{
   int32 code = 1;
   string token = 2;
   int32 expiredTime = 3;
-  optional common.UserInfo userInfo = 5;
+  optional UserInfo userInfo = 5;
 }
 
 message GetUserInfoReq{
@@ -52,7 +126,7 @@ message GetUserFriendProfileReq{
 }
 message GetUserFriendProfileResp{
   int32 code = 1;
-  common.UserInfo userInfo = 2;
+  UserInfo userInfo = 2;
   bool isFriend = 3;
 }
 
@@ -75,15 +149,18 @@ message UpdateUserInfoResp{
 message UploadUserAvatarReq{
   int32 userId = 1;
   bytes data = 2;
+  string fileName = 3;
 }
 message UploadUserAvatarResp{
   int32 code = 1;
   string path = 2;
+  string fileName = 3;
 }
 
 message UploadUserCoverReq{
   int32 userId = 1;
   bytes data = 2;
+  string fileName = 3;
 }
 message UploadUserCoverResp{
   int32 code = 1;
@@ -96,7 +173,7 @@ message SearchUserReq{
 }
 message SearchUserResp{
   message result {
-    common.UserInfo userInfo = 1;
+    UserInfo userInfo = 1;
     bool isFriend = 2;
   }
   int32 code = 1;
@@ -128,10 +205,12 @@ message IsStickerExistResp{
   bool isExist = 2;
 }
 
-message GetUserStickerReq{}
+message GetUserStickerReq{
+  uint32 userId = 1;
+}
 message GetUserStickerResp{
   int32 code = 1;
-  repeated sticker_message.StickerInfo stickerInfo = 2;
+  repeated StickerInfo stickerInfo = 2;
 }
 
 //================STORY MESSAGE============================
@@ -143,7 +222,7 @@ message AddStoryReq{
 }
 message AddStoryResp{
   uint32 code = 1;
-  story_message.StoryInfo info = 2;
+  StoryInfo info = 2;
 }
 
 message GetUserStoryReq{
@@ -152,7 +231,7 @@ message GetUserStoryReq{
 }
 message GetUserStoryResp{
   uint32 code = 1;
-  repeated story_message.StoryInfo stories = 2;
+  repeated StoryInfo stories = 2;
   uint32 lastStoryId = 3;
 }
 
@@ -165,9 +244,9 @@ message GetActiveStoryReq{
 }
 message GetActiveStoryResp{
   uint32 code = 1;
-  common.PageableInfo pageInfo = 2;
+  PageableInfo pageInfo = 2;
   uint32 currentStoryTime = 3;
-  repeated story_message.FriendStory friendStories = 4;
+  repeated FriendStory friendStories = 4;
 }
 
 message DeleteStoryReq{
@@ -184,11 +263,11 @@ message GetStoryInfoByIdRep{
 }
 message GetStoryInfoByIdResp{
   uint32 code = 1;
-  story_message.StoryInfo info = 2;
+  StoryInfo info = 2;
   bool isLiked = 3;
   uint32 totalSeenCount = 4;
   uint32 createdAt = 5;
-  repeated story_message.StorySeenUserBasicInfo storySeenList = 6;
+  repeated StorySeenUserBasicInfo storySeenList = 6;
 }
 
 message UpdateStorySeenReq{
@@ -223,7 +302,7 @@ message GetStorySeenListReq{
 message GetStorySeenListResp{
   uint32 code = 1;
   uint32 totalSeen = 2;
-  repeated story_message.StorySeenInfo seenList = 3;
+  repeated StorySeenInfo seenList = 3;
 }
 
 //================STICKER MESSAGE============================
@@ -252,13 +331,13 @@ message GetStickerInfoReq{
 }
 message GetStickerInfoResp{
   int32 code = 1;
-  sticker_message.StickerInfo info = 2;
+  StickerInfo info = 2;
 }
 
 message GetStickerListReq{}
 message GetStickerListResp{
   int32 code = 1;
-  repeated sticker_message.StickerInfo sticker = 2;
+  repeated StickerInfo sticker = 2;
 }
 
 
@@ -287,8 +366,8 @@ message GetFriendListReq{
 }
 message GetFriendListResp{
   uint32 code = 1;
-  common.PageableInfo pageInfo = 2;
-  repeated common.UserInfo friendList = 3;
+  PageableInfo pageInfo = 2;
+  repeated UserInfo friendList = 3;
 }
 
 message GetFriendInfoReq{
@@ -297,7 +376,7 @@ message GetFriendInfoReq{
 }
 message GetFriendInfoResp{
   uint32 code = 1;
-  friend_message.FriendInfo info = 2;
+  FriendInfo info = 2;
 }
 
 
@@ -349,8 +428,8 @@ message GetGroupMembersReq{
 }
 message GetGroupMembersResp{
   uint32 code = 1;
-  common.PageableInfo pageInfo = 2;
-  repeated group_message.GroupMemberInfo memberInfo = 3;
+  PageableInfo pageInfo = 2;
+  repeated GroupMemberInfo memberInfo = 3;
 }
 
 message UpdateGroupInfoReq{
@@ -381,8 +460,8 @@ message GetUserGroupReq{
 }
 message GetUserGroupResp{
   uint32 code = 1;
-  common.PageableInfo pageInfo = 2;
-  repeated group_message.GroupInfo groupInfo = 3;
+  PageableInfo pageInfo = 2;
+  repeated GroupInfo groupInfo = 3;
 }
 
 message SearchGroupReq{
@@ -391,7 +470,7 @@ message SearchGroupReq{
 }
 message SearchGroupResp{
   uint32 code = 1;
-  repeated group_message.FullGroupInfo results = 2;
+  repeated FullGroupInfo results = 2;
 }
 
 message GetGroupInfoByUUIDReq{
@@ -400,7 +479,7 @@ message GetGroupInfoByUUIDReq{
 }
 message GetGroupInfoByUUIDResp{
   uint32 code = 1;
-  group_message.FullGroupInfo result = 2;
+  FullGroupInfo result = 2;
 }
 
 message CountUserGroupReq{
@@ -420,8 +499,8 @@ service UserService {
   rpc GetUserFriendProfile(GetUserFriendProfileReq) returns (GetUserFriendProfileResp);
   rpc UpdateUserInfo(UpdateUserInfoReq) returns (UpdateUserInfoResp);
   rpc UpdateUserStatus(UpdateUserStatusReq) returns (UpdateUserStatusResp);
-  rpc UploadUserAvatar(stream UploadUserAvatarReq) returns (UploadUserAvatarResp);
-  rpc UploadUserCover(stream UploadUserCoverReq) returns (UploadUserCoverResp);
+  rpc UploadUserAvatar( UploadUserAvatarReq) returns (UploadUserAvatarResp);
+  rpc UploadUserCover( UploadUserCoverReq) returns (UploadUserCoverResp);
   rpc SearchUser(SearchUserReq) returns (SearchUserResp);
   rpc AddUserSticker(AddStickerReq) returns (AddStickerResp);
   rpc DeleteUserSticker(DeleteStickerReq) returns (DeleteStickerResp);

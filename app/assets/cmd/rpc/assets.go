@@ -26,7 +26,7 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
-		assets_api.RegisterAssertRPCServer(grpcServer, server.NewAssertRPCServer(ctx))
+		assets_api.RegisterAssetRPCServer(grpcServer, server.NewAssetRPCServer(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)

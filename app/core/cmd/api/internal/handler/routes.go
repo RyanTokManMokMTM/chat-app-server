@@ -230,13 +230,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				// User account sign in
 				Method:  http.MethodPost,
 				Path:    "/user/signin",
-				Handler: user.UserSignInHandler(serverCtx),
+				Handler: user.SignInHandler(serverCtx),
 			},
 			{
 				// User accout sign up
 				Method:  http.MethodPost,
 				Path:    "/user/signup",
-				Handler: user.UserSignUpHandler(serverCtx),
+				Handler: user.SignUpHandler(serverCtx),
 			},
 		},
 		rest.WithPrefix("/api/v1"),

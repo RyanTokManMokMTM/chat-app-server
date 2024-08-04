@@ -37,6 +37,9 @@ type (
 	DeleteStoryLikeResp      = core.DeleteStoryLikeResp
 	DeleteStoryReq           = core.DeleteStoryReq
 	DeleteStoryResp          = core.DeleteStoryResp
+	FriendInfo               = core.FriendInfo
+	FriendStory              = core.FriendStory
+	FullGroupInfo            = core.FullGroupInfo
 	GetActiveStoryReq        = core.GetActiveStoryReq
 	GetActiveStoryResp       = core.GetActiveStoryResp
 	GetFriendInfoReq         = core.GetFriendInfoReq
@@ -67,12 +70,15 @@ type (
 	GetUserStickerResp       = core.GetUserStickerResp
 	GetUserStoryReq          = core.GetUserStoryReq
 	GetUserStoryResp         = core.GetUserStoryResp
+	GroupInfo                = core.GroupInfo
+	GroupMemberInfo          = core.GroupMemberInfo
 	IsStickerExistReq        = core.IsStickerExistReq
 	IsStickerExistResp       = core.IsStickerExistResp
 	JoinGroupReq             = core.JoinGroupReq
 	JoinGroupResp            = core.JoinGroupResp
 	LeaveGroupReq            = core.LeaveGroupReq
 	LeaveGroupResp           = core.LeaveGroupResp
+	PageableInfo             = core.PageableInfo
 	SearchGroupReq           = core.SearchGroupReq
 	SearchGroupResp          = core.SearchGroupResp
 	SearchUserReq            = core.SearchUserReq
@@ -82,6 +88,10 @@ type (
 	SignInResp               = core.SignInResp
 	SignUpReq                = core.SignUpReq
 	SignUpResp               = core.SignUpResp
+	StickerInfo              = core.StickerInfo
+	StoryInfo                = core.StoryInfo
+	StorySeenInfo            = core.StorySeenInfo
+	StorySeenUserBasicInfo   = core.StorySeenUserBasicInfo
 	UpdateGroupInfoReq       = core.UpdateGroupInfoReq
 	UpdateGroupInfoResp      = core.UpdateGroupInfoResp
 	UpdateStorySeenReq       = core.UpdateStorySeenReq
@@ -96,6 +106,7 @@ type (
 	UploadUserAvatarResp     = core.UploadUserAvatarResp
 	UploadUserCoverReq       = core.UploadUserCoverReq
 	UploadUserCoverResp      = core.UploadUserCoverResp
+	UserInfo                 = core.UserInfo
 
 	UserService interface {
 		SignUp(ctx context.Context, in *SignUpReq, opts ...grpc.CallOption) (*SignUpResp, error)
@@ -104,8 +115,8 @@ type (
 		GetUserFriendProfile(ctx context.Context, in *GetUserFriendProfileReq, opts ...grpc.CallOption) (*GetUserFriendProfileResp, error)
 		UpdateUserInfo(ctx context.Context, in *UpdateUserInfoReq, opts ...grpc.CallOption) (*UpdateUserInfoResp, error)
 		UpdateUserStatus(ctx context.Context, in *UpdateUserStatusReq, opts ...grpc.CallOption) (*UpdateUserStatusResp, error)
-		UploadUserAvatar(ctx context.Context, opts ...grpc.CallOption) (core.UserService_UploadUserAvatarClient, error)
-		UploadUserCover(ctx context.Context, opts ...grpc.CallOption) (core.UserService_UploadUserCoverClient, error)
+		UploadUserAvatar(ctx context.Context, in *UploadUserAvatarReq, opts ...grpc.CallOption) (*UploadUserAvatarResp, error)
+		UploadUserCover(ctx context.Context, in *UploadUserCoverReq, opts ...grpc.CallOption) (*UploadUserCoverResp, error)
 		SearchUser(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*SearchUserResp, error)
 		AddUserSticker(ctx context.Context, in *AddStickerReq, opts ...grpc.CallOption) (*AddStickerResp, error)
 		DeleteUserSticker(ctx context.Context, in *DeleteStickerReq, opts ...grpc.CallOption) (*DeleteStickerResp, error)
@@ -154,14 +165,14 @@ func (m *defaultUserService) UpdateUserStatus(ctx context.Context, in *UpdateUse
 	return client.UpdateUserStatus(ctx, in, opts...)
 }
 
-func (m *defaultUserService) UploadUserAvatar(ctx context.Context, opts ...grpc.CallOption) (core.UserService_UploadUserAvatarClient, error) {
+func (m *defaultUserService) UploadUserAvatar(ctx context.Context, in *UploadUserAvatarReq, opts ...grpc.CallOption) (*UploadUserAvatarResp, error) {
 	client := core.NewUserServiceClient(m.cli.Conn())
-	return client.UploadUserAvatar(ctx, opts...)
+	return client.UploadUserAvatar(ctx, in, opts...)
 }
 
-func (m *defaultUserService) UploadUserCover(ctx context.Context, opts ...grpc.CallOption) (core.UserService_UploadUserCoverClient, error) {
+func (m *defaultUserService) UploadUserCover(ctx context.Context, in *UploadUserCoverReq, opts ...grpc.CallOption) (*UploadUserCoverResp, error) {
 	client := core.NewUserServiceClient(m.cli.Conn())
-	return client.UploadUserCover(ctx, opts...)
+	return client.UploadUserCover(ctx, in, opts...)
 }
 
 func (m *defaultUserService) SearchUser(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*SearchUserResp, error) {

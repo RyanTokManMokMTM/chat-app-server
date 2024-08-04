@@ -1,6 +1,20 @@
 Name: core.rpc
-ListenOn: 0.0.0.0:8080
+ListenOn: 0.0.0.0:9000
 Etcd:
   Hosts:
   - 127.0.0.1:2379
   Key: core.rpc
+
+MySQL:
+  DataSource: root:admin@tcp(127.0.0.1:3306)/chatappdb?charset=utf8mb4&parseTime=true&loc=Asia%2FHong_Kong
+  MaxIdleConns: 100
+  MaxOpenConns: 100
+
+Salt: W4tiDEeWlwxlRPYYRRMhJ65piS1ochvMymwfVdumittPoSxhkHNnVLe6m12C4v15
+ResourcesPath : /resources
+MaxFileSize : 1048576
+
+AuthConf:
+  AccessSecret: 2BNVfmf0WtyX1HQmzYx5rOKLzlHBEPRX729pZ0gpxujnaikoRRCF78T8fKDNTLWy
+  AccessExpire: 36800
+

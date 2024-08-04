@@ -1,4 +1,12 @@
 Name: CoreAPI
 Host: 0.0.0.0
-Port: 8080
+Port: 8000
+CoreRPC:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: core.rpc
 
+Auth:
+  AccessSecret: 2BNVfmf0WtyX1HQmzYx5rOKLzlHBEPRX729pZ0gpxujnaikoRRCF78T8fKDNTLWy
+  AccessExpire: 36800

@@ -1,6 +1,6 @@
 package errx
 
-type InternalCode uint
+type InternalCode uint32
 
 const (
 	SUCCESS                InternalCode = 0
@@ -12,6 +12,7 @@ const (
 	DB_ERROR               InternalCode = 100006
 	DB_AFFECTED_ZERO_ERROR InternalCode = 100007
 	FILE_UPLOAD_FAILED     InternalCode = 100008
+	NOT_FOUND              InternalCode = 100009
 )
 
 const (

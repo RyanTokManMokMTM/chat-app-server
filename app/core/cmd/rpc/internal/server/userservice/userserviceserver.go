@@ -52,14 +52,14 @@ func (s *UserServiceServer) UpdateUserStatus(ctx context.Context, in *core.Updat
 	return l.UpdateUserStatus(in)
 }
 
-func (s *UserServiceServer) UploadUserAvatar(stream core.UserService_UploadUserAvatarServer) error {
-	l := userservicelogic.NewUploadUserAvatarLogic(stream.Context(), s.svcCtx)
-	return l.UploadUserAvatar(stream)
+func (s *UserServiceServer) UploadUserAvatar(ctx context.Context, in *core.UploadUserAvatarReq) (*core.UploadUserAvatarResp, error) {
+	l := userservicelogic.NewUploadUserAvatarLogic(ctx, s.svcCtx)
+	return l.UploadUserAvatar(in)
 }
 
-func (s *UserServiceServer) UploadUserCover(stream core.UserService_UploadUserCoverServer) error {
-	l := userservicelogic.NewUploadUserCoverLogic(stream.Context(), s.svcCtx)
-	return l.UploadUserCover(stream)
+func (s *UserServiceServer) UploadUserCover(ctx context.Context, in *core.UploadUserCoverReq) (*core.UploadUserCoverResp, error) {
+	l := userservicelogic.NewUploadUserCoverLogic(ctx, s.svcCtx)
+	return l.UploadUserCover(in)
 }
 
 func (s *UserServiceServer) SearchUser(ctx context.Context, in *core.SearchUserReq) (*core.SearchUserResp, error) {

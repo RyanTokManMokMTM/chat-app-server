@@ -5,7 +5,6 @@
       <entry url="file://$PROJECT_DIR$">
         <entryData>
           <resourceRoots>
-            <path value="file://$PROJECT_DIR$/app/core/cmd/rpc/proto" />
             <path value="file://$PROJECT_DIR$/app/common/desc" />
           </resourceRoots>
         </entryData>

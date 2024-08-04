@@ -1,6 +1,7 @@
 package main
 
 import (
+	"api/app/common/rpc"
 	"flag"
 	"fmt"
 
@@ -33,11 +34,11 @@ func main() {
 		core.RegisterStoryServiceServer(grpcServer, storyserviceServer.NewStoryServiceServer(ctx))
 		core.RegisterGroupServiceServer(grpcServer, groupserviceServer.NewGroupServiceServer(ctx))
 		core.RegisterFriendServiceServer(grpcServer, friendserviceServer.NewFriendServiceServer(ctx))
-
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)
 		}
 	})
+	s.AddUnaryInterceptors(rpc.LoggerInterceptor)
 	defer s.Stop()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)

@@ -139,13 +139,13 @@ service CoreAPI{
     @doc(
         summary: "User accout sign up"
     )
-    @handler UserSignUp
+    @handler SignUp
     post /user/signup(SignUpReq) returns (SignUpResp)
 
     @doc(
         summary: "User account sign in"
     )
-    @handler UserSignIn
+    @handler SignIn
     post /user/signin(SignInReq) returns (SignInResp)
 
     @doc(
