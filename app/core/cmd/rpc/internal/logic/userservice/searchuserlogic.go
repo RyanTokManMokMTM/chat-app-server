@@ -5,7 +5,7 @@ import (
 	"api/app/core/cmd/rpc/internal/svc"
 	"api/app/core/cmd/rpc/types/core"
 	"context"
-	"errors"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -30,23 +30,24 @@ func (l *SearchUserLogic) SearchUser(in *core.SearchUserReq) (*core.SearchUserRe
 	userID := uint(in.UserId)
 
 	if len(in.Query) == 0 {
-		return nil, errx.NewCustomError(errx.REQ_PARAM_ERROR, "Missing Search Keyword.")
+		return nil, errors.Wrapf(errx.NewCustomErrCode(errx.REQ_PARAM_ERROR), "request parameter error : missing searching keyword")
 	}
 	_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not exist, error %+v", err)
 		}
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		logx.WithContext(l.ctx).Errorf("Error : %+v", err)
+		return nil, err
 	}
 
 	results, err := l.svcCtx.DAO.FindUsers(l.ctx, in.Query)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errx.NewCustomError(errx.NOT_FOUND, err.Error())
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not exist, error %+v", err)
 		}
-
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		logx.WithContext(l.ctx).Errorf("Error : %+v", err)
+		return nil, err
 	}
 
 	var users = make([]*core.SearchUserRespResult, 0)
@@ -76,9 +77,9 @@ func (l *SearchUserLogic) SearchUser(in *core.SearchUserReq) (*core.SearchUserRe
 			}, IsFriend: isFriend,
 		})
 	}
-	if len(users) == 0 {
-		return nil, errx.NewCustomError(errx.NOT_FOUND, err.Error())
-	}
+	//if len(users) == 0 {
+	//	return nil, errx.NewCustomError(errx.NOT_FOUND, err.Error())
+	//}
 
 	return &core.SearchUserResp{
 		Code:          int32(errx.SUCCESS),

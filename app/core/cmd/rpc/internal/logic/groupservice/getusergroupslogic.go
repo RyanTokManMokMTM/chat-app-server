@@ -1,10 +1,13 @@
 package groupservicelogic
 
 import (
-	"context"
-
+	"api/app/common/errx"
+	"api/app/common/pagerx"
 	"api/app/core/cmd/rpc/internal/svc"
 	"api/app/core/cmd/rpc/types/core"
+	"context"
+	"github.com/pkg/errors"
+	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,6 +28,41 @@ func NewGetUserGroupsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 
 func (l *GetUserGroupsLogic) GetUserGroups(in *core.GetUserGroupReq) (*core.GetUserGroupResp, error) {
 	// todo: add your logic here and delete this line
+	userID := uint(in.UserId)
+	_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	if err != nil {
+		logx.WithContext(l.ctx).Error(err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not exist, error : %+v", err)
+		}
+		return nil, err
+	}
 
-	return &core.GetUserGroupResp{}, nil
+	total := l.svcCtx.DAO.CountUserGroups(l.ctx, userID)
+	//
+	pageLimit := pagerx.GetLimit(uint(in.Limit))
+	pageSize := pagerx.GetTotalPageByPageSize(uint(total), pageLimit)
+	pageOffset := pagerx.PageOffset(pageSize, uint(in.Page))
+
+	groups, err := l.svcCtx.DAO.GetUserGroups(l.ctx, userID, int(pageOffset), int(pageLimit))
+	if err != nil {
+		logx.WithContext(l.ctx).Error(err)
+		return nil, err
+	}
+
+	userGroups := make([]*core.GroupInfo, 0)
+	for _, g := range groups {
+		userGroups = append(userGroups, &core.GroupInfo{
+			Id:        uint32(g.GroupInfo.Id),
+			Uuid:      g.GroupInfo.Uuid,
+			Name:      g.GroupInfo.GroupName,
+			Avatar:    g.GroupInfo.GroupAvatar,
+			CreatedAt: uint32(g.GroupInfo.CreatedAt.Unix()),
+		})
+	}
+
+	return &core.GetUserGroupResp{
+		Code:      uint32(errx.SUCCESS),
+		GroupInfo: userGroups,
+	}, nil
 }

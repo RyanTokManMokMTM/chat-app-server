@@ -1,7 +1,10 @@
 package story
 
 import (
+	"api/app/common/ctxtool"
+	"api/app/core/cmd/rpc/types/core"
 	"context"
+	"net/http"
 
 	"api/app/core/cmd/api/internal/svc"
 	"api/app/core/cmd/api/internal/types"
@@ -26,6 +29,31 @@ func NewGetStorySeenListInfoLogic(ctx context.Context, svcCtx *svc.ServiceContex
 
 func (l *GetStorySeenListInfoLogic) GetStorySeenListInfo(req *types.GetStorySeenListReq) (resp *types.GetStorySeenListResp, err error) {
 	// todo: add your logic here and delete this line
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	rpcResp, rpcErr := l.svcCtx.StoryService.GetStorySeenListInfo(l.ctx, &core.GetStorySeenListReq{
+		UserId:  uint32(userID),
+		StoryId: uint32(req.StoryId),
+	})
 
-	return
+	if rpcErr != nil {
+		logx.WithContext(l.ctx).Error(err)
+		return nil, rpcErr
+	}
+
+	seenInfoList := make([]types.StorySeenInfo, 0)
+	for _, info := range rpcResp.SeenList {
+		seenInfoList = append(seenInfoList, types.StorySeenInfo{
+			UserID:     uint(info.UserId),
+			Uuid:       info.Uuid,
+			UserName:   info.Username,
+			UserAvatar: info.Avatar,
+			IsLiked:    info.IsLiked,
+			CreatedAt:  uint(info.CreatedAt),
+		})
+	}
+	return &types.GetStorySeenListResp{
+		Code:      uint(http.StatusOK),
+		SeenList:  seenInfoList,
+		TotalSeen: uint(rpcResp.TotalSeen),
+	}, nil
 }

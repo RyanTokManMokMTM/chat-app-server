@@ -1,11 +1,11 @@
 package story
 
 import (
-	"context"
-
+	"api/app/common/ctxtool"
 	"api/app/core/cmd/api/internal/svc"
 	"api/app/core/cmd/api/internal/types"
-
+	"api/app/core/cmd/rpc/types/core"
+	"context"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,6 +26,38 @@ func NewGetActiveStoriesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 func (l *GetActiveStoriesLogic) GetActiveStories(req *types.GetActiveStoryReq) (resp *types.GetActiveStoryResp, err error) {
 	// todo: add your logic here and delete this line
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	rpcResp, rpcErr := l.svcCtx.StoryService.GetActiveStories(l.ctx, &core.GetActiveStoryReq{
+		UserId:   uint32(userID),
+		Page:     uint32(req.Page),
+		Limit:    uint32(req.Limit),
+		LatestID: uint32(req.LatestID),
+	})
 
-	return
+	if rpcErr != nil {
+		logx.WithContext(l.ctx).Error(err)
+		return nil, rpcErr
+	}
+
+	activeStories := make([]types.FriendStroy, 0)
+	for _, story := range rpcResp.FriendStories {
+		activeStories = append(activeStories, types.FriendStroy{
+			UserID:               uint(story.UserId),
+			Uuid:                 story.Uuid,
+			UserName:             story.Username,
+			UserAvatar:           story.Avatar,
+			IsSeen:               story.IsSeen,
+			LatestStoryTimeStamp: uint(story.LatestStoryTimeStamp),
+		})
+	}
+
+	return &types.GetActiveStoryResp{
+		Code:             uint(rpcResp.Code),
+		FriendStroies:    activeStories,
+		CurrentStoryTime: uint(rpcResp.CurrentStoryTime),
+		PageableInfo: types.PageableInfo{
+			TotalPage: uint(rpcResp.PageInfo.TotalPage),
+			Page:      req.Page,
+		},
+	}, nil
 }

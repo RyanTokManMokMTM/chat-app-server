@@ -1,13 +1,12 @@
 package logic
 
 import (
+	"api/app/assets/cmd/rpc/internal/svc"
+	"api/app/assets/cmd/rpc/types/assets_api"
 	"api/app/common/errx"
 	"api/app/common/uploadx"
 	"context"
-	"io"
-
-	"api/app/assets/cmd/rpc/internal/svc"
-	"api/app/assets/cmd/rpc/types/assets_api"
+	"github.com/pkg/errors"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,38 +25,17 @@ func NewUploadFileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upload
 	}
 }
 
-func (l *UploadFileLogic) UploadFile(stream assets_api.AssetRPC_UploadFileServer) error {
+func (l *UploadFileLogic) UploadFile(in *assets_api.UploadFileReq) (*assets_api.UploadFileResp, error) {
 	// todo: add your logic here and delete this line
-	//TODO: Receiving the file chunks
-	fileData := make([]byte, 0)
-	fileName := ""
-	for {
-		req, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
-		chunk := req.GetData()
-		if fileName == "" {
-			fileName = req.GetFileName()
-		}
-
-		fileData = append(fileData, chunk...) //added data to fileData
+	if len(in.Data) == 0 {
+		return nil, errors.Wrapf(errx.NewCustomErrCode(errx.REQ_PARAM_ERROR), "data is nill")
 	}
-
-	path, err := uploadx.SaveBytesIntoFile(fileName, fileData, l.svcCtx.Config.ResourcesPath)
+	path, err := uploadx.SaveBytesIntoFile(in.FileName, in.Data, l.svcCtx.Config.ResourcesPath)
 	if err != nil {
-		return stream.SendAndClose(&assets_api.UploadFileResp{
-			Code: int32(errx.SERVER_COMMON_ERROR),
-			Path: "",
-		})
+		return nil, err
 	}
-	//save and
-	return stream.SendAndClose(&assets_api.UploadFileResp{
+	return &assets_api.UploadFileResp{
 		Code: int32(errx.SUCCESS),
 		Path: path,
-	})
+	}, nil
 }

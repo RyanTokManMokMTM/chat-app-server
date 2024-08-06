@@ -4,19 +4,17 @@ package stream;
 option go_package="./assets_api";
 
 message UploadImageReq {
-  string type = 1;
-  string fileName =2;
-  bytes data = 3;
+  string format = 1;
+  string base64Str = 2;
 }
 message UploadImageResp {
   int32 code = 1;
-  string path = 3;
+  string path = 2;
 }
 
 message UploadFileReq {
-  string type = 1;
-  string fileName =2;
-  bytes data = 3;
+  string fileName = 1;
+  bytes data = 2;
 }
 message UploadFileResp {
   int32 code = 1;
@@ -24,6 +22,6 @@ message UploadFileResp {
 }
 
 service AssetRPC {
-  rpc UploadImage(stream UploadImageReq) returns (UploadImageResp);
-  rpc UploadFile(stream UploadFileReq) returns (UploadFileResp);
+  rpc UploadImage(UploadImageReq) returns (UploadImageResp);
+  rpc UploadFile(UploadFileReq) returns (UploadFileResp);
 }

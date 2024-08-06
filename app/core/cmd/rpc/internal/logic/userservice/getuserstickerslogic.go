@@ -5,7 +5,7 @@ import (
 	"api/app/core/cmd/rpc/internal/svc"
 	"api/app/core/cmd/rpc/types/core"
 	"context"
-	"errors"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -32,15 +32,17 @@ func (l *GetUserStickersLogic) GetUserStickers(in *core.GetUserStickerReq) (*cor
 	_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not exist, error: %+v", err)
 		}
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		logx.WithContext(l.ctx).Errorf("Error : %+v", err)
+		return nil, err
 	}
 
 	stickerList := make([]*core.StickerInfo, 0)
 	stickers, err := l.svcCtx.DAO.FindAllSticker(l.ctx, userID)
 	if err != nil {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		logx.WithContext(l.ctx).Errorf("Error : %+v", err)
+		return nil, err
 	}
 
 	for _, s := range stickers {

@@ -4,6 +4,8 @@
 package server
 
 import (
+	"context"
+
 	"api/app/assets/cmd/rpc/internal/logic"
 	"api/app/assets/cmd/rpc/internal/svc"
 	"api/app/assets/cmd/rpc/types/assets_api"
@@ -20,12 +22,12 @@ func NewAssetRPCServer(svcCtx *svc.ServiceContext) *AssetRPCServer {
 	}
 }
 
-func (s *AssetRPCServer) UploadImage(stream assets_api.AssetRPC_UploadImageServer) error {
-	l := logic.NewUploadImageLogic(stream.Context(), s.svcCtx)
-	return l.UploadImage(stream)
+func (s *AssetRPCServer) UploadImage(ctx context.Context, in *assets_api.UploadImageReq) (*assets_api.UploadImageResp, error) {
+	l := logic.NewUploadImageLogic(ctx, s.svcCtx)
+	return l.UploadImage(in)
 }
 
-func (s *AssetRPCServer) UploadFile(stream assets_api.AssetRPC_UploadFileServer) error {
-	l := logic.NewUploadFileLogic(stream.Context(), s.svcCtx)
-	return l.UploadFile(stream)
+func (s *AssetRPCServer) UploadFile(ctx context.Context, in *assets_api.UploadFileReq) (*assets_api.UploadFileResp, error) {
+	l := logic.NewUploadFileLogic(ctx, s.svcCtx)
+	return l.UploadFile(in)
 }

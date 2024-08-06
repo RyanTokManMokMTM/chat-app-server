@@ -5,7 +5,7 @@ import (
 	"api/app/core/cmd/rpc/internal/svc"
 	"api/app/core/cmd/rpc/types/core"
 	"context"
-	"errors"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -31,13 +31,15 @@ func (l *UpdateUserStatusLogic) UpdateUserStatus(in *core.UpdateUserStatusReq) (
 	_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not exist,error : %+v", err)
 		}
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		logx.WithContext(l.ctx).Errorf("Error : %+v", err)
+		return nil, err
 	}
 
 	if err := l.svcCtx.DAO.UpdateUserStatusMessage(l.ctx, userID, in.Status); err != nil {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		logx.WithContext(l.ctx).Errorf("Error : %+v", err)
+		return nil, err
 	}
 
 	return &core.UpdateUserStatusResp{

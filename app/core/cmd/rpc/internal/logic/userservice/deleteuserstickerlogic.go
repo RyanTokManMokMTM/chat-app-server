@@ -5,7 +5,7 @@ import (
 	"api/app/core/cmd/rpc/internal/svc"
 	"api/app/core/cmd/rpc/types/core"
 	"context"
-	"errors"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -31,21 +31,21 @@ func (l *DeleteUserStickerLogic) DeleteUserSticker(in *core.DeleteStickerReq) (*
 	_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not found ,error : %+v", err)
 		}
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		return nil, err
 	}
 
 	sticker, err := l.svcCtx.DAO.FindOneStickerFromUser(l.ctx, userID, in.StickerUUID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errx.NewCustomErrCode(errx.STICKER_NOT_EXIST)
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.STICKER_NOT_EXIST), "sticker not exist,error :%+v", err)
 		}
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		return nil, err
 	}
 
 	if err := l.svcCtx.DAO.DeleteOneStickerFromUser(l.ctx, userID, sticker); err != nil {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		return nil, err
 	}
 
 	return &core.DeleteStickerResp{

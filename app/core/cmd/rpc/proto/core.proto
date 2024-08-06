@@ -45,7 +45,7 @@ message FullGroupInfo {
   uint32 members = 2;
   bool isJoined = 3;
   bool isOwner = 4;
-  uint32 createdBy= 5;
+  string createdBy= 5;
 }
 
 message StickerInfo{
@@ -107,7 +107,7 @@ message SignInResp{
 }
 
 message GetUserInfoReq{
-  optional int32 userId = 1;
+  optional uint32 userId = 1;
   optional string uuid = 2;
 }
 message GetUserInfoResp{
@@ -121,8 +121,9 @@ message GetUserInfoResp{
 }
 
 message GetUserFriendProfileReq{
-  optional int32 userId = 1;
-  optional string uuid = 2;
+  uint32 userId = 1;
+  optional uint32 FriendUserId = 2;
+  optional string FriendUuid = 3;
 }
 message GetUserFriendProfileResp{
   int32 code = 1;
@@ -131,7 +132,7 @@ message GetUserFriendProfileResp{
 }
 
 message UpdateUserStatusReq{
-  int32 userId = 1;
+  uint32 userId = 1;
   string status = 2;
 }
 message UpdateUserStatusResp{
@@ -139,7 +140,7 @@ message UpdateUserStatusResp{
 }
 
 message UpdateUserInfoReq{
-  int32 userId = 1;
+  uint32 userId = 1;
   string name = 2;
 }
 message UpdateUserInfoResp{
@@ -147,7 +148,7 @@ message UpdateUserInfoResp{
 }
 
 message UploadUserAvatarReq{
-  int32 userId = 1;
+  uint32 userId = 1;
   bytes data = 2;
   string fileName = 3;
 }
@@ -158,7 +159,7 @@ message UploadUserAvatarResp{
 }
 
 message UploadUserCoverReq{
-  int32 userId = 1;
+  uint32 userId = 1;
   bytes data = 2;
   string fileName = 3;
 }
@@ -168,7 +169,7 @@ message UploadUserCoverResp{
 }
 
 message SearchUserReq{
-  int32 userId = 1;
+  uint32 userId = 1;
   string query = 2;
 }
 message SearchUserResp{
@@ -181,7 +182,7 @@ message SearchUserResp{
 }
 
 message AddStickerReq{
-  int32 userId = 1;
+  uint32 userId = 1;
   string stickerUUID = 2;
 }
 message AddStickerResp{
@@ -189,7 +190,7 @@ message AddStickerResp{
 }
 
 message DeleteStickerReq{
-  int32 userId = 1;
+  uint32 userId = 1;
   string stickerUUID = 2;
 }
 message DeleteStickerResp{
@@ -197,7 +198,7 @@ message DeleteStickerResp{
 }
 
 message IsStickerExistReq{
-  int32 userId = 1;
+  uint32 userId = 1;
   string stickerUUID = 2;
 }
 message IsStickerExistResp{
@@ -218,7 +219,8 @@ message GetUserStickerResp{
 
 message AddStoryReq{
   uint32 userId = 1;
-  bytes data = 2; //story image data.
+  string storyImgFileName = 2;
+  bytes data = 3; //story image data.
 }
 message AddStoryResp{
   uint32 code = 1;
@@ -307,10 +309,18 @@ message GetStorySeenListResp{
 
 //================STICKER MESSAGE============================
 //Sticker Message
+message stickerData {
+  string name = 1;
+  bytes data = 2;
+}
 
+message StickerFileMap {
+  repeated stickerData data = 1;
+}
 message CreateStickerGroupReq{
   int32 userId = 1;
   string stickerName = 2;
+  map <string, StickerFileMap > stickerData = 3;
 }
 message CreateStickerGroupResp{
   int32 code = 1;
@@ -386,7 +396,7 @@ message CreateGroupReq{
   uint32 userId = 1;
   string groupName = 2;
   repeated uint32 groupMembers = 3;
-  string avatar = 4;
+  bytes avatarData = 4;
 }
 message CreateGroupResp{
   uint32 code = 1;
@@ -435,8 +445,8 @@ message GetGroupMembersResp{
 message UpdateGroupInfoReq{
   uint32 userId = 1;
   uint32 groupId = 2;
-  uint32 groupName = 3;
-  uint32 groupDesc = 4;
+  string groupName = 3;
+  string groupDesc = 4;
 }
 message UpdateGroupInfoResp{
   uint32 code = 1;
@@ -446,6 +456,7 @@ message UploadGroupAvatarReq{
   uint32 userId = 1;
   uint32 groupId = 2;
   bytes data = 3;
+  string avatarFileName = 4;
 }
 message UploadGroupAvatarResp{
   uint32 code = 1;
@@ -489,6 +500,7 @@ message CountUserGroupResp{
   uint32 code = 1;
   uint32 total = 2;
 }
+
 //===================SERVICE=========================================
 //UserService
 service UserService {
@@ -510,13 +522,13 @@ service UserService {
 
 //Story Service
 service StoryService {
-  rpc AddStory(stream AddStoryReq) returns (AddStoryResp);
+  rpc AddStory( AddStoryReq) returns (AddStoryResp);
   rpc DeleteStory(DeleteStoryReq) returns (DeleteStoryResp);
   rpc GetUserStoriesByUserId(GetUserStoryReq) returns (GetUserStoryResp);
   rpc GetActiveStories(GetActiveStoryReq) returns (GetActiveStoryResp);
   rpc UpdateStorySeen(UpdateStorySeenReq) returns (UpdateStorySeenResp);
   rpc CreateStoryLike(CreateStoryLikeReq) returns (CreateStoryLikeResp);
-  rpc DeleteStoryLike(DeleteStoryReq) returns (DeleteStoryLikeResp);
+  rpc DeleteStoryLike(DeleteStoryLikeReq) returns (DeleteStoryLikeResp);
   rpc GetStoryInfo(GetStoryInfoByIdRep) returns (GetStoryInfoByIdResp);
   rpc GetStorySeenListInfo(GetStorySeenListReq) returns (GetStorySeenListResp);
 }
@@ -528,7 +540,7 @@ service GroupService {
   rpc LeaveGroup(LeaveGroupReq) returns (LeaveGroupResp);
   rpc DeleteGroup(DeleteGroupReq) returns (DeleteGroupResp);
   rpc GetGroupMembers(GetGroupMembersReq) returns (GetGroupMembersResp);
-  rpc UploadGroupAvatar(stream UploadGroupAvatarReq) returns (UploadGroupAvatarResp);
+  rpc UploadGroupAvatar(UploadGroupAvatarReq) returns (UploadGroupAvatarResp);
   rpc UpdateGroupInfo(UpdateGroupInfoReq) returns (UpdateGroupInfoResp);
   rpc GetUserGroups(GetUserGroupReq) returns (GetUserGroupResp);
   rpc SearchGroup(SearchGroupReq) returns (SearchGroupResp);
@@ -544,3 +556,10 @@ service FriendService {
   rpc GetFriendInformation(GetFriendInfoReq) returns (GetFriendInfoResp);
 }
 
+//Sticker Service
+service StickerService {
+  rpc CreateStickerGroup(CreateStickerGroupReq) returns (CreateStickerGroupResp);
+  rpc GetStickerGroupResources(GetStickerResourcesReq) returns (GetStickerResourcesResp);
+  rpc GetStickerGroupInfo(GetStickerInfoReq) returns (GetStickerInfoResp);
+  rpc GetStickerGroupList(GetStickerListReq) returns (GetStickerListResp);
+}

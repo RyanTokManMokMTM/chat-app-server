@@ -88,6 +88,8 @@ type (
 	SignInResp               = core.SignInResp
 	SignUpReq                = core.SignUpReq
 	SignUpResp               = core.SignUpResp
+	StickerData              = core.StickerData
+	StickerFileMap           = core.StickerFileMap
 	StickerInfo              = core.StickerInfo
 	StoryInfo                = core.StoryInfo
 	StorySeenInfo            = core.StorySeenInfo
@@ -114,7 +116,7 @@ type (
 		LeaveGroup(ctx context.Context, in *LeaveGroupReq, opts ...grpc.CallOption) (*LeaveGroupResp, error)
 		DeleteGroup(ctx context.Context, in *DeleteGroupReq, opts ...grpc.CallOption) (*DeleteGroupResp, error)
 		GetGroupMembers(ctx context.Context, in *GetGroupMembersReq, opts ...grpc.CallOption) (*GetGroupMembersResp, error)
-		UploadGroupAvatar(ctx context.Context, opts ...grpc.CallOption) (core.GroupService_UploadGroupAvatarClient, error)
+		UploadGroupAvatar(ctx context.Context, in *UploadGroupAvatarReq, opts ...grpc.CallOption) (*UploadGroupAvatarResp, error)
 		UpdateGroupInfo(ctx context.Context, in *UpdateGroupInfoReq, opts ...grpc.CallOption) (*UpdateGroupInfoResp, error)
 		GetUserGroups(ctx context.Context, in *GetUserGroupReq, opts ...grpc.CallOption) (*GetUserGroupResp, error)
 		SearchGroup(ctx context.Context, in *SearchGroupReq, opts ...grpc.CallOption) (*SearchGroupResp, error)
@@ -158,9 +160,9 @@ func (m *defaultGroupService) GetGroupMembers(ctx context.Context, in *GetGroupM
 	return client.GetGroupMembers(ctx, in, opts...)
 }
 
-func (m *defaultGroupService) UploadGroupAvatar(ctx context.Context, opts ...grpc.CallOption) (core.GroupService_UploadGroupAvatarClient, error) {
+func (m *defaultGroupService) UploadGroupAvatar(ctx context.Context, in *UploadGroupAvatarReq, opts ...grpc.CallOption) (*UploadGroupAvatarResp, error) {
 	client := core.NewGroupServiceClient(m.cli.Conn())
-	return client.UploadGroupAvatar(ctx, opts...)
+	return client.UploadGroupAvatar(ctx, in, opts...)
 }
 
 func (m *defaultGroupService) UpdateGroupInfo(ctx context.Context, in *UpdateGroupInfoReq, opts ...grpc.CallOption) (*UpdateGroupInfoResp, error) {

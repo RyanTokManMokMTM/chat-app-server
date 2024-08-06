@@ -1,7 +1,15 @@
 package story
 
 import (
+	"api/app/common/ctxtool"
+	"api/app/common/errx"
+	"api/app/common/uploadx"
+	"api/app/core/cmd/rpc/types/core"
+	"bytes"
 	"context"
+	"github.com/pkg/errors"
+	"io"
+	"net/http"
 
 	"api/app/core/cmd/api/internal/svc"
 	"api/app/core/cmd/api/internal/types"
@@ -13,19 +21,54 @@ type AddStoryLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	r      *http.Request
 }
 
 // Create a new instance story
-func NewAddStoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddStoryLogic {
+func NewAddStoryLogic(ctx context.Context, svcCtx *svc.ServiceContext, r *http.Request) *AddStoryLogic {
 	return &AddStoryLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		r:      r,
 	}
 }
 
 func (l *AddStoryLogic) AddStory(req *types.AddStoryReq) (resp *types.AddStoryResp, err error) {
 	// todo: add your logic here and delete this line
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
 
-	return
+	file, header, err := l.r.FormFile(uploadx.StoryMediaField)
+	if err != nil {
+		logx.WithContext(l.ctx).Error(err)
+		return nil, errors.Wrapf(errx.NewCustomErrCode(errx.REQ_PARAM_ERROR), "Story media not exist")
+	}
+
+	buffer := bytes.NewBuffer(nil)
+	fileName := header.Filename
+	_, err = io.Copy(buffer, file)
+	if err != nil {
+		logx.WithContext(l.ctx).Error(err)
+		return nil, errors.Wrapf(errx.NewCustomErrCode(errx.SERVER_COMMON_ERROR), "error:  %+v", err)
+	}
+
+	rpcResp, rpcErr := l.svcCtx.StoryService.AddStory(l.ctx, &core.AddStoryReq{
+		UserId:           uint32(userID),
+		StoryImgFileName: fileName,
+		Data:             buffer.Bytes(),
+	})
+
+	if rpcErr != nil {
+		logx.WithContext(l.ctx).Error(err)
+		return nil, rpcErr
+	}
+
+	return &types.AddStoryResp{
+		Code: uint(rpcResp.Code),
+		Info: types.StoryInfo{
+			StoryID:       uint(rpcResp.Info.StoryId),
+			StoryUUID:     rpcResp.Info.StoryUUID,
+			StoryMediaURL: rpcResp.Info.StoryURL,
+		},
+	}, nil
 }

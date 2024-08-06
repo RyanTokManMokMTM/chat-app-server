@@ -88,6 +88,8 @@ type (
 	SignInResp               = core.SignInResp
 	SignUpReq                = core.SignUpReq
 	SignUpResp               = core.SignUpResp
+	StickerData              = core.StickerData
+	StickerFileMap           = core.StickerFileMap
 	StickerInfo              = core.StickerInfo
 	StoryInfo                = core.StoryInfo
 	StorySeenInfo            = core.StorySeenInfo

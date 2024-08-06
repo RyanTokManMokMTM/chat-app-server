@@ -1,11 +1,11 @@
 package userservicelogic
 
 import (
+	"api/app/common/errx"
 	"api/app/core/cmd/rpc/internal/svc"
 	"api/app/core/cmd/rpc/types/core"
 	"context"
-	"errors"
-	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -31,15 +31,16 @@ func (l *IsStickerExistLogic) IsStickerExist(in *core.IsStickerExistReq) (*core.
 	_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not exist, error: %+v", err)
 		}
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		logx.WithContext(l.ctx).Errorf("Error : %+v", err)
+		return nil, err
 	}
 
 	var isExist = false
 	sticker, err := l.svcCtx.DAO.FindOneStickerFromUser(l.ctx, userID, in.StickerUUID)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		return nil, err
 	}
 
 	if sticker != nil && sticker.Id != 0 {

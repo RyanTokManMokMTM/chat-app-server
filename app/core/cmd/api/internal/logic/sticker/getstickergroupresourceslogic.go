@@ -1,7 +1,9 @@
 package sticker
 
 import (
+	"api/app/core/cmd/rpc/types/core"
 	"context"
+	"net/http"
 
 	"api/app/core/cmd/api/internal/svc"
 	"api/app/core/cmd/api/internal/types"
@@ -25,6 +27,18 @@ func NewGetStickerGroupResourcesLogic(ctx context.Context, svcCtx *svc.ServiceCo
 
 func (l *GetStickerGroupResourcesLogic) GetStickerGroupResources(req *types.GetStickerResourcesReq) (resp *types.GetStickerResourcesResp, err error) {
 	// todo: add your logic here and delete this line
+	rpcResp, rpcErr := l.svcCtx.StickerService.GetStickerGroupResources(l.ctx, &core.GetStickerResourcesReq{
+		StickerGroupUUID: req.StickerGroupUUID,
+	})
 
-	return
+	if rpcErr != nil {
+		logx.WithContext(l.ctx).Error(err)
+		return nil, err
+	}
+
+	return &types.GetStickerResourcesResp{
+		Code:          http.StatusOK,
+		StickerId:     rpcResp.StickerId,
+		ResourcesPath: rpcResp.Paths,
+	}, nil
 }

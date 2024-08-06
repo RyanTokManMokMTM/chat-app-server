@@ -568,13 +568,13 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StoryServiceClient interface {
-	AddStory(ctx context.Context, opts ...grpc.CallOption) (StoryService_AddStoryClient, error)
+	AddStory(ctx context.Context, in *AddStoryReq, opts ...grpc.CallOption) (*AddStoryResp, error)
 	DeleteStory(ctx context.Context, in *DeleteStoryReq, opts ...grpc.CallOption) (*DeleteStoryResp, error)
 	GetUserStoriesByUserId(ctx context.Context, in *GetUserStoryReq, opts ...grpc.CallOption) (*GetUserStoryResp, error)
 	GetActiveStories(ctx context.Context, in *GetActiveStoryReq, opts ...grpc.CallOption) (*GetActiveStoryResp, error)
 	UpdateStorySeen(ctx context.Context, in *UpdateStorySeenReq, opts ...grpc.CallOption) (*UpdateStorySeenResp, error)
 	CreateStoryLike(ctx context.Context, in *CreateStoryLikeReq, opts ...grpc.CallOption) (*CreateStoryLikeResp, error)
-	DeleteStoryLike(ctx context.Context, in *DeleteStoryReq, opts ...grpc.CallOption) (*DeleteStoryLikeResp, error)
+	DeleteStoryLike(ctx context.Context, in *DeleteStoryLikeReq, opts ...grpc.CallOption) (*DeleteStoryLikeResp, error)
 	GetStoryInfo(ctx context.Context, in *GetStoryInfoByIdRep, opts ...grpc.CallOption) (*GetStoryInfoByIdResp, error)
 	GetStorySeenListInfo(ctx context.Context, in *GetStorySeenListReq, opts ...grpc.CallOption) (*GetStorySeenListResp, error)
 }
@@ -587,38 +587,13 @@ func NewStoryServiceClient(cc grpc.ClientConnInterface) StoryServiceClient {
 	return &storyServiceClient{cc}
 }
 
-func (c *storyServiceClient) AddStory(ctx context.Context, opts ...grpc.CallOption) (StoryService_AddStoryClient, error) {
-	stream, err := c.cc.NewStream(ctx, &StoryService_ServiceDesc.Streams[0], StoryService_AddStory_FullMethodName, opts...)
+func (c *storyServiceClient) AddStory(ctx context.Context, in *AddStoryReq, opts ...grpc.CallOption) (*AddStoryResp, error) {
+	out := new(AddStoryResp)
+	err := c.cc.Invoke(ctx, StoryService_AddStory_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &storyServiceAddStoryClient{stream}
-	return x, nil
-}
-
-type StoryService_AddStoryClient interface {
-	Send(*AddStoryReq) error
-	CloseAndRecv() (*AddStoryResp, error)
-	grpc.ClientStream
-}
-
-type storyServiceAddStoryClient struct {
-	grpc.ClientStream
-}
-
-func (x *storyServiceAddStoryClient) Send(m *AddStoryReq) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *storyServiceAddStoryClient) CloseAndRecv() (*AddStoryResp, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(AddStoryResp)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 func (c *storyServiceClient) DeleteStory(ctx context.Context, in *DeleteStoryReq, opts ...grpc.CallOption) (*DeleteStoryResp, error) {
@@ -666,7 +641,7 @@ func (c *storyServiceClient) CreateStoryLike(ctx context.Context, in *CreateStor
 	return out, nil
 }
 
-func (c *storyServiceClient) DeleteStoryLike(ctx context.Context, in *DeleteStoryReq, opts ...grpc.CallOption) (*DeleteStoryLikeResp, error) {
+func (c *storyServiceClient) DeleteStoryLike(ctx context.Context, in *DeleteStoryLikeReq, opts ...grpc.CallOption) (*DeleteStoryLikeResp, error) {
 	out := new(DeleteStoryLikeResp)
 	err := c.cc.Invoke(ctx, StoryService_DeleteStoryLike_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -697,13 +672,13 @@ func (c *storyServiceClient) GetStorySeenListInfo(ctx context.Context, in *GetSt
 // All implementations must embed UnimplementedStoryServiceServer
 // for forward compatibility
 type StoryServiceServer interface {
-	AddStory(StoryService_AddStoryServer) error
+	AddStory(context.Context, *AddStoryReq) (*AddStoryResp, error)
 	DeleteStory(context.Context, *DeleteStoryReq) (*DeleteStoryResp, error)
 	GetUserStoriesByUserId(context.Context, *GetUserStoryReq) (*GetUserStoryResp, error)
 	GetActiveStories(context.Context, *GetActiveStoryReq) (*GetActiveStoryResp, error)
 	UpdateStorySeen(context.Context, *UpdateStorySeenReq) (*UpdateStorySeenResp, error)
 	CreateStoryLike(context.Context, *CreateStoryLikeReq) (*CreateStoryLikeResp, error)
-	DeleteStoryLike(context.Context, *DeleteStoryReq) (*DeleteStoryLikeResp, error)
+	DeleteStoryLike(context.Context, *DeleteStoryLikeReq) (*DeleteStoryLikeResp, error)
 	GetStoryInfo(context.Context, *GetStoryInfoByIdRep) (*GetStoryInfoByIdResp, error)
 	GetStorySeenListInfo(context.Context, *GetStorySeenListReq) (*GetStorySeenListResp, error)
 	mustEmbedUnimplementedStoryServiceServer()
@@ -713,8 +688,8 @@ type StoryServiceServer interface {
 type UnimplementedStoryServiceServer struct {
 }
 
-func (UnimplementedStoryServiceServer) AddStory(StoryService_AddStoryServer) error {
-	return status.Errorf(codes.Unimplemented, "method AddStory not implemented")
+func (UnimplementedStoryServiceServer) AddStory(context.Context, *AddStoryReq) (*AddStoryResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddStory not implemented")
 }
 func (UnimplementedStoryServiceServer) DeleteStory(context.Context, *DeleteStoryReq) (*DeleteStoryResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteStory not implemented")
@@ -731,7 +706,7 @@ func (UnimplementedStoryServiceServer) UpdateStorySeen(context.Context, *UpdateS
 func (UnimplementedStoryServiceServer) CreateStoryLike(context.Context, *CreateStoryLikeReq) (*CreateStoryLikeResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateStoryLike not implemented")
 }
-func (UnimplementedStoryServiceServer) DeleteStoryLike(context.Context, *DeleteStoryReq) (*DeleteStoryLikeResp, error) {
+func (UnimplementedStoryServiceServer) DeleteStoryLike(context.Context, *DeleteStoryLikeReq) (*DeleteStoryLikeResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteStoryLike not implemented")
 }
 func (UnimplementedStoryServiceServer) GetStoryInfo(context.Context, *GetStoryInfoByIdRep) (*GetStoryInfoByIdResp, error) {
@@ -753,30 +728,22 @@ func RegisterStoryServiceServer(s grpc.ServiceRegistrar, srv StoryServiceServer)
 	s.RegisterService(&StoryService_ServiceDesc, srv)
 }
 
-func _StoryService_AddStory_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(StoryServiceServer).AddStory(&storyServiceAddStoryServer{stream})
-}
-
-type StoryService_AddStoryServer interface {
-	SendAndClose(*AddStoryResp) error
-	Recv() (*AddStoryReq, error)
-	grpc.ServerStream
-}
-
-type storyServiceAddStoryServer struct {
-	grpc.ServerStream
-}
-
-func (x *storyServiceAddStoryServer) SendAndClose(m *AddStoryResp) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *storyServiceAddStoryServer) Recv() (*AddStoryReq, error) {
-	m := new(AddStoryReq)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
+func _StoryService_AddStory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddStoryReq)
+	if err := dec(in); err != nil {
 		return nil, err
 	}
-	return m, nil
+	if interceptor == nil {
+		return srv.(StoryServiceServer).AddStory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StoryService_AddStory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StoryServiceServer).AddStory(ctx, req.(*AddStoryReq))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _StoryService_DeleteStory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -870,7 +837,7 @@ func _StoryService_CreateStoryLike_Handler(srv interface{}, ctx context.Context,
 }
 
 func _StoryService_DeleteStoryLike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteStoryReq)
+	in := new(DeleteStoryLikeReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -882,7 +849,7 @@ func _StoryService_DeleteStoryLike_Handler(srv interface{}, ctx context.Context,
 		FullMethod: StoryService_DeleteStoryLike_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StoryServiceServer).DeleteStoryLike(ctx, req.(*DeleteStoryReq))
+		return srv.(StoryServiceServer).DeleteStoryLike(ctx, req.(*DeleteStoryLikeReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -931,6 +898,10 @@ var StoryService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*StoryServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "AddStory",
+			Handler:    _StoryService_AddStory_Handler,
+		},
+		{
 			MethodName: "DeleteStory",
 			Handler:    _StoryService_DeleteStory_Handler,
 		},
@@ -963,13 +934,7 @@ var StoryService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _StoryService_GetStorySeenListInfo_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "AddStory",
-			Handler:       _StoryService_AddStory_Handler,
-			ClientStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "cmd/rpc/proto/core.proto",
 }
 
@@ -996,7 +961,7 @@ type GroupServiceClient interface {
 	LeaveGroup(ctx context.Context, in *LeaveGroupReq, opts ...grpc.CallOption) (*LeaveGroupResp, error)
 	DeleteGroup(ctx context.Context, in *DeleteGroupReq, opts ...grpc.CallOption) (*DeleteGroupResp, error)
 	GetGroupMembers(ctx context.Context, in *GetGroupMembersReq, opts ...grpc.CallOption) (*GetGroupMembersResp, error)
-	UploadGroupAvatar(ctx context.Context, opts ...grpc.CallOption) (GroupService_UploadGroupAvatarClient, error)
+	UploadGroupAvatar(ctx context.Context, in *UploadGroupAvatarReq, opts ...grpc.CallOption) (*UploadGroupAvatarResp, error)
 	UpdateGroupInfo(ctx context.Context, in *UpdateGroupInfoReq, opts ...grpc.CallOption) (*UpdateGroupInfoResp, error)
 	GetUserGroups(ctx context.Context, in *GetUserGroupReq, opts ...grpc.CallOption) (*GetUserGroupResp, error)
 	SearchGroup(ctx context.Context, in *SearchGroupReq, opts ...grpc.CallOption) (*SearchGroupResp, error)
@@ -1057,38 +1022,13 @@ func (c *groupServiceClient) GetGroupMembers(ctx context.Context, in *GetGroupMe
 	return out, nil
 }
 
-func (c *groupServiceClient) UploadGroupAvatar(ctx context.Context, opts ...grpc.CallOption) (GroupService_UploadGroupAvatarClient, error) {
-	stream, err := c.cc.NewStream(ctx, &GroupService_ServiceDesc.Streams[0], GroupService_UploadGroupAvatar_FullMethodName, opts...)
+func (c *groupServiceClient) UploadGroupAvatar(ctx context.Context, in *UploadGroupAvatarReq, opts ...grpc.CallOption) (*UploadGroupAvatarResp, error) {
+	out := new(UploadGroupAvatarResp)
+	err := c.cc.Invoke(ctx, GroupService_UploadGroupAvatar_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &groupServiceUploadGroupAvatarClient{stream}
-	return x, nil
-}
-
-type GroupService_UploadGroupAvatarClient interface {
-	Send(*UploadGroupAvatarReq) error
-	CloseAndRecv() (*UploadGroupAvatarResp, error)
-	grpc.ClientStream
-}
-
-type groupServiceUploadGroupAvatarClient struct {
-	grpc.ClientStream
-}
-
-func (x *groupServiceUploadGroupAvatarClient) Send(m *UploadGroupAvatarReq) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *groupServiceUploadGroupAvatarClient) CloseAndRecv() (*UploadGroupAvatarResp, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(UploadGroupAvatarResp)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 func (c *groupServiceClient) UpdateGroupInfo(ctx context.Context, in *UpdateGroupInfoReq, opts ...grpc.CallOption) (*UpdateGroupInfoResp, error) {
@@ -1145,7 +1085,7 @@ type GroupServiceServer interface {
 	LeaveGroup(context.Context, *LeaveGroupReq) (*LeaveGroupResp, error)
 	DeleteGroup(context.Context, *DeleteGroupReq) (*DeleteGroupResp, error)
 	GetGroupMembers(context.Context, *GetGroupMembersReq) (*GetGroupMembersResp, error)
-	UploadGroupAvatar(GroupService_UploadGroupAvatarServer) error
+	UploadGroupAvatar(context.Context, *UploadGroupAvatarReq) (*UploadGroupAvatarResp, error)
 	UpdateGroupInfo(context.Context, *UpdateGroupInfoReq) (*UpdateGroupInfoResp, error)
 	GetUserGroups(context.Context, *GetUserGroupReq) (*GetUserGroupResp, error)
 	SearchGroup(context.Context, *SearchGroupReq) (*SearchGroupResp, error)
@@ -1173,8 +1113,8 @@ func (UnimplementedGroupServiceServer) DeleteGroup(context.Context, *DeleteGroup
 func (UnimplementedGroupServiceServer) GetGroupMembers(context.Context, *GetGroupMembersReq) (*GetGroupMembersResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetGroupMembers not implemented")
 }
-func (UnimplementedGroupServiceServer) UploadGroupAvatar(GroupService_UploadGroupAvatarServer) error {
-	return status.Errorf(codes.Unimplemented, "method UploadGroupAvatar not implemented")
+func (UnimplementedGroupServiceServer) UploadGroupAvatar(context.Context, *UploadGroupAvatarReq) (*UploadGroupAvatarResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UploadGroupAvatar not implemented")
 }
 func (UnimplementedGroupServiceServer) UpdateGroupInfo(context.Context, *UpdateGroupInfoReq) (*UpdateGroupInfoResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateGroupInfo not implemented")
@@ -1294,30 +1234,22 @@ func _GroupService_GetGroupMembers_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GroupService_UploadGroupAvatar_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(GroupServiceServer).UploadGroupAvatar(&groupServiceUploadGroupAvatarServer{stream})
-}
-
-type GroupService_UploadGroupAvatarServer interface {
-	SendAndClose(*UploadGroupAvatarResp) error
-	Recv() (*UploadGroupAvatarReq, error)
-	grpc.ServerStream
-}
-
-type groupServiceUploadGroupAvatarServer struct {
-	grpc.ServerStream
-}
-
-func (x *groupServiceUploadGroupAvatarServer) SendAndClose(m *UploadGroupAvatarResp) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *groupServiceUploadGroupAvatarServer) Recv() (*UploadGroupAvatarReq, error) {
-	m := new(UploadGroupAvatarReq)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
+func _GroupService_UploadGroupAvatar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UploadGroupAvatarReq)
+	if err := dec(in); err != nil {
 		return nil, err
 	}
-	return m, nil
+	if interceptor == nil {
+		return srv.(GroupServiceServer).UploadGroupAvatar(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GroupService_UploadGroupAvatar_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupServiceServer).UploadGroupAvatar(ctx, req.(*UploadGroupAvatarReq))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _GroupService_UpdateGroupInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -1438,6 +1370,10 @@ var GroupService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _GroupService_GetGroupMembers_Handler,
 		},
 		{
+			MethodName: "UploadGroupAvatar",
+			Handler:    _GroupService_UploadGroupAvatar_Handler,
+		},
+		{
 			MethodName: "UpdateGroupInfo",
 			Handler:    _GroupService_UpdateGroupInfo_Handler,
 		},
@@ -1458,13 +1394,7 @@ var GroupService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _GroupService_CountUserGroup_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "UploadGroupAvatar",
-			Handler:       _GroupService_UploadGroupAvatar_Handler,
-			ClientStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "cmd/rpc/proto/core.proto",
 }
 
@@ -1663,6 +1593,207 @@ var FriendService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetFriendInformation",
 			Handler:    _FriendService_GetFriendInformation_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "cmd/rpc/proto/core.proto",
+}
+
+const (
+	StickerService_CreateStickerGroup_FullMethodName       = "/core.StickerService/CreateStickerGroup"
+	StickerService_GetStickerGroupResources_FullMethodName = "/core.StickerService/GetStickerGroupResources"
+	StickerService_GetStickerGroupInfo_FullMethodName      = "/core.StickerService/GetStickerGroupInfo"
+	StickerService_GetStickerGroupList_FullMethodName      = "/core.StickerService/GetStickerGroupList"
+)
+
+// StickerServiceClient is the client API for StickerService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type StickerServiceClient interface {
+	CreateStickerGroup(ctx context.Context, in *CreateStickerGroupReq, opts ...grpc.CallOption) (*CreateStickerGroupResp, error)
+	GetStickerGroupResources(ctx context.Context, in *GetStickerResourcesReq, opts ...grpc.CallOption) (*GetStickerResourcesResp, error)
+	GetStickerGroupInfo(ctx context.Context, in *GetStickerInfoReq, opts ...grpc.CallOption) (*GetStickerInfoResp, error)
+	GetStickerGroupList(ctx context.Context, in *GetStickerListReq, opts ...grpc.CallOption) (*GetStickerListResp, error)
+}
+
+type stickerServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewStickerServiceClient(cc grpc.ClientConnInterface) StickerServiceClient {
+	return &stickerServiceClient{cc}
+}
+
+func (c *stickerServiceClient) CreateStickerGroup(ctx context.Context, in *CreateStickerGroupReq, opts ...grpc.CallOption) (*CreateStickerGroupResp, error) {
+	out := new(CreateStickerGroupResp)
+	err := c.cc.Invoke(ctx, StickerService_CreateStickerGroup_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *stickerServiceClient) GetStickerGroupResources(ctx context.Context, in *GetStickerResourcesReq, opts ...grpc.CallOption) (*GetStickerResourcesResp, error) {
+	out := new(GetStickerResourcesResp)
+	err := c.cc.Invoke(ctx, StickerService_GetStickerGroupResources_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *stickerServiceClient) GetStickerGroupInfo(ctx context.Context, in *GetStickerInfoReq, opts ...grpc.CallOption) (*GetStickerInfoResp, error) {
+	out := new(GetStickerInfoResp)
+	err := c.cc.Invoke(ctx, StickerService_GetStickerGroupInfo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *stickerServiceClient) GetStickerGroupList(ctx context.Context, in *GetStickerListReq, opts ...grpc.CallOption) (*GetStickerListResp, error) {
+	out := new(GetStickerListResp)
+	err := c.cc.Invoke(ctx, StickerService_GetStickerGroupList_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// StickerServiceServer is the server API for StickerService service.
+// All implementations must embed UnimplementedStickerServiceServer
+// for forward compatibility
+type StickerServiceServer interface {
+	CreateStickerGroup(context.Context, *CreateStickerGroupReq) (*CreateStickerGroupResp, error)
+	GetStickerGroupResources(context.Context, *GetStickerResourcesReq) (*GetStickerResourcesResp, error)
+	GetStickerGroupInfo(context.Context, *GetStickerInfoReq) (*GetStickerInfoResp, error)
+	GetStickerGroupList(context.Context, *GetStickerListReq) (*GetStickerListResp, error)
+	mustEmbedUnimplementedStickerServiceServer()
+}
+
+// UnimplementedStickerServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedStickerServiceServer struct {
+}
+
+func (UnimplementedStickerServiceServer) CreateStickerGroup(context.Context, *CreateStickerGroupReq) (*CreateStickerGroupResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateStickerGroup not implemented")
+}
+func (UnimplementedStickerServiceServer) GetStickerGroupResources(context.Context, *GetStickerResourcesReq) (*GetStickerResourcesResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStickerGroupResources not implemented")
+}
+func (UnimplementedStickerServiceServer) GetStickerGroupInfo(context.Context, *GetStickerInfoReq) (*GetStickerInfoResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStickerGroupInfo not implemented")
+}
+func (UnimplementedStickerServiceServer) GetStickerGroupList(context.Context, *GetStickerListReq) (*GetStickerListResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStickerGroupList not implemented")
+}
+func (UnimplementedStickerServiceServer) mustEmbedUnimplementedStickerServiceServer() {}
+
+// UnsafeStickerServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to StickerServiceServer will
+// result in compilation errors.
+type UnsafeStickerServiceServer interface {
+	mustEmbedUnimplementedStickerServiceServer()
+}
+
+func RegisterStickerServiceServer(s grpc.ServiceRegistrar, srv StickerServiceServer) {
+	s.RegisterService(&StickerService_ServiceDesc, srv)
+}
+
+func _StickerService_CreateStickerGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateStickerGroupReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StickerServiceServer).CreateStickerGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StickerService_CreateStickerGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StickerServiceServer).CreateStickerGroup(ctx, req.(*CreateStickerGroupReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StickerService_GetStickerGroupResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStickerResourcesReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StickerServiceServer).GetStickerGroupResources(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StickerService_GetStickerGroupResources_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StickerServiceServer).GetStickerGroupResources(ctx, req.(*GetStickerResourcesReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StickerService_GetStickerGroupInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStickerInfoReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StickerServiceServer).GetStickerGroupInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StickerService_GetStickerGroupInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StickerServiceServer).GetStickerGroupInfo(ctx, req.(*GetStickerInfoReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StickerService_GetStickerGroupList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStickerListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StickerServiceServer).GetStickerGroupList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StickerService_GetStickerGroupList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StickerServiceServer).GetStickerGroupList(ctx, req.(*GetStickerListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// StickerService_ServiceDesc is the grpc.ServiceDesc for StickerService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var StickerService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "core.StickerService",
+	HandlerType: (*StickerServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateStickerGroup",
+			Handler:    _StickerService_CreateStickerGroup_Handler,
+		},
+		{
+			MethodName: "GetStickerGroupResources",
+			Handler:    _StickerService_GetStickerGroupResources_Handler,
+		},
+		{
+			MethodName: "GetStickerGroupInfo",
+			Handler:    _StickerService_GetStickerGroupInfo_Handler,
+		},
+		{
+			MethodName: "GetStickerGroupList",
+			Handler:    _StickerService_GetStickerGroupList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

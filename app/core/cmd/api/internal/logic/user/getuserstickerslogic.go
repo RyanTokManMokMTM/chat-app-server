@@ -1,10 +1,11 @@
 package user
 
 import (
-	"context"
-
 	"api/app/core/cmd/api/internal/svc"
 	"api/app/core/cmd/api/internal/types"
+	"api/app/core/cmd/rpc/types/core"
+	"context"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,6 +27,27 @@ func NewGetUserStickersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 
 func (l *GetUserStickersLogic) GetUserStickers(req *types.GetUserStickerReq) (resp *types.GetUserStickerResp, err error) {
 	// todo: add your logic here and delete this line
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	rpcResp, rpcErr := l.svcCtx.UserService.GetUserStickers(l.ctx, &core.GetUserStickerReq{
+		UserId: uint32(userID),
+	})
 
-	return
+	if rpcErr != nil {
+		logx.WithContext(l.ctx).Error(rpcErr)
+		return nil, rpcErr
+	}
+
+	stickers := make([]types.StickerInfo, 0)
+	for _, sticker := range rpcResp.StickerInfo {
+		stickers = append(stickers, types.StickerInfo{
+			StickerID:   sticker.StickerId,
+			StickerName: sticker.StickerName,
+			StickerThum: sticker.StickerThum,
+		})
+	}
+
+	return &types.GetUserStickerResp{
+		Code:     uint(rpcResp.Code),
+		Stickers: stickers,
+	}, nil
 }

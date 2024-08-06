@@ -1,8 +1,10 @@
 Name: assets.rpc
-ListenOn: 0.0.0.0:8080
+ListenOn: 0.0.0.0:9001
+Log:
+  Encoding: plain
 Etcd:
   Hosts:
   - 127.0.0.1:2379
   Key: assets.rpc
-ResourcesPath : ./resources
+ResourcesPath : /resources
 MaxFileSize : 1048576

@@ -1,7 +1,10 @@
 package group
 
 import (
+	"api/app/common/ctxtool"
+	"api/app/core/cmd/rpc/types/core"
 	"context"
+	"net/http"
 
 	"api/app/core/cmd/api/internal/svc"
 	"api/app/core/cmd/api/internal/types"
@@ -26,6 +29,37 @@ func NewGetGroupMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 
 func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GetGroupMembersReq) (resp *types.GetGroupMembersResp, err error) {
 	// todo: add your logic here and delete this line
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	rpcResp, rpcErr := l.svcCtx.GroupService.GetGroupMembers(l.ctx, &core.GetGroupMembersReq{
+		UserId:  uint32(userID),
+		GroupID: uint32(req.GroupID),
+		Page:    uint32(req.Page),
+		Limit:   uint32(req.Limit),
+	})
 
-	return
+	if rpcErr != nil {
+		logx.WithContext(l.ctx).Error(err)
+		return nil, err
+	}
+
+	membersList := make([]types.GroupMemberInfo, 0)
+	for _, member := range rpcResp.MemberInfo {
+		membersList = append(membersList, types.GroupMemberInfo{
+			CommonUserInfo: types.CommonUserInfo{
+				ID:            uint(member.UserInfo.Id),
+				Uuid:          member.UserInfo.Uuid,
+				NickName:      member.UserInfo.Name,
+				Avatar:        member.UserInfo.Avatar,
+				Email:         member.UserInfo.Email,
+				Cover:         member.UserInfo.Cover,
+				StatusMessage: member.UserInfo.StatusMessage,
+			},
+			IsGroupLead: member.IsGroupLead,
+		})
+	}
+
+	return &types.GetGroupMembersResp{
+		Code:       uint(http.StatusOK),
+		MemberList: membersList,
+	}, nil
 }

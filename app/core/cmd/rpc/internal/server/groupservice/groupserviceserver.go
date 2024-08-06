@@ -47,9 +47,9 @@ func (s *GroupServiceServer) GetGroupMembers(ctx context.Context, in *core.GetGr
 	return l.GetGroupMembers(in)
 }
 
-func (s *GroupServiceServer) UploadGroupAvatar(stream core.GroupService_UploadGroupAvatarServer) error {
-	l := groupservicelogic.NewUploadGroupAvatarLogic(stream.Context(), s.svcCtx)
-	return l.UploadGroupAvatar(stream)
+func (s *GroupServiceServer) UploadGroupAvatar(ctx context.Context, in *core.UploadGroupAvatarReq) (*core.UploadGroupAvatarResp, error) {
+	l := groupservicelogic.NewUploadGroupAvatarLogic(ctx, s.svcCtx)
+	return l.UploadGroupAvatar(in)
 }
 
 func (s *GroupServiceServer) UpdateGroupInfo(ctx context.Context, in *core.UpdateGroupInfoReq) (*core.UpdateGroupInfoResp, error) {

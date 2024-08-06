@@ -6,7 +6,7 @@ import (
 	"api/app/core/cmd/rpc/types/core"
 	"api/app/internal/models"
 	"context"
-	"errors"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -33,26 +33,26 @@ func (l *AddUserStickerLogic) AddUserSticker(in *core.AddStickerReq) (*core.AddS
 	_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not found,error : %+v", err)
 		}
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		return nil, err
 	}
 
 	_, err = l.svcCtx.DAO.FindOneStickerGroupByStickerUUID(l.ctx, in.StickerUUID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errx.NewCustomErrCode(errx.STICKER_NOT_EXIST)
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.STICKER_NOT_EXIST), "Sticker not found,error %+v,", err)
 		}
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		return nil, err //db error
 	}
 
 	_, err = l.svcCtx.DAO.FindOneStickerFromUser(l.ctx, userId, in.StickerUUID)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		return nil, err
 	}
 
 	if err := l.svcCtx.DAO.InsertOneStickerToUser(l.ctx, userId, &models.Sticker{Uuid: in.StickerUUID}); err != nil {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		return nil, err
 	}
 
 	return &core.AddStickerResp{

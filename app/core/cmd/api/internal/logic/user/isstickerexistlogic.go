@@ -1,10 +1,11 @@
 package user
 
 import (
-	"context"
-
+	"api/app/common/ctxtool"
 	"api/app/core/cmd/api/internal/svc"
 	"api/app/core/cmd/api/internal/types"
+	"api/app/core/cmd/rpc/types/core"
+	"context"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,6 +27,19 @@ func NewIsStickerExistLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Is
 
 func (l *IsStickerExistLogic) IsStickerExist(req *types.IsStickerExistReq) (resp *types.IsStickerExistResp, err error) {
 	// todo: add your logic here and delete this line
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	rpcResp, rpcErr := l.svcCtx.UserService.IsStickerExist(l.ctx, &core.IsStickerExistReq{
+		UserId:      uint32(userID),
+		StickerUUID: req.StickerUUID,
+	})
 
-	return
+	if rpcErr != nil {
+		logx.WithContext(l.ctx).Error(rpcErr)
+		return nil, rpcErr
+	}
+
+	return &types.IsStickerExistResp{
+		Code:    uint(rpcResp.Code),
+		IsExist: rpcResp.IsExist,
+	}, nil
 }

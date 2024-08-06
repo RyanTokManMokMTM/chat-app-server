@@ -22,9 +22,9 @@ func NewStoryServiceServer(svcCtx *svc.ServiceContext) *StoryServiceServer {
 	}
 }
 
-func (s *StoryServiceServer) AddStory(stream core.StoryService_AddStoryServer) error {
-	l := storyservicelogic.NewAddStoryLogic(stream.Context(), s.svcCtx)
-	return l.AddStory(stream)
+func (s *StoryServiceServer) AddStory(ctx context.Context, in *core.AddStoryReq) (*core.AddStoryResp, error) {
+	l := storyservicelogic.NewAddStoryLogic(ctx, s.svcCtx)
+	return l.AddStory(in)
 }
 
 func (s *StoryServiceServer) DeleteStory(ctx context.Context, in *core.DeleteStoryReq) (*core.DeleteStoryResp, error) {
@@ -52,7 +52,7 @@ func (s *StoryServiceServer) CreateStoryLike(ctx context.Context, in *core.Creat
 	return l.CreateStoryLike(in)
 }
 
-func (s *StoryServiceServer) DeleteStoryLike(ctx context.Context, in *core.DeleteStoryReq) (*core.DeleteStoryLikeResp, error) {
+func (s *StoryServiceServer) DeleteStoryLike(ctx context.Context, in *core.DeleteStoryLikeReq) (*core.DeleteStoryLikeResp, error) {
 	l := storyservicelogic.NewDeleteStoryLikeLogic(ctx, s.svcCtx)
 	return l.DeleteStoryLike(in)
 }

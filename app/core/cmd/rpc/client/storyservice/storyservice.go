@@ -88,6 +88,8 @@ type (
 	SignInResp               = core.SignInResp
 	SignUpReq                = core.SignUpReq
 	SignUpResp               = core.SignUpResp
+	StickerData              = core.StickerData
+	StickerFileMap           = core.StickerFileMap
 	StickerInfo              = core.StickerInfo
 	StoryInfo                = core.StoryInfo
 	StorySeenInfo            = core.StorySeenInfo
@@ -109,13 +111,13 @@ type (
 	UserInfo                 = core.UserInfo
 
 	StoryService interface {
-		AddStory(ctx context.Context, opts ...grpc.CallOption) (core.StoryService_AddStoryClient, error)
+		AddStory(ctx context.Context, in *AddStoryReq, opts ...grpc.CallOption) (*AddStoryResp, error)
 		DeleteStory(ctx context.Context, in *DeleteStoryReq, opts ...grpc.CallOption) (*DeleteStoryResp, error)
 		GetUserStoriesByUserId(ctx context.Context, in *GetUserStoryReq, opts ...grpc.CallOption) (*GetUserStoryResp, error)
 		GetActiveStories(ctx context.Context, in *GetActiveStoryReq, opts ...grpc.CallOption) (*GetActiveStoryResp, error)
 		UpdateStorySeen(ctx context.Context, in *UpdateStorySeenReq, opts ...grpc.CallOption) (*UpdateStorySeenResp, error)
 		CreateStoryLike(ctx context.Context, in *CreateStoryLikeReq, opts ...grpc.CallOption) (*CreateStoryLikeResp, error)
-		DeleteStoryLike(ctx context.Context, in *DeleteStoryReq, opts ...grpc.CallOption) (*DeleteStoryLikeResp, error)
+		DeleteStoryLike(ctx context.Context, in *DeleteStoryLikeReq, opts ...grpc.CallOption) (*DeleteStoryLikeResp, error)
 		GetStoryInfo(ctx context.Context, in *GetStoryInfoByIdRep, opts ...grpc.CallOption) (*GetStoryInfoByIdResp, error)
 		GetStorySeenListInfo(ctx context.Context, in *GetStorySeenListReq, opts ...grpc.CallOption) (*GetStorySeenListResp, error)
 	}
@@ -131,9 +133,9 @@ func NewStoryService(cli zrpc.Client) StoryService {
 	}
 }
 
-func (m *defaultStoryService) AddStory(ctx context.Context, opts ...grpc.CallOption) (core.StoryService_AddStoryClient, error) {
+func (m *defaultStoryService) AddStory(ctx context.Context, in *AddStoryReq, opts ...grpc.CallOption) (*AddStoryResp, error) {
 	client := core.NewStoryServiceClient(m.cli.Conn())
-	return client.AddStory(ctx, opts...)
+	return client.AddStory(ctx, in, opts...)
 }
 
 func (m *defaultStoryService) DeleteStory(ctx context.Context, in *DeleteStoryReq, opts ...grpc.CallOption) (*DeleteStoryResp, error) {
@@ -161,7 +163,7 @@ func (m *defaultStoryService) CreateStoryLike(ctx context.Context, in *CreateSto
 	return client.CreateStoryLike(ctx, in, opts...)
 }
 
-func (m *defaultStoryService) DeleteStoryLike(ctx context.Context, in *DeleteStoryReq, opts ...grpc.CallOption) (*DeleteStoryLikeResp, error) {
+func (m *defaultStoryService) DeleteStoryLike(ctx context.Context, in *DeleteStoryLikeReq, opts ...grpc.CallOption) (*DeleteStoryLikeResp, error) {
 	client := core.NewStoryServiceClient(m.cli.Conn())
 	return client.DeleteStoryLike(ctx, in, opts...)
 }

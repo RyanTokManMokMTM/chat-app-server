@@ -1,10 +1,11 @@
 package user
 
 import (
-	"context"
-
+	"api/app/common/errx"
 	"api/app/core/cmd/api/internal/svc"
 	"api/app/core/cmd/api/internal/types"
+	"api/app/core/cmd/rpc/types/core"
+	"context"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,5 +28,26 @@ func NewGetUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUs
 func (l *GetUserInfoLogic) GetUserInfo(req *types.GetUserInfoReq) (resp *types.GetUserInfoResp, err error) {
 	// todo: add your logic here and delete this line
 
-	return
+	if req.UUID == "" && req.UserID == 0 {
+		return nil, errx.NewCustomErrCode(errx.REQ_PARAM_ERROR)
+	}
+	userId := uint32(req.UserID)
+	rpcResp, rpcErr := l.svcCtx.UserService.GetUserInfo(l.ctx, &core.GetUserInfoReq{
+		Uuid:   &(req.UUID),
+		UserId: &(userId),
+	})
+
+	if rpcErr != nil {
+		logx.WithContext(l.ctx).Error(rpcErr)
+		return nil, rpcErr
+	}
+	return &types.GetUserInfoResp{
+		Code:          uint(rpcResp.Code),
+		UUID:          rpcResp.Uuid,
+		Email:         rpcResp.Email,
+		Name:          rpcResp.Name,
+		Avatar:        rpcResp.Avatar,
+		Cover:         rpcResp.Cover,
+		StatusMessage: rpcResp.StatusMessage,
+	}, nil
 }

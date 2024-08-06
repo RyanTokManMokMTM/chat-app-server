@@ -6,7 +6,7 @@ import (
 	"api/app/core/cmd/rpc/types/core"
 	"api/app/internal/models"
 	"context"
-	"errors"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -29,27 +29,33 @@ func NewGetUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUs
 func (l *GetUserInfoLogic) GetUserInfo(in *core.GetUserInfoReq) (*core.GetUserInfoResp, error) {
 	// todo: add your logic here and delete this line
 	if in.Uuid == nil && in.UserId == nil {
-		return nil, errx.NewCustomErrCode(errx.REQ_PARAM_ERROR)
+		return nil, errors.Wrapf(errx.NewCustomErrCode(errx.REQ_PARAM_ERROR), "request parameter invaild")
 	}
 
 	userId := uint(*in.UserId)
 	var u *models.User
 	if userId != 0 {
-		_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userId)
+		logx.Info("Get user by id")
+		found, err := l.svcCtx.DAO.FindOneUser(l.ctx, userId)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+				return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not exist, error : %+v", err)
 			}
-			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+			logx.WithContext(l.ctx).Errorf("Error : %+v", err)
+			return nil, err
 		}
+		u = found
 	} else {
-		_, err := l.svcCtx.DAO.FindOneUserByUUID(l.ctx, *in.Uuid)
+		found, err := l.svcCtx.DAO.FindOneUserByUUID(l.ctx, *in.Uuid)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+				return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not exist, error : %+v", err)
 			}
+			logx.WithContext(l.ctx).Errorf("Error : %+v", err)
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
+
+		u = found
 	}
 
 	return &core.GetUserInfoResp{

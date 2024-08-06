@@ -1,13 +1,12 @@
 package logic
 
 import (
+	"api/app/assets/cmd/rpc/internal/svc"
+	"api/app/assets/cmd/rpc/types/assets_api"
 	"api/app/common/errx"
 	"api/app/common/uploadx"
 	"context"
-	"io"
-
-	"api/app/assets/cmd/rpc/internal/svc"
-	"api/app/assets/cmd/rpc/types/assets_api"
+	"github.com/pkg/errors"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,37 +25,19 @@ func NewUploadImageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Uploa
 	}
 }
 
-func (l *UploadImageLogic) UploadImage(stream assets_api.AssetRPC_UploadImageServer) error {
+func (l *UploadImageLogic) UploadImage(in *assets_api.UploadImageReq) (*assets_api.UploadImageResp, error) {
 	// todo: add your logic here and delete this line
-	imageData := make([]byte, 0)
-	imageName := ""
-
-	for {
-		req, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
-		if imageName == "" {
-			imageName = req.GetFileName()
-		}
-
-		data := req.GetData()
-		imageData = append(imageData, data...)
+	if len(in.Base64Str) == 0 {
+		return nil, errors.Wrapf(errx.NewCustomErrCode(errx.REQ_PARAM_ERROR), "base64 is nil")
 	}
 
-	path, err := uploadx.SaveBytesIntoFile(imageName, imageData, l.svcCtx.Config.ResourcesPath)
+	path, err := uploadx.SaveImageByBase64(in.Base64Str, in.Format, l.svcCtx.Config.ResourcesPath)
 	if err != nil {
-		return stream.SendAndClose(&assets_api.UploadImageResp{
-			Code: int32(errx.FILE_UPLOAD_FAILED),
-			Path: "",
-		})
+		return nil, errx.NewCustomError(errx.SERVER_COMMON_ERROR, err.Error())
 	}
-	return stream.SendAndClose(&assets_api.UploadImageResp{
+
+	return &assets_api.UploadImageResp{
 		Code: int32(errx.SUCCESS),
 		Path: path,
-	})
+	}, nil
 }

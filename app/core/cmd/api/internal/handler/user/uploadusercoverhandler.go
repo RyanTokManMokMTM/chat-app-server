@@ -42,7 +42,7 @@ func UploadUserCoverHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := user.NewUploadUserCoverLogic(r.Context(), svcCtx)
+		l := user.NewUploadUserCoverLogic(r.Context(), svcCtx, r)
 		resp, err := l.UploadUserCover(&req)
 		if err != nil {
 			//convert to customError

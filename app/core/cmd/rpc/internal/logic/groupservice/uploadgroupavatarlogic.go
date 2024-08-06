@@ -1,10 +1,13 @@
 package groupservicelogic
 
 import (
-	"context"
-
+	"api/app/common/errx"
+	"api/app/common/uploadx"
 	"api/app/core/cmd/rpc/internal/svc"
 	"api/app/core/cmd/rpc/types/core"
+	"context"
+	"github.com/pkg/errors"
+	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -23,8 +26,45 @@ func NewUploadGroupAvatarLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-func (l *UploadGroupAvatarLogic) UploadGroupAvatar(stream core.GroupService_UploadGroupAvatarServer) error {
+func (l *UploadGroupAvatarLogic) UploadGroupAvatar(in *core.UploadGroupAvatarReq) (*core.UploadGroupAvatarResp, error) {
 	// todo: add your logic here and delete this line
+	userID := uint(in.UserId)
+	_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	if err != nil {
+		logx.WithContext(l.ctx).Error(err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not exist")
+		}
+		return nil, err
+	}
 
-	return nil
+	group, err := l.svcCtx.DAO.FindOneGroup(l.ctx, uint(in.GroupId))
+	if err != nil {
+		logx.WithContext(l.ctx).Error(err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.GROUP_NOT_EXIST), "group not exist")
+		}
+		return nil, err
+	}
+
+	if group.GroupLead != userID {
+		return nil, errors.Wrapf(errx.NewCustomErrCode(errx.NO_GROUP_AUTHORITY), "No group authrotiy")
+	}
+
+	//upload
+	avatarPaths, err := uploadx.SaveBytesIntoFile(in.AvatarFileName, in.Data, l.svcCtx.Config.ResourcesPath)
+	if err != nil {
+		logx.WithContext(l.ctx).Error(err)
+		return nil, errors.Wrapf(errx.NewCustomErrCode(errx.FILE_UPLOAD_FAILED), "File upload filed, error : %+v", err)
+	}
+
+	if err := l.svcCtx.DAO.UpdateOneGroupAvatar(l.ctx, group.Id, avatarPaths); err != nil {
+		logx.WithContext(l.ctx).Error(err)
+		return nil, err
+	}
+
+	return &core.UploadGroupAvatarResp{
+		Code: uint32(errx.SUCCESS),
+		Path: avatarPaths,
+	}, nil
 }

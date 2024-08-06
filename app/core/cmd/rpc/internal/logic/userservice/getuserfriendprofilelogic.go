@@ -1,12 +1,12 @@
 package userservicelogic
 
 import (
+	"api/app/common/errx"
 	"api/app/core/cmd/rpc/internal/svc"
 	"api/app/core/cmd/rpc/types/core"
 	"api/app/internal/models"
 	"context"
-	"errors"
-	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -28,35 +28,36 @@ func NewGetUserFriendProfileLogic(ctx context.Context, svcCtx *svc.ServiceContex
 
 func (l *GetUserFriendProfileLogic) GetUserFriendProfile(in *core.GetUserFriendProfileReq) (*core.GetUserFriendProfileResp, error) {
 	// todo: add your logic here and delete this line
-	if in.Uuid == nil && in.UserId == nil {
-		return nil, errx.NewCustomErrCode(errx.REQ_PARAM_ERROR)
+	if in.FriendUuid == nil && in.FriendUserId == nil {
+		return nil, errors.Wrapf(errx.NewCustomErrCode(errx.REQ_PARAM_ERROR), "request parameter invalid")
 	}
 
-	userID := uint(*in.UserId)
+	userID := uint(in.UserId)
 	_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not exist, error: %+v", err)
 		}
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		return nil, err
 	}
 
 	var u *models.User
-	if userID != 0 {
-		_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	if in.FriendUserId != nil {
+		friendUserId := uint(*in.FriendUserId)
+		_, err := l.svcCtx.DAO.FindOneUser(l.ctx, friendUserId)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+				return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not exist, error : %+v", err)
 			}
-			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+			return nil, err
 		}
 	} else {
-		_, err := l.svcCtx.DAO.FindOneUserByUUID(l.ctx, *in.Uuid)
+		_, err := l.svcCtx.DAO.FindOneUserByUUID(l.ctx, *in.FriendUuid)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+				return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not exist, error : %+v", err)
 			}
-			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+			return nil, err
 		}
 	}
 
@@ -64,7 +65,7 @@ func (l *GetUserFriendProfileLogic) GetUserFriendProfile(in *core.GetUserFriendP
 	_, err = l.svcCtx.DAO.FindOneFriend(l.ctx, userID, u.Id)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+			return nil, err
 		}
 		isFriend = false
 	}

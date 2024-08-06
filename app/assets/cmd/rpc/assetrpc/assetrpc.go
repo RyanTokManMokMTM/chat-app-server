@@ -19,8 +19,8 @@ type (
 	UploadImageResp = assets_api.UploadImageResp
 
 	AssetRPC interface {
-		UploadImage(ctx context.Context, opts ...grpc.CallOption) (assets_api.AssetRPC_UploadImageClient, error)
-		UploadFile(ctx context.Context, opts ...grpc.CallOption) (assets_api.AssetRPC_UploadFileClient, error)
+		UploadImage(ctx context.Context, in *UploadImageReq, opts ...grpc.CallOption) (*UploadImageResp, error)
+		UploadFile(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*UploadFileResp, error)
 	}
 
 	defaultAssetRPC struct {
@@ -34,12 +34,12 @@ func NewAssetRPC(cli zrpc.Client) AssetRPC {
 	}
 }
 
-func (m *defaultAssetRPC) UploadImage(ctx context.Context, opts ...grpc.CallOption) (assets_api.AssetRPC_UploadImageClient, error) {
+func (m *defaultAssetRPC) UploadImage(ctx context.Context, in *UploadImageReq, opts ...grpc.CallOption) (*UploadImageResp, error) {
 	client := assets_api.NewAssetRPCClient(m.cli.Conn())
-	return client.UploadImage(ctx, opts...)
+	return client.UploadImage(ctx, in, opts...)
 }
 
-func (m *defaultAssetRPC) UploadFile(ctx context.Context, opts ...grpc.CallOption) (assets_api.AssetRPC_UploadFileClient, error) {
+func (m *defaultAssetRPC) UploadFile(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*UploadFileResp, error) {
 	client := assets_api.NewAssetRPCClient(m.cli.Conn())
-	return client.UploadFile(ctx, opts...)
+	return client.UploadFile(ctx, in, opts...)
 }

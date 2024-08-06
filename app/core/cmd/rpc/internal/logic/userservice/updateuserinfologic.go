@@ -3,7 +3,7 @@ package userservicelogic
 import (
 	"api/app/common/errx"
 	"context"
-	"errors"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"strings"
 
@@ -33,9 +33,10 @@ func (l *UpdateUserInfoLogic) UpdateUserInfo(in *core.UpdateUserInfoReq) (*core.
 	u, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not exist, error: %+v", err)
 		}
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		logx.WithContext(l.ctx).Errorf("Error : %+v", err)
+		return nil, err
 	}
 	if strings.Compare(in.Name, u.NickName) == 0 {
 		return &core.UpdateUserInfoResp{
@@ -44,7 +45,8 @@ func (l *UpdateUserInfoLogic) UpdateUserInfo(in *core.UpdateUserInfoReq) (*core.
 	}
 
 	if err := l.svcCtx.DAO.UpdateUserProfile(l.ctx, userID, in.Name); err != nil {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		logx.WithContext(l.ctx).Errorf("Error : %+v", err)
+		return nil, err
 	}
 
 	return &core.UpdateUserInfoResp{

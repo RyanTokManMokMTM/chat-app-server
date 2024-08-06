@@ -11,7 +11,7 @@ import (
 
 	"net/http"
 
-	"github.com/zeromicro/go-zero/rest/httpx"
+	f"github.com/zeromicro/go-zero/rest/httpx"
 	{{.ImportPackages}}
 )
 

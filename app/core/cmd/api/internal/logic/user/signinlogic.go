@@ -1,12 +1,10 @@
 package user
 
 import (
-	"api/app/core/cmd/rpc/types/core"
-	"context"
-	"net/http"
-
 	"api/app/core/cmd/api/internal/svc"
 	"api/app/core/cmd/api/internal/types"
+	"api/app/core/cmd/rpc/types/core"
+	"context"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,28 +26,29 @@ func NewSignInLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SignInLogi
 
 func (l *SignInLogic) SignIn(req *types.SignInReq) (resp *types.SignInResp, err error) {
 	// todo: add your logic here and delete this line
-	response, rpcErr := l.svcCtx.UserService.SignIn(
+	rpcResp, rpcErr := l.svcCtx.UserService.SignIn(
 		l.ctx,
 		&core.SignInReq{
 			Email:    req.Email,
 			Password: req.Password,
 		})
 	if rpcErr != nil {
+		logx.WithContext(l.ctx).Error(rpcErr)
 		return nil, rpcErr
 	}
 
 	return &types.SignInResp{
-		Code:        uint(http.StatusOK),
-		Token:       response.Token,
-		ExpiredTime: uint(response.ExpiredTime),
+		Code:        uint(rpcResp.Code),
+		Token:       rpcResp.Token,
+		ExpiredTime: uint(rpcResp.ExpiredTime),
 		UserInfo: types.CommonUserInfo{
-			ID:            uint(response.UserInfo.Id),
-			Uuid:          response.UserInfo.Uuid,
-			NickName:      response.UserInfo.Name,
-			Avatar:        response.UserInfo.Avatar,
-			Email:         response.UserInfo.Email,
-			Cover:         response.UserInfo.Cover,
-			StatusMessage: response.UserInfo.StatusMessage,
+			ID:            uint(rpcResp.UserInfo.Id),
+			Uuid:          rpcResp.UserInfo.Uuid,
+			NickName:      rpcResp.UserInfo.Name,
+			Avatar:        rpcResp.UserInfo.Avatar,
+			Email:         rpcResp.UserInfo.Email,
+			Cover:         rpcResp.UserInfo.Cover,
+			StatusMessage: rpcResp.UserInfo.StatusMessage,
 		},
 	}, nil
 

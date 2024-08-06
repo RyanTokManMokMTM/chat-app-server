@@ -22,9 +22,3 @@ type UploadImageResp struct {
 	Code uint   `json:"code"`
 	Path string `json:"path"`
 }
-
-type UploadImagesReq struct {
-}
-
-type UploadImagesResp struct {
-}

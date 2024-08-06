@@ -1,10 +1,12 @@
 package friendservicelogic
 
 import (
-	"context"
-
+	"api/app/common/errx"
 	"api/app/core/cmd/rpc/internal/svc"
 	"api/app/core/cmd/rpc/types/core"
+	"context"
+	"github.com/pkg/errors"
+	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,6 +27,32 @@ func NewDeleteFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Dele
 
 func (l *DeleteFriendLogic) DeleteFriend(in *core.DeleteFriendReq) (*core.DeleteFriendResp, error) {
 	// todo: add your logic here and delete this line
+	userID := uint(in.UserId)
+	_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	if err != nil {
+		logx.WithContext(l.ctx).Error(err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not exist, error : %+v", err)
+		}
+		return nil, err
+	}
 
-	return &core.DeleteFriendResp{}, nil
+	//TODO: Find Friend
+	_, err = l.svcCtx.DAO.FindOneFriend(l.ctx, userID, uint(in.FriendId))
+	if err != nil {
+		logx.WithContext(l.ctx).Error(err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.NOT_YET_FRIEND), "user not yet friend, userId : %d", in.FriendId)
+		}
+		return nil, err
+	}
+
+	if err := l.svcCtx.DAO.DeleteOneFriend(l.ctx, userID, uint(in.FriendId)); err != nil {
+		logx.WithContext(l.ctx).Error(err)
+		return nil, err
+	}
+
+	return &core.DeleteFriendResp{
+		Code: uint32(errx.SUCCESS),
+	}, nil
 }

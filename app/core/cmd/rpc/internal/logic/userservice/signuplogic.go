@@ -35,6 +35,7 @@ func (l *SignUpLogic) SignUp(in *core.SignUpReq) (*core.SignUpResp, error) {
 	found, err := l.svcCtx.DAO.FindOneUserByEmail(l.ctx, in.Email)
 
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		logx.WithContext(l.ctx).Errorf("Error : %+v", err)
 		return nil, err
 	}
 
@@ -45,7 +46,7 @@ func (l *SignUpLogic) SignUp(in *core.SignUpReq) (*core.SignUpResp, error) {
 	encryptedPW := cryptox.PasswordEncrypt(in.Password, l.svcCtx.Config.Salt)
 	u, err := l.svcCtx.DAO.InsertOneUser(l.ctx, in.Name, in.Email, encryptedPW)
 	if err != nil {
-		logx.WithContext(l.ctx).Errorf("insert db error :%+v", err)
+		logx.WithContext(l.ctx).Errorf("Error : %+v", err)
 		return nil, err
 	}
 

@@ -1,10 +1,11 @@
 package friend
 
 import (
-	"context"
-
+	"api/app/common/ctxtool"
 	"api/app/core/cmd/api/internal/svc"
 	"api/app/core/cmd/api/internal/types"
+	"api/app/core/cmd/rpc/types/core"
+	"context"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,6 +27,17 @@ func NewDeleteFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Dele
 
 func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *types.DeleteFriendResp, err error) {
 	// todo: add your logic here and delete this line
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	rpcResp, rpcErr := l.svcCtx.FriendService.DeleteFriend(l.ctx, &core.DeleteFriendReq{
+		UserId:   uint32(userID),
+		FriendId: uint32(req.UserID),
+	})
 
-	return
+	if rpcErr != nil {
+		logx.WithContext(l.ctx).Error(err)
+		return nil, err
+	}
+	return &types.DeleteFriendResp{
+		Code: uint(rpcResp.Code),
+	}, nil
 }

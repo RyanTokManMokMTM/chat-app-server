@@ -42,7 +42,7 @@ func UploadUserAvatarHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := user.NewUploadUserAvatarLogic(r.Context(), svcCtx)
+		l := user.NewUploadUserAvatarLogic(r.Context(), svcCtx, r)
 		resp, err := l.UploadUserAvatar(&req)
 		if err != nil {
 			//convert to customError

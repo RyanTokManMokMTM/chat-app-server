@@ -34,6 +34,7 @@ func (l *SignUpLogic) SignUp(req *types.SignUpReq) (resp *types.SignUpResp, err 
 	})
 
 	if rpcErr != nil {
+		logx.WithContext(l.ctx).Error(rpcErr)
 		return nil, rpcErr
 	}
 

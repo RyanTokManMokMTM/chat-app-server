@@ -1,10 +1,12 @@
 package user
 
 import (
-	"context"
-
+	"api/app/common/errx"
 	"api/app/core/cmd/api/internal/svc"
 	"api/app/core/cmd/api/internal/types"
+	"api/app/core/cmd/rpc/types/core"
+	"context"
+	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,5 +29,33 @@ func NewGetUserFriendProfileLogic(ctx context.Context, svcCtx *svc.ServiceContex
 func (l *GetUserFriendProfileLogic) GetUserFriendProfile(req *types.GetUserFriendProfileReq) (resp *types.GetUserFriendProfileResp, err error) {
 	// todo: add your logic here and delete this line
 
-	return
+	if req.UUID == "" && req.UserID == 0 {
+		return nil, errx.NewCustomErrCode(errx.REQ_PARAM_ERROR)
+	}
+
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	fdUserID := uint32(req.UserID)
+	rpcResp, rpcErr := l.svcCtx.UserService.GetUserFriendProfile(l.ctx, &core.GetUserFriendProfileReq{
+		UserId:       uint32(userID),
+		FriendUserId: &(fdUserID),
+		FriendUuid:   &(req.UUID),
+	})
+
+	if rpcErr != nil {
+		logx.WithContext(l.ctx).Error(rpcErr)
+		return nil, rpcErr
+	}
+
+	return &types.GetUserFriendProfileResp{
+		Code: uint(rpcResp.Code),
+		UserInfo: types.CommonUserInfo{
+			ID:            uint(rpcResp.UserInfo.Id),
+			Uuid:          rpcResp.UserInfo.Uuid,
+			NickName:      rpcResp.UserInfo.Name,
+			Email:         rpcResp.UserInfo.Email,
+			Avatar:        rpcResp.UserInfo.Avatar,
+			Cover:         rpcResp.UserInfo.Cover,
+			StatusMessage: rpcResp.UserInfo.StatusMessage,
+		}, IsFriend: rpcResp.IsFriend,
+	}, nil
 }

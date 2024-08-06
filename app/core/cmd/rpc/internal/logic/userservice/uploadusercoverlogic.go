@@ -6,8 +6,8 @@ import (
 	"api/app/core/cmd/rpc/internal/svc"
 	"api/app/core/cmd/rpc/types/core"
 	"context"
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -33,19 +33,21 @@ func (l *UploadUserCoverLogic) UploadUserCover(in *core.UploadUserCoverReq) (*co
 	_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.USER_NOT_EXIST), "user not exist ,error : %+v", err)
 		}
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		logx.WithContext(l.ctx).Errorf("Error : %+v", err)
+		return nil, err
 	}
 
 	name, err := uploadx.SaveBytesIntoFile(in.FileName, in.Data, l.svcCtx.Config.ResourcesPath)
 	if err != nil {
-		return nil, errx.NewCustomErrCode(errx.FILE_UPLOAD_FAILED)
+		return nil, errors.Wrapf(errx.NewCustomErrCode(errx.FILE_UPLOAD_FAILED), "upload file failed, error: %+v", err)
 	}
 
-	path := fmt.Sprintf("/%v", name)
+	path := fmt.Sprintf("%v", name)
 	if err = l.svcCtx.DAO.UpdateUserCover(l.ctx, userID, path); err != nil {
-		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
+		logx.WithContext(l.ctx).Errorf("Error : %+v", err)
+		return nil, err
 	}
 
 	return &core.UploadUserCoverResp{

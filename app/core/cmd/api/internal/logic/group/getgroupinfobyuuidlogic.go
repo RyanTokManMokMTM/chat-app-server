@@ -1,7 +1,10 @@
 package group
 
 import (
+	"api/app/common/ctxtool"
+	"api/app/core/cmd/rpc/types/core"
 	"context"
+	"net/http"
 
 	"api/app/core/cmd/api/internal/svc"
 	"api/app/core/cmd/api/internal/types"
@@ -27,5 +30,32 @@ func NewGetGroupInfoByUUIDLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUUIDReq) (resp *types.GetGroupInfoByUUIDResp, err error) {
 	// todo: add your logic here and delete this line
 
-	return
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	rpcResp, rpcErr := l.svcCtx.GroupService.GetGroupInfoByUUID(l.ctx, &core.GetGroupInfoByUUIDReq{
+		UserId: uint32(userID),
+		Uuid:   req.UUID,
+	})
+
+	if rpcErr != nil {
+		logx.WithContext(l.ctx).Error(err)
+		return nil, err
+	}
+
+	return &types.GetGroupInfoByUUIDResp{
+		Code: uint(http.StatusOK),
+		Result: types.FullGroupInfo{
+			GroupInfo: types.GroupInfo{
+				ID:        uint(rpcResp.Result.Info.Id),
+				Uuid:      rpcResp.Result.Info.Uuid,
+				Name:      rpcResp.Result.Info.Name,
+				Avatar:    rpcResp.Result.Info.Avatar,
+				Desc:      rpcResp.Result.Info.Desc,
+				CreatedAt: uint(rpcResp.Result.Info.CreatedAt),
+			},
+			Members:   uint(count),
+			IsJoined:  rpcResp.Result.IsJoined,
+			IsOwner:   rpcResp.Result.IsOwner,
+			CreatedBy: rpcResp.Result.CreatedBy,
+		},
+	}, nil
 }

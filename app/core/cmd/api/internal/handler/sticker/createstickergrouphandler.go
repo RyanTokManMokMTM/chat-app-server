@@ -42,7 +42,7 @@ func CreateStickerGroupHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := sticker.NewCreateStickerGroupLogic(r.Context(), svcCtx)
+		l := sticker.NewCreateStickerGroupLogic(r.Context(), svcCtx, r)
 		resp, err := l.CreateStickerGroup(&req)
 		if err != nil {
 			//convert to customError
