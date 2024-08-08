@@ -4,9 +4,9 @@ package handler
 import (
 	"net/http"
 
-	assets "api/app/assets/cmd/api/internal/handler/assets"
-	health "api/app/assets/cmd/api/internal/handler/health"
-	"api/app/assets/cmd/api/internal/svc"
+	assets "github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/handler/assets"
+	health "github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/handler/health"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
 )

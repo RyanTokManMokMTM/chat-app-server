@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 
-	"api/app/chat/cmd/api/internal/config"
-	"api/app/chat/cmd/api/internal/handler"
-	"api/app/chat/cmd/api/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/config"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/handler"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"

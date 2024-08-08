@@ -501,6 +501,43 @@ message CountUserGroupResp{
   uint32 total = 2;
 }
 
+//Message
+
+message GetMessagesReq{
+  uint32 userId = 1;
+  uint32 messageType = 2;
+  uint32 sourceId = 3;
+  uint32 limit = 4;
+  uint32 latestId = 5;
+}
+message GetMessagesResp{
+  uint32 code = 1;
+  repeated MessageUser messages = 2;
+}
+
+message DeleteMessageReq{
+  uint32 userId = 1;
+  uint32 msgId = 2;
+}
+message DeleteMessageResp{
+  uint32 code = 1;
+}
+
+message MessageUser{
+  uint32 messageId = 1;
+  uint32 fromId = 2;
+  uint32 toId = 3;
+  string content = 4;
+  string contentType = 5;
+  uint32 messageType = 6;
+  string url = 7;
+  string fileName = 8;
+  uint32 fileSize = 9;
+  uint32 storyTime = 10;
+  uint32 createdAt = 11;
+}
+
+
 //===================SERVICE=========================================
 //UserService
 service UserService {
@@ -562,4 +599,10 @@ service StickerService {
   rpc GetStickerGroupResources(GetStickerResourcesReq) returns (GetStickerResourcesResp);
   rpc GetStickerGroupInfo(GetStickerInfoReq) returns (GetStickerInfoResp);
   rpc GetStickerGroupList(GetStickerListReq) returns (GetStickerListResp);
+}
+
+//ChatMessage Service
+service ChatService {
+  rpc GetMessages(GetMessagesReq) returns (GetMessagesResp);
+  rpc DeleteMessage(DeleteMessageReq) returns (DeleteMessageResp);
 }

@@ -1,12 +1,12 @@
 package logic
 
 import (
-	"api/app/assets/cmd/rpc/internal/svc"
-	"api/app/assets/cmd/rpc/types/assets_api"
-	"api/app/common/errx"
-	"api/app/common/uploadx"
 	"context"
 	"github.com/pkg/errors"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/types/assets_api"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/uploadx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

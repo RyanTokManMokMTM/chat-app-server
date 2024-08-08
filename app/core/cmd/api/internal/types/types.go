@@ -88,6 +88,14 @@ type DeleteGroupResp struct {
 	Code uint `json:"code"`
 }
 
+type DeleteMessageReq struct {
+	MesssageID uint `json:"msg_id"`
+}
+
+type DeleteMessageResp struct {
+	Code uint `json:"code"`
+}
+
 type DeleteStickerReq struct {
 	StickerUUID string `json:"sticker_id"`
 }
@@ -190,6 +198,19 @@ type GetGroupMembersResp struct {
 	Code uint `json:"code"`
 	PageableInfo
 	MemberList []GroupMemberInfo `json:"member_list"`
+}
+
+type GetMessagesReq struct {
+	MessageType uint `json:"message_type"`
+	SouceId     uint `json:"id"` //can be a groupId or friendId
+	Page        uint `form:"page,default=1"`
+	Limit       uint `form:"limit,default=20"`
+	LatestID    uint `form:"latest_id,default=0"`
+}
+
+type GetMessagesResp struct {
+	Code     uint          `json:"code"`
+	Messages []MessageUser `json:"message"`
 }
 
 type GetStickerInfoReq struct {
@@ -340,6 +361,20 @@ type LeaveGroupReq struct {
 
 type LeaveGroupResp struct {
 	Code uint `json:"code"`
+}
+
+type MessageUser struct {
+	MessageID   uint   `json:"id"`
+	FromID      uint   `json:"from_id"`
+	ToID        uint   `json:"to_id"`
+	Content     string `json:"content"`
+	ContentType string `json:"content_type"`
+	MessageType uint   `json:"message_type"`
+	Url         string `json:"url"`
+	FileName    string `json:"file_name"`
+	FileSize    uint   `json:"file_size"`
+	StoryTime   uint   `json:"story_available_time"`
+	CreatedAt   uint   `json:"create_at"`
 }
 
 type PageableInfo struct {

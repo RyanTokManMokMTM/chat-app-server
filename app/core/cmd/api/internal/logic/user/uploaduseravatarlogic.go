@@ -1,14 +1,14 @@
 package user
 
 import (
-	"api/app/common/ctxtool"
-	"api/app/common/uploadx"
-	"api/app/core/cmd/api/internal/svc"
-	"api/app/core/cmd/api/internal/types"
-	"api/app/core/cmd/rpc/types/core"
 	"bytes"
 	"context"
-	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/ctxtool"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/uploadx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/types"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
 	"io"
 	"net/http"
 

@@ -3,8 +3,8 @@ package health
 import (
 	"context"
 
-	"api/app/core/cmd/api/internal/svc"
-	"api/app/core/cmd/api/internal/types"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,6 +25,7 @@ func NewHealthCheckLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Healt
 
 func (l *HealthCheckLogic) HealthCheck() (resp *types.HealthCheckResp, err error) {
 	// todo: add your logic here and delete this line
-
-	return
+	return &types.HealthCheckResp{
+		Resp: "pong",
+	}, nil
 }

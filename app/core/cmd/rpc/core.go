@@ -1,17 +1,17 @@
 package main
 
 import (
-	"api/app/common/rpc"
 	"flag"
 	"fmt"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/rpc"
 
-	"api/app/core/cmd/rpc/internal/config"
-	friendserviceServer "api/app/core/cmd/rpc/internal/server/friendservice"
-	groupserviceServer "api/app/core/cmd/rpc/internal/server/groupservice"
-	storyserviceServer "api/app/core/cmd/rpc/internal/server/storyservice"
-	userserviceServer "api/app/core/cmd/rpc/internal/server/userservice"
-	"api/app/core/cmd/rpc/internal/svc"
-	"api/app/core/cmd/rpc/types/core"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/config"
+	friendserviceServer "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/server/friendservice"
+	groupserviceServer "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/server/groupservice"
+	storyserviceServer "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/server/storyservice"
+	userserviceServer "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/server/userservice"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"

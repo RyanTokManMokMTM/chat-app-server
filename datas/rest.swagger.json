@@ -1985,8 +1985,8 @@
     }
   },
   "securityDefinitions": {
-    "apiKey": {
-      "type": "apiKey",
+    "github.com/ryantokmanmokmtm/chat-app-serverKey": {
+      "type": "github.com/ryantokmanmokmtm/chat-app-serverKey",
       "description": "Enter JWT Bearer token **_only_**",
       "name": "Authorization",
       "in": "header"
@@ -1994,7 +1994,7 @@
   },
   "security": [
     {
-      "apiKey": []
+      "github.com/ryantokmanmokmtm/chat-app-serverKey": []
     }
   ]
 }

@@ -3,9 +3,9 @@ package assets
 import (
 	"net/http"
 
-	"api/app/assets/cmd/api/internal/logic/assets"
-	"api/app/assets/cmd/api/internal/svc"
-	"api/app/assets/cmd/api/internal/types"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/logic/assets"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/types"
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 

@@ -1,11 +1,11 @@
 package uploadx
 
 import (
-	"api/app/common/util"
 	"bytes"
 	"encoding/base64"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/util"
 	"github.com/zeromicro/go-zero/core/logx"
 	"io"
 	"mime/multipart"

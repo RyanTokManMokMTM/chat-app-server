@@ -1,11 +1,11 @@
 package group
 
 import (
-	"api/app/common/ctxtool"
-	"api/app/core/cmd/api/internal/svc"
-	"api/app/core/cmd/api/internal/types"
-	"api/app/core/cmd/rpc/types/core"
 	"context"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/ctxtool"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/types"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

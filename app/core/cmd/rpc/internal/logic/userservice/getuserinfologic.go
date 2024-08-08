@@ -1,12 +1,12 @@
 package userservicelogic
 
 import (
-	"api/app/common/errx"
-	"api/app/core/cmd/rpc/internal/svc"
-	"api/app/core/cmd/rpc/types/core"
-	"api/app/internal/models"
 	"context"
 	"github.com/pkg/errors"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/internal/models"
 	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"

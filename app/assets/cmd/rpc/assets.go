@@ -4,10 +4,10 @@ import (
 	"flag"
 	"fmt"
 
-	"api/app/assets/cmd/rpc/internal/config"
-	"api/app/assets/cmd/rpc/internal/server"
-	"api/app/assets/cmd/rpc/internal/svc"
-	"api/app/assets/cmd/rpc/types/assets_api"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/internal/config"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/internal/server"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/types/assets_api"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"

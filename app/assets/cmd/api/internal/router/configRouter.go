@@ -1,10 +1,10 @@
 package router
 
 import (
-	"api/app/assets/cmd/api/internal/config"
-	"api/app/assets/cmd/api/internal/handler"
-	"api/app/assets/cmd/api/internal/svc"
-	"api/app/common/util"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/config"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/handler"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/util"
 	"github.com/zeromicro/go-zero/rest"
 	"net/http"
 	"path"
@@ -12,7 +12,7 @@ import (
 )
 
 func ConfigRouter(c config.Config) *rest.Server {
-	server := rest.MustNewServer(c.RestConf) // new a router
+	server := rest.MustNewServer(c.RestConf) // new a configRouter
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)

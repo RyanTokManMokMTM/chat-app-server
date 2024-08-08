@@ -3,8 +3,8 @@ package health
 import (
 	"context"
 
-	"api/app/chat/cmd/api/internal/svc"
-	"api/app/chat/cmd/api/internal/types"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

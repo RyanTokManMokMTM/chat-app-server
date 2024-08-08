@@ -1,11 +1,11 @@
 package main
 
 import (
-	"api/app/assets/cmd/api/internal/router"
 	"flag"
 	"fmt"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/router"
 
-	"api/app/assets/cmd/api/internal/config"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/config"
 	"github.com/zeromicro/go-zero/core/conf"
 )
 

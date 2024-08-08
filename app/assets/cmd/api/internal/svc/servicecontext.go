@@ -1,8 +1,8 @@
 package svc
 
 import (
-	"api/app/assets/cmd/api/internal/config"
-	"api/app/assets/cmd/rpc/assetrpc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/config"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/assetrpc"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 

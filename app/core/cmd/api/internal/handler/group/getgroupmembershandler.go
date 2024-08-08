@@ -6,14 +6,14 @@ import (
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 	"github.com/pkg/errors"
-	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
 	"google.golang.org/grpc/status"
 
 	"net/http"
 
-	"api/app/core/cmd/api/internal/logic/group"
-	"api/app/core/cmd/api/internal/svc"
-	"api/app/core/cmd/api/internal/types"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/logic/group"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/types"
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 

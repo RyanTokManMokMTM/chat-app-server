@@ -1,12 +1,13 @@
 package svc
 
 import (
-	"api/app/core/cmd/api/internal/config"
-	"api/app/core/cmd/rpc/client/friendservice"
-	"api/app/core/cmd/rpc/client/groupservice"
-	"api/app/core/cmd/rpc/client/stickerservice"
-	"api/app/core/cmd/rpc/client/storyservice"
-	"api/app/core/cmd/rpc/client/userservice"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/config"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/client/chatservice"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/client/friendservice"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/client/groupservice"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/client/stickerservice"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/client/storyservice"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/client/userservice"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
@@ -17,6 +18,7 @@ type ServiceContext struct {
 	GroupService   groupservice.GroupService
 	StickerService stickerservice.StickerService
 	StoryService   storyservice.StoryService
+	ChatService    chatservice.ChatService
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -28,5 +30,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		GroupService:   groupservice.NewGroupService(zrpc.MustNewClient(c.CoreRPC)),
 		StickerService: stickerservice.NewStickerService(zrpc.MustNewClient(c.CoreRPC)),
 		StoryService:   storyservice.NewStoryService(zrpc.MustNewClient(c.CoreRPC)),
+		ChatService:    chatservice.NewChatService(zrpc.MustNewClient(c.CoreRPC)),
 	}
 }

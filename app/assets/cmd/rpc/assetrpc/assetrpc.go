@@ -6,7 +6,7 @@ package assetrpc
 import (
 	"context"
 
-	"api/app/assets/cmd/rpc/types/assets_api"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/types/assets_api"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"

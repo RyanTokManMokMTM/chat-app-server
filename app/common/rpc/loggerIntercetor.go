@@ -1,9 +1,9 @@
 package rpc
 
 import (
-	"api/app/common/errx"
 	"context"
 	"github.com/pkg/errors"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

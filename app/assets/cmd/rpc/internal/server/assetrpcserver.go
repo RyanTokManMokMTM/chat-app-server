@@ -6,9 +6,9 @@ package server
 import (
 	"context"
 
-	"api/app/assets/cmd/rpc/internal/logic"
-	"api/app/assets/cmd/rpc/internal/svc"
-	"api/app/assets/cmd/rpc/types/assets_api"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/internal/logic"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/types/assets_api"
 )
 
 type AssetRPCServer struct {

@@ -6,7 +6,7 @@ package stickerservice
 import (
 	"context"
 
-	"api/app/core/cmd/rpc/types/core"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
@@ -31,6 +31,8 @@ type (
 	DeleteFriendResp         = core.DeleteFriendResp
 	DeleteGroupReq           = core.DeleteGroupReq
 	DeleteGroupResp          = core.DeleteGroupResp
+	DeleteMessageReq         = core.DeleteMessageReq
+	DeleteMessageResp        = core.DeleteMessageResp
 	DeleteStickerReq         = core.DeleteStickerReq
 	DeleteStickerResp        = core.DeleteStickerResp
 	DeleteStoryLikeReq       = core.DeleteStoryLikeReq
@@ -50,6 +52,8 @@ type (
 	GetGroupInfoByUUIDResp   = core.GetGroupInfoByUUIDResp
 	GetGroupMembersReq       = core.GetGroupMembersReq
 	GetGroupMembersResp      = core.GetGroupMembersResp
+	GetMessagesReq           = core.GetMessagesReq
+	GetMessagesResp          = core.GetMessagesResp
 	GetStickerInfoReq        = core.GetStickerInfoReq
 	GetStickerInfoResp       = core.GetStickerInfoResp
 	GetStickerListReq        = core.GetStickerListReq
@@ -78,6 +82,7 @@ type (
 	JoinGroupResp            = core.JoinGroupResp
 	LeaveGroupReq            = core.LeaveGroupReq
 	LeaveGroupResp           = core.LeaveGroupResp
+	MessageUser              = core.MessageUser
 	PageableInfo             = core.PageableInfo
 	SearchGroupReq           = core.SearchGroupReq
 	SearchGroupResp          = core.SearchGroupResp

@@ -6,7 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
     "github.com/pkg/errors"
     "google.golang.org/grpc/status"
-	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 
 	"net/http"

@@ -5,10 +5,11 @@ import "desc/friend.api"
 import "desc/group.api"
 import "desc/story.api"
 import "desc/sticker.api"
+import "desc/message.api"
 
 info (
-	title:   "CoreAPI"
-	desc:    "A router for a CoreAPI"
+	title:   "Chat API"
+	desc:    "A configRouter for a Chat API"
 	author:  "Jackson.tmm"
 	email:   "ryantokmanmokmtm@hotmail.com"
 	version: "v1"

@@ -1,11 +1,11 @@
 package assets
 
 import (
-	"api/app/assets/cmd/api/internal/svc"
-	"api/app/assets/cmd/api/internal/types"
-	"api/app/assets/cmd/rpc/types/assets_api"
-	"api/app/common/errx"
 	"context"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/types"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/types/assets_api"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

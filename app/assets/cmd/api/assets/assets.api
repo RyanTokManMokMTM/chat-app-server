@@ -3,8 +3,8 @@ syntax = "v1"
 import "desc/file.api"
 
 info (
-	title:   "chat-app-router"
-	desc:    "A router for a chat-app"
+	title:   "chat-app-configRouter"
+	desc:    "A configRouter for a chat-app"
 	author:  "Jackson.tmm"
 	email:   "ryantokmanmokmtm@hotmail.com"
 	version: "v1"

@@ -1,9 +1,9 @@
 package dao
 
 import (
-	"api/app/internal/models"
 	"context"
-	socket_message "github.com/ryantokmanmokmtm/chat-app-server/socket-proto"
+	socket_message "github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/socket-proto"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/internal/models"
 )
 
 type Store interface {

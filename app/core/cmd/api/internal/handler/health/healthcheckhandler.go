@@ -2,13 +2,13 @@ package health
 
 import (
 	"github.com/pkg/errors"
-	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
 	"google.golang.org/grpc/status"
 
 	"net/http"
 
-	"api/app/core/cmd/api/internal/logic/health"
-	"api/app/core/cmd/api/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/logic/health"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/svc"
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 

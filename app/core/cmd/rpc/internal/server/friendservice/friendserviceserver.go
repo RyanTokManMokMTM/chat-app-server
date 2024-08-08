@@ -6,9 +6,9 @@ package server
 import (
 	"context"
 
-	"api/app/core/cmd/rpc/internal/logic/friendservice"
-	"api/app/core/cmd/rpc/internal/svc"
-	"api/app/core/cmd/rpc/types/core"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/logic/friendservice"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
 )
 
 type FriendServiceServer struct {

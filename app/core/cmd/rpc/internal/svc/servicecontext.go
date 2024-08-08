@@ -1,9 +1,9 @@
 package svc
 
 import (
-	"api/app/core/cmd/rpc/internal/config"
-	"api/app/internal/dao"
-	"api/app/internal/models"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/config"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/internal/dao"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/internal/models"
 )
 
 type ServiceContext struct {

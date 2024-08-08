@@ -1,18 +1,18 @@
 package userservicelogic
 
 import (
-	"api/app/common/cryptox"
-	"api/app/common/ctxtool"
-	"api/app/common/errx"
-	"api/app/common/jwtx"
 	"context"
 	"github.com/pkg/errors"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/cryptox"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/ctxtool"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/jwtx"
 	"gorm.io/gorm"
 	"strings"
 	"time"
 
-	"api/app/core/cmd/rpc/internal/svc"
-	"api/app/core/cmd/rpc/types/core"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

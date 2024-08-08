@@ -1,3 +1,23 @@
 Name: ChatAPI
 Host: 0.0.0.0
-Port: 8083
+Port: 8082
+Log:
+  Encoding: plain
+
+Auth:
+  AccessSecret: 2BNVfmf0WtyX1HQmzYx5rOKLzlHBEPRX729pZ0gpxujnaikoRRCF78T8fKDNTLWy
+  AccessExpire: 36800
+
+MySQL:
+  #  DataSource: ${MYSQL_USERNAME}:${MYSQL_PASSWORD}@tcp(${MYSQL_DB_HOST}:3306)/${DATABASE}?charset=utf8mb4&parseTime=true&loc=Asia%2FHong_Kong
+  DataSource: root:admin@tcp(127.0.0.1:3306)/chatappdb?charset=utf8mb4&parseTime=true&loc=Asia%2FHong_Kong
+  MaxIdleConns: 100
+  MaxOpenConns: 100
+
+Redis:
+  Addr: localhost:6379
+  Password : admin
+
+IceServer:
+  Urls:
+    - "stun:stun.l.google.com:19302"

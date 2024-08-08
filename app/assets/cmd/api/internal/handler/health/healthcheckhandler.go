@@ -3,8 +3,8 @@ package health
 import (
 	"net/http"
 
-	"api/app/assets/cmd/api/internal/logic/health"
-	"api/app/assets/cmd/api/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/logic/health"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/svc"
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 

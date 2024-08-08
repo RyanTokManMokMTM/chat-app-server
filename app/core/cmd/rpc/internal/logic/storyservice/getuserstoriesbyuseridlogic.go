@@ -1,14 +1,14 @@
 package storyservicelogic
 
 import (
-	"api/app/common/errx"
 	"context"
 	"github.com/pkg/errors"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
 	"gorm.io/gorm"
 	"time"
 
-	"api/app/core/cmd/rpc/internal/svc"
-	"api/app/core/cmd/rpc/types/core"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/svc"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

@@ -4,13 +4,14 @@ package handler
 import (
 	"net/http"
 
-	friend "api/app/core/cmd/api/internal/handler/friend"
-	group "api/app/core/cmd/api/internal/handler/group"
-	health "api/app/core/cmd/api/internal/handler/health"
-	sticker "api/app/core/cmd/api/internal/handler/sticker"
-	story "api/app/core/cmd/api/internal/handler/story"
-	user "api/app/core/cmd/api/internal/handler/user"
-	"api/app/core/cmd/api/internal/svc"
+	friend "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/handler/friend"
+	group "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/handler/group"
+	health "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/handler/health"
+	message "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/handler/message"
+	sticker "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/handler/sticker"
+	story "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/handler/story"
+	user "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/handler/user"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
 )
@@ -128,6 +129,25 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: health.HealthCheckHandler(serverCtx),
 			},
 		},
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// get room messages by roomID
+				Method:  http.MethodGet,
+				Path:    "/message",
+				Handler: message.GetMessagesHandler(serverCtx),
+			},
+			{
+				// Delete one message
+				Method:  http.MethodDelete,
+				Path:    "/message",
+				Handler: message.DeleteMessageHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),
 	)
 
