@@ -1,9 +1,5 @@
 package variable
 
-import (
-	"github.com/redis/go-redis/v9"
-)
-
 const (
 	PONG_MESSAGE = "PONG"
 	PING_MESSAGE = "PING"
@@ -15,4 +11,4 @@ const (
 	ReadLimit = 1024 * 1024 * 1024
 )
 
-var RedisConnection *redis.Client
+//var RedisConnection *redis.Client

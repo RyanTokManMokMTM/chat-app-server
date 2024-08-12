@@ -42,7 +42,7 @@ func AddStoryHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := story.NewAddStoryLogic(r.Context(), svcCtx)
+		l := story.NewAddStoryLogic(r.Context(), svcCtx, r)
 		resp, err := l.AddStory(&req)
 		if err != nil {
 			//convert to customError

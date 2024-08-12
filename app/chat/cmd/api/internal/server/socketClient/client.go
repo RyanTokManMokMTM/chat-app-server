@@ -205,6 +205,7 @@ func (c *SocketClient) SendMessage(socketMessageType int, message []byte) {
 		fallthrough
 	case websocket.PongMessage:
 		c.sendChannel <- message
+		break
 	case websocket.CloseMessage:
 		err := c.conn.WriteMessage(websocket.CloseMessage, message) //TODO: send a close message to client
 		logx.Error(err)

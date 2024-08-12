@@ -4,9 +4,10 @@ import (
 	"context"
 	"github.com/pkg/errors"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
+	"gorm.io/gorm"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
-	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,7 +26,7 @@ func NewDeleteStoryLikeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *D
 	}
 }
 
-func (l *DeleteStoryLikeLogic) DeleteStoryLike(in *core.DeleteStoryReq) (*core.DeleteStoryLikeResp, error) {
+func (l *DeleteStoryLikeLogic) DeleteStoryLike(in *core.DeleteStoryLikeReq) (*core.DeleteStoryLikeResp, error) {
 	// todo: add your logic here and delete this line
 	userID := uint(in.UserId)
 	_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)

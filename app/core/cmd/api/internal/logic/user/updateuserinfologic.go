@@ -27,7 +27,7 @@ func NewUpdateUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Up
 func (l *UpdateUserInfoLogic) UpdateUserInfo(req *types.UpdateUserInfoReq) (resp *types.UpdateUserInfoResp, err error) {
 	// todo: add your logic here and delete this line
 	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	rpcResp, rpcErr := l.svcCtx.CoreRPC.UpdateUserInfo(l.ctx, &core.UpdateUserInfoReq{
+	rpcResp, rpcErr := l.svcCtx.UserService.UpdateUserInfo(l.ctx, &core.UpdateUserInfoReq{
 		UserId: uint32(userID),
 		Name:   req.Name,
 	})

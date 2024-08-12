@@ -27,11 +27,13 @@ func NewCreateGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Creat
 func (l *CreateGroupLogic) CreateGroup(req *types.CreateGroupReq) (resp *types.CreateGroupResp, err error) {
 	// todo: add your logic here and delete this line
 	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-
+	logx.Info(userID)
 	groupMember := make([]uint32, 0)
 	for _, member := range req.GroupMembers {
 		groupMember = append(groupMember, uint32(member))
 	}
+
+	logx.Info(groupMember)
 	rpcResp, rpcErr := l.svcCtx.GroupService.CreateGroup(l.ctx, &core.CreateGroupReq{
 		UserId:       uint32(userID),
 		GroupName:    req.GroupName,

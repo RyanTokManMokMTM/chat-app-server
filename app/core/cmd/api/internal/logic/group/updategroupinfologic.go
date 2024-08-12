@@ -1,11 +1,11 @@
 package group
 
 import (
+	"context"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/types"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
-	"context"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -30,7 +30,7 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 	userID := ctxtool.GetUserIDFromCTX(l.ctx)
 	rpcResp, rpcErr := l.svcCtx.GroupService.UpdateGroupInfo(l.ctx, &core.UpdateGroupInfoReq{
 		UserId:    uint32(userID),
-		GroupId: uint32(req.GroupID),
+		GroupId:   uint32(req.GroupID),
 		GroupName: req.GroupName,
 		GroupDesc: req.GroupDesc,
 	})
@@ -38,7 +38,7 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 	if rpcErr != nil {
 		logx.WithContext(l.ctx).Error(err)
 		return nil, err
-	}s
+	}
 
 	return &types.UpdateGroupInfoResp{
 		Code: uint(rpcResp.Code),

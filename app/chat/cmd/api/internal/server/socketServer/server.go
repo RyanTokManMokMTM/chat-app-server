@@ -8,6 +8,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/pion/webrtc/v3"
+	"github.com/pkg/errors"
+	"github.com/redis/go-redis/v9"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/server/rtcSFU/sessionManager"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/server/rtcSFU/transportClient"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/server/rtcSFU/types"
@@ -38,24 +40,26 @@ var _ serverTypes.ISocketServer = (*SocketServer)(nil)
 
 type SocketServer struct {
 	sync.Mutex
-	Clients    map[string]*socketClient.SocketClient
-	register   chan *socketClient.SocketClient
-	unRegister chan *socketClient.SocketClient
-	multicast  chan []byte
-	broadcast  chan []byte
+	redisClient *redis.Client
+	Clients     map[string]*socketClient.SocketClient
+	register    chan *socketClient.SocketClient
+	unRegister  chan *socketClient.SocketClient
+	multicast   chan []byte
+	broadcast   chan []byte
 
 	sessionManager *sessionManager.SessionManager
 	testConn       *webrtc.PeerConnection
 	//eventListener *listener.SocketEvent
 }
 
-func NewSocketServer(iceServerURLs []string) *SocketServer {
+func NewSocketServer(iceServerURLs []string, redisCli *redis.Client) *SocketServer {
 	return &SocketServer{
 		Clients:        make(map[string]*socketClient.SocketClient),
 		register:       make(chan *socketClient.SocketClient),
 		unRegister:     make(chan *socketClient.SocketClient),
 		multicast:      make(chan []byte),
 		broadcast:      make(chan []byte),
+		redisClient:    redisCli,
 		sessionManager: sessionManager.NewSessionManager(),
 	}
 }
@@ -78,6 +82,7 @@ func (s *SocketServer) Start() {
 			logx.Infof("User %v is leaving.", client.UUID)
 			s.remove(client)
 		case message := <-s.multicast:
+			logx.Info("receiving message.....")
 			err := s.multicastMessageHandler(message)
 			if err != nil {
 				logx.Error("multicast error ", err)
@@ -122,6 +127,7 @@ func (s *SocketServer) GetOneClient(clientUUId string) (*socketClient.SocketClie
 func (s *SocketServer) sendGroupMessage(message *socket_message.Message, server *SocketServer, svcCtx *svc.ServiceContext) {
 	//TODO: GET ALL GROUP MEMBER
 	//TODO: Check if group is exist
+	logx.Info("Sending group message........")
 	ctx := context.Background()
 	group, err := svcCtx.DAO.FindOneGroupByUUID(ctx, message.ToUUID)
 	if err != nil {
@@ -136,11 +142,12 @@ func (s *SocketServer) sendGroupMessage(message *socket_message.Message, server 
 		return
 
 	}
+
 	for _, mem := range members {
 		if mem.MemberInfo.Uuid == message.FromUUID && message.ContentType != variable.SYS {
 			continue
 		}
-
+		logx.Info(mem.MemberInfo.Uuid)
 		conn, ok := server.Clients[mem.MemberInfo.Uuid]
 
 		socketMessage := &socket_message.Message{
@@ -170,7 +177,7 @@ func (s *SocketServer) sendGroupMessage(message *socket_message.Message, server 
 		if !ok {
 			logx.Infof("Group %v 's member %v is offline", message.ToUUID, mem.MemberInfo.Uuid)
 			ctx := context.Background()
-			_, err := variable.RedisConnection.RPush(ctx, mem.MemberInfo.Uuid, messageBytes).Result()
+			_, err := s.redisClient.RPush(ctx, mem.MemberInfo.Uuid, messageBytes).Result()
 			if err != nil {
 				logx.Error("offline message to redis err %s", err.Error())
 			}
@@ -234,6 +241,11 @@ func (s *SocketServer) onHandleNormalMessage(msg *socket_message.Message) error 
 	case variable.SHARED:
 		//TODO: save message
 		conn, ok := s.Clients[msg.FromUUID]
+		if !ok {
+			logx.Errorf("user ID : %s offline", msg.FromUUID)
+			return errors.New("user is offline")
+		}
+
 		if ok && msg.ContentType != variable.SYS {
 			//TODO: No need to save system message
 			s.saveMessage(conn.SvcCtx, msg)
@@ -252,7 +264,7 @@ func (s *SocketServer) onHandleNormalMessage(msg *socket_message.Message) error 
 			} else {
 				logx.Info("User not connect.")
 				ctx := context.Background()
-				_, err := variable.RedisConnection.RPush(ctx, msg.ToUUID, string(bytes)).Result()
+				_, err := s.redisClient.RPush(ctx, msg.ToUUID, string(bytes)).Result()
 				if err != nil {
 					logx.Error("offline message to redis err %s", err.Error())
 					return err
@@ -260,7 +272,6 @@ func (s *SocketServer) onHandleNormalMessage(msg *socket_message.Message) error 
 			}
 
 		} else if msg.MessageType == variable.MESSAGE_TYPE_GROUPCHAT {
-			logx.Info("Sending Group Message")
 			s.sendGroupMessage(msg, s, conn.SvcCtx)
 		}
 

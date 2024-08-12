@@ -16,4 +16,8 @@ type Config struct {
 		AccessSecret string
 		AccessExpire int64
 	}
+	RedisPubSub struct {
+		Addr     string
+		Password string
+	}
 }

@@ -19,3 +19,6 @@ AuthConf:
   AccessSecret: 2BNVfmf0WtyX1HQmzYx5rOKLzlHBEPRX729pZ0gpxujnaikoRRCF78T8fKDNTLWy
   AccessExpire: 36800
 
+RedisPubSub:
+  Addr: localhost:6379
+  Password : admin

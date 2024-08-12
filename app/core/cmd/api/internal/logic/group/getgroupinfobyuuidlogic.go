@@ -52,7 +52,7 @@ func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUU
 				Desc:      rpcResp.Result.Info.Desc,
 				CreatedAt: uint(rpcResp.Result.Info.CreatedAt),
 			},
-			Members:   uint(count),
+			Members:   uint(rpcResp.Result.Members),
 			IsJoined:  rpcResp.Result.IsJoined,
 			IsOwner:   rpcResp.Result.IsOwner,
 			CreatedBy: rpcResp.Result.CreatedBy,

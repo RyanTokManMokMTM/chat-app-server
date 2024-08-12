@@ -18,6 +18,7 @@ type Config struct {
 	Redis struct {
 		Addr     string
 		Password string
+		Channels []string
 	}
 
 	IceServer struct {

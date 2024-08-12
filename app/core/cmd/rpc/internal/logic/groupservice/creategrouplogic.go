@@ -2,12 +2,15 @@ package groupservicelogic
 
 import (
 	"context"
+	"fmt"
 	"github.com/pkg/errors"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
-	"github.com/ryantokmanmokmtm/chat-app-server/app/common/uploadx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/redisx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/redisx/types"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
 	"gorm.io/gorm"
+	"strings"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,7 +32,7 @@ func NewCreateGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Creat
 func (l *CreateGroupLogic) CreateGroup(in *core.CreateGroupReq) (*core.CreateGroupResp, error) {
 	// todo: add your logic here and delete this line
 	userID := uint(in.UserId)
-	_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	u, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
 	if err != nil {
 		logx.WithContext(l.ctx).Error(err)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -40,12 +43,12 @@ func (l *CreateGroupLogic) CreateGroup(in *core.CreateGroupReq) (*core.CreateGro
 	avatar := "/defaultGroup.jpg"
 
 	if len(in.AvatarData) != 0 {
-		path, err := uploadx.SaveImageByBase64(string(in.AvatarData), "jpg", l.svcCtx.Config.ResourcesPath)
-		if err != nil {
-			logx.WithContext(l.ctx).Error(err)
-			return nil, err
-		}
-		avatar = path
+		//path, err := uploadx.SaveImageByBase64(string(in.AvatarData), "jpg", l.svcCtx.Config.ResourcesPath)
+		//if err != nil {
+		//	logx.WithContext(l.ctx).Error(err)
+		//	return nil, err
+		//}
+		avatar = string(in.AvatarData)
 	}
 
 	group, err := l.svcCtx.DAO.InsertOneGroup(l.ctx, in.GroupName, avatar, userID)
@@ -55,31 +58,38 @@ func (l *CreateGroupLogic) CreateGroup(in *core.CreateGroupReq) (*core.CreateGro
 	}
 
 	//TODO: Put it into MQ, and sent it by MQ
-	//sysMessage := fmt.Sprintf("%s created the group.", u.NickName)
-	//if len(req.GroupMembers) > 0 {
-	//	var members []string
-	//	for _, memberID := range req.GroupMembers {
-	//		err := l.svcCtx.DAO.InsertOneGroupMember(l.ctx, group.Id, memberID)
-	//		if err != nil {
-	//			logx.Error(err.Error())
-	//			continue
-	//		}
-	//
-	//		mem, err := l.svcCtx.DAO.FindOneUser(l.ctx, memberID)
-	//		if err != nil {
-	//			logx.Error(err.Error())
-	//			continue
-	//		}
-	//
-	//		members = append(members, mem.NickName)
-	//	}
-	//	sysMessage = fmt.Sprintf("%s added %s to the group.", u.NickName, strings.Join(members, ","))
-	//}
+	sysMessage := fmt.Sprintf("%s created the group.", u.NickName)
 
-	//go func() {
-	//	logx.Info("sending a system message")
-	//	ws.SendGroupSystemNotification(u.Uuid, group.Uuid, sysMessage)
-	//}()
+	if len(in.GroupMembers) > 0 {
+		var members []string
+		for _, memberID := range in.GroupMembers {
+			err := l.svcCtx.DAO.InsertOneGroupMember(l.ctx, group.Id, uint(memberID))
+			if err != nil {
+				logx.Error(err.Error())
+				continue
+			}
+			logx.Info(memberID)
+			mem, err := l.svcCtx.DAO.FindOneUser(l.ctx, uint(memberID))
+			if err != nil {
+				logx.Error(err.Error())
+				continue
+			}
+
+			members = append(members, mem.NickName)
+		}
+		sysMessage = fmt.Sprintf("%s added %s to the group.", u.NickName, strings.Join(members, ","))
+	}
+
+	go func() {
+		logx.Info("sending a system message", sysMessage)
+		redisContext := context.Background()
+		redisx.SendMessageToChannel(l.svcCtx.RedisCli, redisContext, "notification", types.NotificationMessage{
+			To:      group.Uuid,
+			From:    u.Uuid,
+			Content: sysMessage,
+		})
+		//ws.SendGroupSystemNotification(u.Uuid, group.Uuid, sysMessage)
+	}()
 
 	return &core.CreateGroupResp{
 		Code:      uint32(errx.SUCCESS),

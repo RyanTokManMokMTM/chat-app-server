@@ -2,8 +2,11 @@ package groupservicelogic
 
 import (
 	"context"
+	"fmt"
 	"github.com/pkg/errors"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/redisx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/redisx/types"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
 	"gorm.io/gorm"
@@ -28,7 +31,7 @@ func NewJoinGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *JoinGro
 func (l *JoinGroupLogic) JoinGroup(in *core.JoinGroupReq) (*core.JoinGroupResp, error) {
 	// todo: add your logic here and delete this line
 	userID := uint(in.UserId)
-	_, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	u, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
 	if err != nil {
 		logx.WithContext(l.ctx).Error(err)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -37,7 +40,7 @@ func (l *JoinGroupLogic) JoinGroup(in *core.JoinGroupReq) (*core.JoinGroupResp, 
 		return nil, err
 	}
 
-	_, err = l.svcCtx.DAO.FindOneGroup(l.ctx, uint(in.GroupId))
+	g, err := l.svcCtx.DAO.FindOneGroup(l.ctx, uint(in.GroupId))
 	if err != nil {
 		logx.WithContext(l.ctx).Error(err)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -62,12 +65,16 @@ func (l *JoinGroupLogic) JoinGroup(in *core.JoinGroupReq) (*core.JoinGroupResp, 
 		return nil, err
 	}
 	//
-	//go func() {
-	//	logx.Info("sending a system message")
-	//	sysMessage := fmt.Sprintf("%s joined the group", u.NickName)
-	//	ws.SendGroupSystemNotification(u.Uuid, g.Uuid, sysMessage)
-	//}()
-
+	go func() {
+		sysMessage := fmt.Sprintf("%s joined the group", u.NickName)
+		logx.Info("sending a system message", sysMessage)
+		redisx.SendMessageToChannel(l.svcCtx.RedisCli, l.ctx, "notification", types.NotificationMessage{
+			To:      u.Uuid,
+			From:    g.Uuid,
+			Content: sysMessage,
+		})
+		//ws.SendGroupSystemNotification(u.Uuid, group.Uuid, sysMessage)
+	}()
 	return &core.JoinGroupResp{
 		Code: uint32(errx.SUCCESS),
 	}, nil

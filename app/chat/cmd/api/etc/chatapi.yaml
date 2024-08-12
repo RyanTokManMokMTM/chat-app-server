@@ -17,6 +17,9 @@ MySQL:
 Redis:
   Addr: localhost:6379
   Password : admin
+  Channels:
+    - notification
+
 
 IceServer:
   Urls:

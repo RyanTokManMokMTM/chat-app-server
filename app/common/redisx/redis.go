@@ -1,4 +1,4 @@
-package redisClient
+package redisx
 
 import (
 	"errors"

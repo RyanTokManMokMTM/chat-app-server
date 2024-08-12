@@ -6,9 +6,12 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/server/socketClient"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/server/socketServer"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/serverTypes"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/util"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
-	"github.com/ryantokmanmokmtm/chat-app-server/app/common/variable"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/redisx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/redisx/types"
+	"github.com/zeromicro/go-zero/core/jsonx"
 	"net/http"
 	"time"
 
@@ -56,16 +59,16 @@ func (l *ConnectWsLogic) ConnectWs(w http.ResponseWriter, r *http.Request, wsSer
 	go client.WriteLoop()
 	//
 	go func() {
-		ctx := context.Background()
-
+		//ctx := context.Background()
+		//Sending Offline Message.
 		//we need to create a connection for each user?
-		len, err := variable.RedisConnection.LLen(ctx, u.Uuid).Result()
+		len, err := l.svcCtx.RedisClient.LLen(l.ctx, u.Uuid).Result()
 		if err != nil {
 			logx.Error("getting Redis length err ", err)
 			return
 		}
 
-		messages, err := l.svcCtx.RedisClient.LRange(ctx, u.Uuid, 0, len).Result()
+		messages, err := l.svcCtx.RedisClient.LRange(l.ctx, u.Uuid, 0, len).Result()
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			logx.Errorf("get offline messages error %s ", err.Error())
@@ -77,9 +80,40 @@ func (l *ConnectWsLogic) ConnectWs(w http.ResponseWriter, r *http.Request, wsSer
 			time.Sleep(time.Second / 50)
 		}
 
-		_, err = l.svcCtx.RedisClient.LTrim(ctx, u.Uuid, 100, -1).Result()
+		_, err = l.svcCtx.RedisClient.LTrim(l.ctx, u.Uuid, 100, -1).Result()
 		if err != nil {
 			logx.Error(err)
+		}
+	}()
+
+	go func() {
+		//Subscribe redis channel and
+		subscriber := redisx.SubscribeChannel(l.svcCtx.RedisClient, l.ctx, l.svcCtx.Config.Redis.Channels)
+		defer func() {
+			logx.Error("subscriber closed...")
+			err := subscriber.Close()
+			if err != nil {
+				logx.WithContext(l.ctx).Error(err)
+			}
+		}()
+
+		subscriberChannel := subscriber.Channel()
+		for msg := range subscriberChannel {
+			logx.WithContext(l.ctx).Infof("Received message for redis channel %s with message : %+v", msg.Channel, msg.Payload)
+			msgData := new(types.NotificationMessage)
+			err := jsonx.Unmarshal([]byte(msg.Payload), msgData)
+			if err != nil {
+				logx.Error(err)
+				continue
+			}
+
+			logx.Infof("Data : %+v", msgData)
+			msg, err := util.MarshalNotificationContent(msgData.GetFormID(), msgData.GetToID(), msgData.GetContent())
+			if err != nil {
+				logx.Error(err)
+				continue
+			}
+			websocketServer.MulticastMessage(msg)
 		}
 	}()
 }
