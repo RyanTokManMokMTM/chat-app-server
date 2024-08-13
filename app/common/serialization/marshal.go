@@ -1,4 +1,4 @@
-package jsonx
+package serialization
 
 import (
 	"encoding/json"

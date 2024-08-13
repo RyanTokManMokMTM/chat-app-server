@@ -5,22 +5,24 @@
 * Websocket
 * MySQL
 * Gorm
+* gRPC
+* ProtoType
 * Redis
 * Pion WebRTC - Streaming
+* etcd
 
+### Flow
+![flow](./doc/workflow.png)
 
 ### Apis List
 | Apis                                | Status     |
 |-------------------------------------|------------|
-| User APIs                           | ✅          |
-| File APIs                           | ✅          |
-| Group APIs                          | ✅          |
-| Friend APIs                         | ✅          |
-| Instance Story APIs                 | ✅          |
-| Sticker APIs                        | ✅          |
-| Websocket - Pull&Push Message Event |  ✅ |
-| WebRTC - SFU(Not stable)            |  ✅ |
+| Core APIs                           | ✅          |
+| Assets APIs                         | ✅          |
+| Socket APIs                         | ✅          |
 
-### Demo
-~~[Demo Video(Old)](https://www.youtube.com/watch?v=bo7lJhMwsc0)~~
-
+### RPC List
+| Apis                                | Status     |
+|-------------------------------------|------------|
+| Core RPC                            | ✅          |
+| Assets RPC                          | ✅          |

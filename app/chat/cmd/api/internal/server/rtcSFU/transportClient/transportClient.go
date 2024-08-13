@@ -221,7 +221,7 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdpType *types.Sign
 		tc.connectionEventHandler(conn, tc.clientId, true, sdpType, onConnectionState, onNewTrackReceived)
 	}
 	ansStr := ans.SDP
-	//ansStr, err := jsonx.Marshal(ans)
+	//ansStr, err := serialization.Marshal(ans)
 	//if err != nil {
 	//	return err
 	//}
