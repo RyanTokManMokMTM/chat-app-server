@@ -66,8 +66,8 @@ func (l *LeaveGroupLogic) LeaveGroup(in *core.LeaveGroupReq) (*core.LeaveGroupRe
 		sysMessage := fmt.Sprintf("%s left the group", u.NickName)
 		logx.Info("sending a system message", sysMessage)
 		redisx.SendMessageToChannel(l.svcCtx.RedisCli, l.ctx, "notification", types.NotificationMessage{
-			To:      u.Uuid,
-			From:    g.Uuid,
+			To:      g.Uuid,
+			From:    u.Uuid,
 			Content: sysMessage,
 		})
 		//ws.SendGroupSystemNotification(u.Uuid, group.Uuid, sysMessage)

@@ -36,8 +36,8 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
-		return nil, err
+		logx.WithContext(l.ctx).Error(rpcErr)
+		return nil, rpcErr
 	}
 
 	friendList := make([]types.CommonUserInfo, 0)

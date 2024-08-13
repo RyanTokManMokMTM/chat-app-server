@@ -35,7 +35,7 @@ func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
+		logx.WithContext(l.ctx).Error(rpcErr)
 		return nil, rpcErr
 	}
 

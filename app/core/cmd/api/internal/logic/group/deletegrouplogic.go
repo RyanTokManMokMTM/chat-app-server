@@ -34,8 +34,8 @@ func (l *DeleteGroupLogic) DeleteGroup(req *types.DeleteGroupReq) (resp *types.D
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
-		return nil, err
+		logx.WithContext(l.ctx).Error(rpcErr)
+		return nil, rpcErr
 	}
 	return &types.DeleteGroupResp{
 		Code: uint(rpcResp.Code),

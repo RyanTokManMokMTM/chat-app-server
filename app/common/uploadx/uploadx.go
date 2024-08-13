@@ -117,7 +117,7 @@ func UploadFileWithCustome(f multipart.File, header *multipart.FileHeader, fileP
 func SaveImageByBase64(data string, format string, resourcesPath string) (string, error) {
 	uri := strings.ToLower(uuid.New().String()) + "." + format
 	index := strings.Index(data, "base64")
-	index += 7 //"data:image/$type};base64,(data stating here)xyz...."
+	index += 7 //"data:image/$type;base64,(data stating here)xyz...."
 	fileData := data[index:]
 	b, err := base64.StdEncoding.DecodeString(fileData)
 	if err != nil {

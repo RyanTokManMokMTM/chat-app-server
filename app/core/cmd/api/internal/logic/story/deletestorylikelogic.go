@@ -34,7 +34,7 @@ func (l *DeleteStoryLikeLogic) DeleteStoryLike(req *types.DeleteStoryLikeReq) (r
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
+		logx.WithContext(l.ctx).Error(rpcErr)
 		return nil, rpcErr
 	}
 	return &types.DeleteStoryLikeResp{

@@ -34,7 +34,7 @@ func (l *DeleteStoryLogic) DeleteStory(req *types.DeleteStoryReq) (resp *types.D
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
+		logx.WithContext(l.ctx).Error(rpcErr)
 		return nil, rpcErr
 	}
 	return &types.DeleteStoryResp{

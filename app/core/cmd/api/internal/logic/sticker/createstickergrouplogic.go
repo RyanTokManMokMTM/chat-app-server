@@ -94,8 +94,8 @@ func (l *CreateStickerGroupLogic) CreateStickerGroup(req *types.CreateStickerGro
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
-		return nil, err
+		logx.WithContext(l.ctx).Error(rpcErr)
+		return nil, rpcErr
 	}
 
 	return &types.CreateStickerGroupResp{

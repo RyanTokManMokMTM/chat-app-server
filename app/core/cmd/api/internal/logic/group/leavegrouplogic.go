@@ -34,8 +34,8 @@ func (l *LeaveGroupLogic) LeaveGroup(req *types.LeaveGroupReq) (resp *types.Leav
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
-		return nil, err
+		logx.WithContext(l.ctx).Error(rpcErr)
+		return nil, rpcErr
 	}
 
 	return &types.LeaveGroupResp{

@@ -34,8 +34,8 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
-		return nil, err
+		logx.WithContext(l.ctx).Error(rpcErr)
+		return nil, rpcErr
 	}
 	return &types.DeleteFriendResp{
 		Code: uint(rpcResp.Code),

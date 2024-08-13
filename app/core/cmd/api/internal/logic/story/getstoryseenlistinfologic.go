@@ -36,7 +36,7 @@ func (l *GetStorySeenListInfoLogic) GetStorySeenListInfo(req *types.GetStorySeen
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
+		logx.WithContext(l.ctx).Error(rpcErr)
 		return nil, rpcErr
 	}
 

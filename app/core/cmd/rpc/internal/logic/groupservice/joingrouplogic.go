@@ -69,8 +69,8 @@ func (l *JoinGroupLogic) JoinGroup(in *core.JoinGroupReq) (*core.JoinGroupResp, 
 		sysMessage := fmt.Sprintf("%s joined the group", u.NickName)
 		logx.Info("sending a system message", sysMessage)
 		redisx.SendMessageToChannel(l.svcCtx.RedisCli, l.ctx, "notification", types.NotificationMessage{
-			To:      u.Uuid,
-			From:    g.Uuid,
+			To:      g.Uuid,
+			From:    u.Uuid,
 			Content: sysMessage,
 		})
 		//ws.SendGroupSystemNotification(u.Uuid, group.Uuid, sysMessage)

@@ -35,7 +35,7 @@ func (l *GetActiveStoriesLogic) GetActiveStories(req *types.GetActiveStoryReq) (
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
+		logx.WithContext(l.ctx).Error(rpcErr)
 		return nil, rpcErr
 	}
 

@@ -4,6 +4,7 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 func GetRootDir() string {
@@ -12,4 +13,15 @@ func GetRootDir() string {
 	root := filepath.Join(filepath.Dir(dir), "../..")
 
 	return root
+}
+
+func ExtractImgTypeFromBase64(data string) string {
+	index := strings.Index(data, "base64")
+	if index == -1 { //no such index
+		return ""
+	}
+	info := data[:index-1]
+	index = strings.Index(info, "/")
+	infoType := strings.Split(info[index+1:], ";")
+	return infoType[0]
 }

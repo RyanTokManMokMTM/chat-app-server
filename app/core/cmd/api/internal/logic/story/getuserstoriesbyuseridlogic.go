@@ -34,7 +34,7 @@ func (l *GetUserStoriesByUserIdLogic) GetUserStoriesByUserId(req *types.GetUserS
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
+		logx.WithContext(l.ctx).Error(rpcErr)
 		return nil, rpcErr
 	}
 

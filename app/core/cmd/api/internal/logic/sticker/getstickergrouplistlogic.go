@@ -28,8 +28,8 @@ func (l *GetStickerGroupListLogic) GetStickerGroupList(req *types.GetStickerList
 	rpcResp, rpcErr := l.svcCtx.StickerService.GetStickerGroupList(l.ctx, &core.GetStickerListReq{})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
-		return nil, err
+		logx.WithContext(l.ctx).Error(rpcErr)
+		return nil, rpcErr
 	}
 
 	stickers := make([]types.StickerInfo, 0)

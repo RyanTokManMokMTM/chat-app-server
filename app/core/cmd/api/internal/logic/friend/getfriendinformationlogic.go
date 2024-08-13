@@ -34,8 +34,8 @@ func (l *GetFriendInformationLogic) GetFriendInformation(req *types.GetFriendInf
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
-		return nil, err
+		logx.WithContext(l.ctx).Error(rpcErr)
+		return nil, rpcErr
 	}
 
 	return &types.GetFriendInfoResp{

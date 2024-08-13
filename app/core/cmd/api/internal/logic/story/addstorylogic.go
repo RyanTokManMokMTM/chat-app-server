@@ -59,7 +59,7 @@ func (l *AddStoryLogic) AddStory(req *types.AddStoryReq) (resp *types.AddStoryRe
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
+		logx.WithContext(l.ctx).Error(rpcErr)
 		return nil, rpcErr
 	}
 

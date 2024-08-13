@@ -7,6 +7,8 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/redisx"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/redisx/types"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/uploadx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/util"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
 	"gorm.io/gorm"
@@ -43,12 +45,16 @@ func (l *CreateGroupLogic) CreateGroup(in *core.CreateGroupReq) (*core.CreateGro
 	avatar := "/defaultGroup.jpg"
 
 	if len(in.AvatarData) != 0 {
-		//path, err := uploadx.SaveImageByBase64(string(in.AvatarData), "jpg", l.svcCtx.Config.ResourcesPath)
-		//if err != nil {
-		//	logx.WithContext(l.ctx).Error(err)
-		//	return nil, err
-		//}
-		avatar = string(in.AvatarData)
+		imgType := util.ExtractImgTypeFromBase64(string(in.AvatarData))
+		if imgType == "" {
+			imgType = "jpg"
+		}
+		path, err := uploadx.SaveImageByBase64(string(in.AvatarData), imgType, l.svcCtx.Config.ResourcesPath)
+		if err != nil {
+			logx.WithContext(l.ctx).Error(err)
+			return nil, err
+		}
+		avatar = path
 	}
 
 	group, err := l.svcCtx.DAO.InsertOneGroup(l.ctx, in.GroupName, avatar, userID)

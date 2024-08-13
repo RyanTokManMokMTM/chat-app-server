@@ -34,8 +34,8 @@ func (l *SearchGroupLogic) SearchGroup(req *types.SearchGroupReq) (resp *types.S
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
-		return nil, err
+		logx.WithContext(l.ctx).Error(rpcErr)
+		return nil, rpcErr
 	}
 
 	groupInfo := make([]types.FullGroupInfo, 0)

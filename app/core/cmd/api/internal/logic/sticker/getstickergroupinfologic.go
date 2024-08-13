@@ -30,8 +30,8 @@ func (l *GetStickerGroupInfoLogic) GetStickerGroupInfo(req *types.GetStickerInfo
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
-		return nil, err
+		logx.WithContext(l.ctx).Error(rpcErr)
+		return nil, rpcErr
 	}
 
 	return &types.GetStickerInfoResp{

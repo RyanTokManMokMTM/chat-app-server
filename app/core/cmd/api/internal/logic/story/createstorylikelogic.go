@@ -34,7 +34,7 @@ func (l *CreateStoryLikeLogic) CreateStoryLike(req *types.CreateStoryLikeReq) (r
 	})
 
 	if rpcErr != nil {
-		logx.WithContext(l.ctx).Error(err)
+		logx.WithContext(l.ctx).Error(rpcErr)
 		return nil, rpcErr
 	}
 
