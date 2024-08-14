@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	AssetRPC_UploadImage_FullMethodName = "/stream.AssetRPC/UploadImage"
-	AssetRPC_UploadFile_FullMethodName  = "/stream.AssetRPC/UploadFile"
+	AssetRPC_UploadImage_FullMethodName        = "/stream.AssetRPC/UploadImage"
+	AssetRPC_UploadFile_FullMethodName         = "/stream.AssetRPC/UploadFile"
+	AssetRPC_UploadStickerGroup_FullMethodName = "/stream.AssetRPC/UploadStickerGroup"
 )
 
 // AssetRPCClient is the client API for AssetRPC service.
@@ -29,6 +30,7 @@ const (
 type AssetRPCClient interface {
 	UploadImage(ctx context.Context, in *UploadImageReq, opts ...grpc.CallOption) (*UploadImageResp, error)
 	UploadFile(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*UploadFileResp, error)
+	UploadStickerGroup(ctx context.Context, in *UploadStickerGroupReq, opts ...grpc.CallOption) (*UploadStickerGroupResp, error)
 }
 
 type assetRPCClient struct {
@@ -57,12 +59,22 @@ func (c *assetRPCClient) UploadFile(ctx context.Context, in *UploadFileReq, opts
 	return out, nil
 }
 
+func (c *assetRPCClient) UploadStickerGroup(ctx context.Context, in *UploadStickerGroupReq, opts ...grpc.CallOption) (*UploadStickerGroupResp, error) {
+	out := new(UploadStickerGroupResp)
+	err := c.cc.Invoke(ctx, AssetRPC_UploadStickerGroup_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AssetRPCServer is the server API for AssetRPC service.
 // All implementations must embed UnimplementedAssetRPCServer
 // for forward compatibility
 type AssetRPCServer interface {
 	UploadImage(context.Context, *UploadImageReq) (*UploadImageResp, error)
 	UploadFile(context.Context, *UploadFileReq) (*UploadFileResp, error)
+	UploadStickerGroup(context.Context, *UploadStickerGroupReq) (*UploadStickerGroupResp, error)
 	mustEmbedUnimplementedAssetRPCServer()
 }
 
@@ -75,6 +87,9 @@ func (UnimplementedAssetRPCServer) UploadImage(context.Context, *UploadImageReq)
 }
 func (UnimplementedAssetRPCServer) UploadFile(context.Context, *UploadFileReq) (*UploadFileResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UploadFile not implemented")
+}
+func (UnimplementedAssetRPCServer) UploadStickerGroup(context.Context, *UploadStickerGroupReq) (*UploadStickerGroupResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UploadStickerGroup not implemented")
 }
 func (UnimplementedAssetRPCServer) mustEmbedUnimplementedAssetRPCServer() {}
 
@@ -125,6 +140,24 @@ func _AssetRPC_UploadFile_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AssetRPC_UploadStickerGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UploadStickerGroupReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AssetRPCServer).UploadStickerGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AssetRPC_UploadStickerGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AssetRPCServer).UploadStickerGroup(ctx, req.(*UploadStickerGroupReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AssetRPC_ServiceDesc is the grpc.ServiceDesc for AssetRPC service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -139,6 +172,10 @@ var AssetRPC_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UploadFile",
 			Handler:    _AssetRPC_UploadFile_Handler,
+		},
+		{
+			MethodName: "UploadStickerGroup",
+			Handler:    _AssetRPC_UploadStickerGroup_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -4,7 +4,8 @@ import "github.com/zeromicro/go-zero/zrpc"
 
 type Config struct {
 	zrpc.RpcServerConf
-	MySQL struct {
+	AssetsRPC zrpc.RpcClientConf
+	MySQL     struct {
 		DataSource   string
 		MaxIdleConns int
 		MaxOpenConns int

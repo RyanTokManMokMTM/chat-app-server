@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/assetrpc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/redisx"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/redisx/types"
-	"github.com/ryantokmanmokmtm/chat-app-server/app/common/uploadx"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/util"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
@@ -45,16 +45,20 @@ func (l *CreateGroupLogic) CreateGroup(in *core.CreateGroupReq) (*core.CreateGro
 	avatar := "/defaultGroup.jpg"
 
 	if len(in.AvatarData) != 0 {
-		imgType := util.ExtractImgTypeFromBase64(string(in.AvatarData))
-		if imgType == "" {
-			imgType = "jpg"
+		imgFormat := util.ExtractImgTypeFromBase64(string(in.AvatarData))
+		if imgFormat == "" {
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.REQ_PARAM_ERROR), "Avatar data format incorrect")
 		}
-		path, err := uploadx.SaveImageByBase64(string(in.AvatarData), imgType, l.svcCtx.Config.ResourcesPath)
-		if err != nil {
-			logx.WithContext(l.ctx).Error(err)
-			return nil, err
+
+		rpcResp, rpcErr := l.svcCtx.AssetsRPC.UploadImage(l.ctx, &assetrpc.UploadImageReq{
+			Format:    imgFormat,
+			Base64Str: string(in.AvatarData),
+		})
+		if rpcErr != nil {
+			logx.WithContext(l.ctx).Error(rpcErr)
+			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.REQ_PARAM_ERROR), "save file error, err: %+v", rpcErr)
 		}
-		avatar = path
+		avatar = rpcResp.Path
 	}
 
 	group, err := l.svcCtx.DAO.InsertOneGroup(l.ctx, in.GroupName, avatar, userID)

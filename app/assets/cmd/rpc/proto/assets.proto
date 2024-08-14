@@ -21,7 +21,33 @@ message UploadFileResp {
   string path = 2;
 }
 
+message stickerData {
+  string name = 1;
+  bytes data = 2;
+}
+
+message stickerUploadedInfo {
+  string name = 1;
+  repeated string paths = 2;
+}
+
+message StickerFileMap {
+  repeated stickerData data = 1;
+}
+
+message UploadStickerGroupReq{
+  string stickerName = 1;
+  string stickerId = 2;
+  map <string, StickerFileMap > stickerData = 3;
+}
+
+message UploadStickerGroupResp{
+  int32 code = 1;
+  repeated stickerUploadedInfo stickerInfos = 2;
+}
+
 service AssetRPC {
   rpc UploadImage(UploadImageReq) returns (UploadImageResp);
   rpc UploadFile(UploadFileReq) returns (UploadFileResp);
+  rpc UploadStickerGroup(UploadStickerGroupReq) returns (UploadStickerGroupResp);
 }

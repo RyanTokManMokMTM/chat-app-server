@@ -3,8 +3,9 @@ package storyservicelogic
 import (
 	"context"
 	"github.com/pkg/errors"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/assetrpc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
-	"github.com/ryantokmanmokmtm/chat-app-server/app/common/uploadx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/util"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
 	"gorm.io/gorm"
@@ -38,13 +39,22 @@ func (l *AddStoryLogic) AddStory(in *core.AddStoryReq) (*core.AddStoryResp, erro
 	}
 
 	//Upload Image
-	path, err := uploadx.SaveBytesIntoFile(in.StoryImgFileName, in.Data, l.svcCtx.Config.ResourcesPath)
-	if err != nil {
-		logx.WithContext(l.ctx).Error(err)
-		return nil, errors.Wrapf(errx.NewCustomErrCode(errx.REQ_PARAM_ERROR), "save file error, err: %+v", err)
+
+	imgFormat := util.ExtractImgTypeFromBase64(string(in.Data))
+	if imgFormat == "" {
+		return nil, errors.Wrapf(errx.NewCustomErrCode(errx.REQ_PARAM_ERROR), "Avatar data format incorrect")
 	}
 
-	story, err := l.svcCtx.DAO.InsertOneStory(l.ctx, userID, path)
+	rpcResp, rpcErr := l.svcCtx.AssetsRPC.UploadImage(l.ctx, &assetrpc.UploadImageReq{
+		Format:    imgFormat,
+		Base64Str: string(in.Data),
+	})
+	if rpcErr != nil {
+		logx.WithContext(l.ctx).Error(rpcErr)
+		return nil, errors.Wrapf(errx.NewCustomErrCode(errx.REQ_PARAM_ERROR), "save file error, err: %+v", rpcErr)
+	}
+
+	story, err := l.svcCtx.DAO.InsertOneStory(l.ctx, userID, rpcResp.Path)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -54,7 +64,7 @@ func (l *AddStoryLogic) AddStory(in *core.AddStoryReq) (*core.AddStoryResp, erro
 		Info: &core.StoryInfo{
 			StoryId:   uint32(story.Id),
 			StoryUUID: story.Uuid.String(),
-			StoryURL:  path,
+			StoryURL:  rpcResp.Path,
 		},
 	}, nil
 }

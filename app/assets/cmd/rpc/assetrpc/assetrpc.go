@@ -13,14 +13,20 @@ import (
 )
 
 type (
-	UploadFileReq   = assets_api.UploadFileReq
-	UploadFileResp  = assets_api.UploadFileResp
-	UploadImageReq  = assets_api.UploadImageReq
-	UploadImageResp = assets_api.UploadImageResp
+	StickerData            = assets_api.StickerData
+	StickerFileMap         = assets_api.StickerFileMap
+	StickerUploadedInfo    = assets_api.StickerUploadedInfo
+	UploadFileReq          = assets_api.UploadFileReq
+	UploadFileResp         = assets_api.UploadFileResp
+	UploadImageReq         = assets_api.UploadImageReq
+	UploadImageResp        = assets_api.UploadImageResp
+	UploadStickerGroupReq  = assets_api.UploadStickerGroupReq
+	UploadStickerGroupResp = assets_api.UploadStickerGroupResp
 
 	AssetRPC interface {
 		UploadImage(ctx context.Context, in *UploadImageReq, opts ...grpc.CallOption) (*UploadImageResp, error)
 		UploadFile(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*UploadFileResp, error)
+		UploadStickerGroup(ctx context.Context, in *UploadStickerGroupReq, opts ...grpc.CallOption) (*UploadStickerGroupResp, error)
 	}
 
 	defaultAssetRPC struct {
@@ -42,4 +48,9 @@ func (m *defaultAssetRPC) UploadImage(ctx context.Context, in *UploadImageReq, o
 func (m *defaultAssetRPC) UploadFile(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*UploadFileResp, error) {
 	client := assets_api.NewAssetRPCClient(m.cli.Conn())
 	return client.UploadFile(ctx, in, opts...)
+}
+
+func (m *defaultAssetRPC) UploadStickerGroup(ctx context.Context, in *UploadStickerGroupReq, opts ...grpc.CallOption) (*UploadStickerGroupResp, error) {
+	client := assets_api.NewAssetRPCClient(m.cli.Conn())
+	return client.UploadStickerGroup(ctx, in, opts...)
 }

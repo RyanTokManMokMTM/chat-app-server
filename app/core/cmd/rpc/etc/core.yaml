@@ -6,6 +6,12 @@ Etcd:
   Key: core.rpc
 Log:
   Encoding: plain
+
+AssetsRPC:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: assets.rpc
 MySQL:
   DataSource: root:admin@tcp(127.0.0.1:3306)/chatappdb?charset=utf8mb4&parseTime=true&loc=Asia%2FHong_Kong
   MaxIdleConns: 100

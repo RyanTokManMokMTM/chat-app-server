@@ -31,3 +31,8 @@ func (s *AssetRPCServer) UploadFile(ctx context.Context, in *assets_api.UploadFi
 	l := logic.NewUploadFileLogic(ctx, s.svcCtx)
 	return l.UploadFile(in)
 }
+
+func (s *AssetRPCServer) UploadStickerGroup(ctx context.Context, in *assets_api.UploadStickerGroupReq) (*assets_api.UploadStickerGroupResp, error) {
+	l := logic.NewUploadStickerGroupLogic(ctx, s.svcCtx)
+	return l.UploadStickerGroup(in)
+}
