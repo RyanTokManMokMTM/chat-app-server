@@ -1,0 +1,24 @@
+FROM golang:alpine as builder
+LABEL stage=gobuilder
+ENV CGO_ENABLED 0
+
+RUN apt update --no-cache && apt update --no-cache tzdata
+
+COPY ../../../go.sum .
+COPY ../../../go.mod .
+RUN go mod download
+
+COPY ../../../app/core/cmd/rpc ./app/core/cmd/rpc
+COPY ../../../app/core/cmd/rpc/etc /rpc/etc
+COPY ../../../app/common ./app/common
+RUN go build -ldflags="-s -w" -o /out/corerpc ./app/core/cmd/api/core.go
+
+FROM scratch
+COPY --from=builder /usr/share/zoneinfo/Asia/Hong_Kong /usr/share/zoneinfo/Asia/Hong_Kong
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+
+ENV TZ Asis/Hong_Kong
+WORKDIR /app
+COPY --from=builder /out/corerpc /app/corerpc
+COPY --from=builder /rpc/etc /app/etc
+CMD ["./corerpc","-f","etc/core.yaml"]
