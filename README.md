@@ -10,6 +10,9 @@
 * Redis
 * Pion WebRTC - Streaming
 * etcd
+* Nginx
+* Docker
+* Docker-compose
 
 ### Flow
 ![flow](./doc/workflow.png)
