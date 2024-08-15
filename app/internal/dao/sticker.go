@@ -16,6 +16,13 @@ func (d *DAO) InsertOneStickerGroup(ctx context.Context, name string) (*models.S
 	return sticker, nil
 }
 
+func (d *DAO) InsertOneStickerGroupWithResources(ctx context.Context, model *models.Sticker) (*models.Sticker, error) {
+	if err := model.InsertOne(ctx, d.engine); err != nil {
+		return nil, err
+	}
+	return model, nil
+}
+
 func (d *DAO) InsertStickerListIntoGroup(ctx context.Context, sticker *models.Sticker, paths []string) error {
 	return sticker.InsertResources(ctx, d.engine, paths)
 }

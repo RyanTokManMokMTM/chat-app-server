@@ -5,7 +5,7 @@ option go_package="./assets_api";
 
 message UploadImageReq {
   string format = 1;
-  string base64Str = 2;
+  bytes data = 2;
 }
 message UploadImageResp {
   int32 code = 1;
@@ -36,18 +36,17 @@ message StickerFileMap {
 }
 
 message UploadStickerGroupReq{
-  string stickerName = 1;
-  string stickerId = 2;
-  map <string, StickerFileMap > stickerData = 3;
+  string stickerId = 1;
+  map <string, StickerFileMap > stickerData = 2;
 }
 
 message UploadStickerGroupResp{
   int32 code = 1;
-  repeated stickerUploadedInfo stickerInfos = 2;
 }
 
 service AssetRPC {
-  rpc UploadImage(UploadImageReq) returns (UploadImageResp);
+  rpc UploadImageByBase64(UploadImageReq) returns (UploadImageResp);
   rpc UploadFile(UploadFileReq) returns (UploadFileResp);
+  rpc UploadImageByByte(UploadImageReq) returns (UploadImageResp);
   rpc UploadStickerGroup(UploadStickerGroupReq) returns (UploadStickerGroupResp);
 }

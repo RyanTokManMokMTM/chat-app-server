@@ -53,10 +53,33 @@ const StoryMediaField = "story_media"
 //	return "/" + name, nil
 //}
 
+func RandomFileName(originalName string) string {
+	fileType := strings.Split(originalName, ".")
+	if len(fileType) < 2 {
+		return ""
+	}
+	randomUUID := strings.ToLower(uuid.NewString())
+	name := fmt.Sprintf("%s.%s", randomUUID, fileType[1])
+	return name
+}
+
 func SaveFileWithRandomName(data []byte, fileName, filePath string) (string, error) {
 	fileType := strings.Split(fileName, ".")[1]
 	randomUUID := strings.ToLower(uuid.NewString())
 	name := fmt.Sprintf("%s.%s", randomUUID, fileType)
+	tempFile, err := os.Create(path.Join(filePath, name))
+	if err != nil {
+		return "", err
+	}
+
+	defer tempFile.Close()
+	buffer := bytes.NewBuffer(data)
+
+	_, _ = io.Copy(tempFile, buffer)
+	return "/" + name, nil
+}
+
+func SaveFileWithName(data []byte, name, filePath string) (string, error) {
 	tempFile, err := os.Create(path.Join(filePath, name))
 	if err != nil {
 		return "", err

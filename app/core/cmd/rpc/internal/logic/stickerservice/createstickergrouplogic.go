@@ -2,11 +2,15 @@ package stickerservicelogic
 
 import (
 	"context"
-	"github.com/pkg/errors"
+	"fmt"
+	"github.com/google/uuid"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/types/assets_api"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/uploadx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/variable"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/internal/models"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,30 +30,29 @@ func NewCreateStickerGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 func (l *CreateStickerGroupLogic) CreateStickerGroup(in *core.CreateStickerGroupReq) (*core.CreateStickerGroupResp, error) {
 	// todo: add your logic here and delete this line
-	//RPC Transaction?
-	stickerModel, err := l.svcCtx.DAO.InsertOneStickerGroup(l.ctx, in.StickerName)
-	if err != nil {
-		logx.WithContext(l.ctx).Error(err)
-		return nil, err
-	}
+	stickerModelUUID := uuid.NewString()
 
 	assetsData := make(map[string]*assets_api.StickerFileMap)
+	resourcesPaths := make(map[string][]string)
 	for key, data := range in.StickerData {
 		stickerData := make([]*assets_api.StickerData, 0)
+		resources := make([]string, 0)
 		for _, i := range data.Data {
+			name := uploadx.RandomFileName(i.Name)
 			stickerData = append(stickerData, &assets_api.StickerData{
-				Name: i.Name,
+				Name: name,
 				Data: i.Data,
 			})
+			resources = append(resources, fmt.Sprintf("/%s/%s", stickerModelUUID, name))
 		}
 		assetsData[key] = &assets_api.StickerFileMap{
 			Data: stickerData,
 		}
+		resourcesPaths[key] = resources
 	}
 
-	rpcResp, rpcErr := l.svcCtx.AssetsRPC.UploadStickerGroup(l.ctx, &assets_api.UploadStickerGroupReq{
-		StickerId:   stickerModel.Uuid,
-		StickerName: in.StickerName,
+	_, rpcErr := l.svcCtx.AssetsRPC.UploadStickerGroup(l.ctx, &assets_api.UploadStickerGroupReq{
+		StickerId:   stickerModelUUID,
 		StickerData: assetsData,
 	})
 
@@ -58,27 +61,20 @@ func (l *CreateStickerGroupLogic) CreateStickerGroup(in *core.CreateStickerGroup
 		return nil, rpcErr
 	}
 
-	filePaths := make([]string, 0)
-	for _, stickerMap := range rpcResp.StickerInfos {
-		key := stickerMap.GetName()
-		if key == "thum" {
-			if len(stickerMap.GetPaths()) > 1 {
-				return nil, errors.Wrapf(errx.NewCustomErrCode(errx.REQ_PARAM_ERROR), "too many thum sticker")
-			}
-			stickerModel.StickerThum = stickerMap.GetPaths()[0]
-			if err := l.svcCtx.DAO.UpdateOneStickerGroup(l.ctx, stickerModel); err != nil {
-				logx.WithContext(l.ctx).Error(err)
-				return nil, err
-			}
-		} else {
-			for _, path := range stickerMap.GetPaths() {
-				filePaths = append(filePaths, path)
-			}
-		}
+	stickerModel := new(models.Sticker)
+	stickerModel.Uuid = stickerModelUUID
+	stickerModel.StickerName = in.StickerName
+	stickerModel.StickerThum = resourcesPaths[variable.STICKER_THUM][0]
 
+	stickerResources := make([]models.StickerResource, 0)
+	for _, p := range resourcesPaths[variable.STICKER_RESOURCES] {
+		stickerResources = append(stickerResources, models.StickerResource{
+			Path: p,
+		})
 	}
-	//
-	if err := l.svcCtx.DAO.InsertStickerListIntoGroup(l.ctx, stickerModel, filePaths); err != nil {
+	stickerModel.Resources = stickerResources
+	_, err := l.svcCtx.DAO.InsertOneStickerGroupWithResources(l.ctx, stickerModel)
+	if err != nil {
 		logx.WithContext(l.ctx).Error(err)
 		return nil, err
 	}

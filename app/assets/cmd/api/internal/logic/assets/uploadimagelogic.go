@@ -31,9 +31,9 @@ func (l *UploadImageLogic) UploadImage(req *types.UploadImageReq) (resp *types.U
 		return nil, errx.NewCustomError(errx.REQ_PARAM_ERROR, "data is empty")
 	}
 
-	rpcResp, rpcErr := l.svcCtx.AssetRPC.UploadImage(l.ctx, &assets_api.UploadImageReq{
-		Format:    req.ImageType,
-		Base64Str: req.Data,
+	rpcResp, rpcErr := l.svcCtx.AssetRPC.UploadImageByBase64(l.ctx, &assets_api.UploadImageReq{
+		Format: req.ImageType,
+		Data:   []byte(req.Data),
 	})
 
 	if rpcErr != nil {

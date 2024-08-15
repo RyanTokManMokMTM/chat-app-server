@@ -21,6 +21,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	db := models.NewEngine(c.MySQL.DataSource, c.MySQL.MaxIdleConns, c.MySQL.MaxOpenConns)
 	newDAO := dao.NewDao(db)
 	client, _ := redisx.ConnectToClient(c.RedisPubSub.Addr, c.RedisPubSub.Password)
+
 	return &ServiceContext{
 		Config:    c,
 		AssetsRPC: assetrpc.NewAssetRPC(zrpc.MustNewClient(c.AssetsRPC)),

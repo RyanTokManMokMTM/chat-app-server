@@ -9,6 +9,7 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/types"
@@ -49,10 +50,14 @@ func (l *UploadUserCoverLogic) UploadUserCover(req *types.UploadUserAvatarReq) (
 		return nil, errx.NewCustomErrCode(errx.FILE_UPLOAD_FAILED)
 	}
 
+	formatInfo := strings.Split(fileName, ".")
+	if len(formatInfo) < 2 {
+		return nil, errx.NewCustomErrCode(errx.REQ_PARAM_ERROR)
+	}
 	rpcResp, rpcErr := l.svcCtx.UserService.UploadUserCover(l.ctx, &core.UploadUserCoverReq{
-		UserId:   uint32(userID),
-		FileName: fileName,
-		Data:     buffer.Bytes(),
+		UserId: uint32(userID),
+		Format: formatInfo[1],
+		Data:   buffer.Bytes(),
 	})
 
 	if rpcErr != nil {

@@ -24,8 +24,9 @@ type (
 	UploadStickerGroupResp = assets_api.UploadStickerGroupResp
 
 	AssetRPC interface {
-		UploadImage(ctx context.Context, in *UploadImageReq, opts ...grpc.CallOption) (*UploadImageResp, error)
+		UploadImageByBase64(ctx context.Context, in *UploadImageReq, opts ...grpc.CallOption) (*UploadImageResp, error)
 		UploadFile(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*UploadFileResp, error)
+		UploadImageByByte(ctx context.Context, in *UploadImageReq, opts ...grpc.CallOption) (*UploadImageResp, error)
 		UploadStickerGroup(ctx context.Context, in *UploadStickerGroupReq, opts ...grpc.CallOption) (*UploadStickerGroupResp, error)
 	}
 
@@ -40,14 +41,19 @@ func NewAssetRPC(cli zrpc.Client) AssetRPC {
 	}
 }
 
-func (m *defaultAssetRPC) UploadImage(ctx context.Context, in *UploadImageReq, opts ...grpc.CallOption) (*UploadImageResp, error) {
+func (m *defaultAssetRPC) UploadImageByBase64(ctx context.Context, in *UploadImageReq, opts ...grpc.CallOption) (*UploadImageResp, error) {
 	client := assets_api.NewAssetRPCClient(m.cli.Conn())
-	return client.UploadImage(ctx, in, opts...)
+	return client.UploadImageByBase64(ctx, in, opts...)
 }
 
 func (m *defaultAssetRPC) UploadFile(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*UploadFileResp, error) {
 	client := assets_api.NewAssetRPCClient(m.cli.Conn())
 	return client.UploadFile(ctx, in, opts...)
+}
+
+func (m *defaultAssetRPC) UploadImageByByte(ctx context.Context, in *UploadImageReq, opts ...grpc.CallOption) (*UploadImageResp, error) {
+	client := assets_api.NewAssetRPCClient(m.cli.Conn())
+	return client.UploadImageByByte(ctx, in, opts...)
 }
 
 func (m *defaultAssetRPC) UploadStickerGroup(ctx context.Context, in *UploadStickerGroupReq, opts ...grpc.CallOption) (*UploadStickerGroupResp, error) {

@@ -21,6 +21,9 @@ func (sk *Sticker) TableName() string {
 }
 
 func (sk *Sticker) BeforeCreate(tx *gorm.DB) error {
+	if sk.Uuid != "" {
+		return nil
+	}
 	sk.Uuid = uuid.New().String()
 	return nil
 }

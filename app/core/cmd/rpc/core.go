@@ -3,11 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/ryantokmanmokmtm/chat-app-server/app/common/rpc"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/config"
+	chatserviceServer "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/server/chatservice"
 	friendserviceServer "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/server/friendservice"
 	groupserviceServer "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/server/groupservice"
+	stickerserviceServer "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/server/stickerservice"
 	storyserviceServer "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/server/storyservice"
 	userserviceServer "github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/server/userservice"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/svc"
@@ -34,11 +35,13 @@ func main() {
 		core.RegisterStoryServiceServer(grpcServer, storyserviceServer.NewStoryServiceServer(ctx))
 		core.RegisterGroupServiceServer(grpcServer, groupserviceServer.NewGroupServiceServer(ctx))
 		core.RegisterFriendServiceServer(grpcServer, friendserviceServer.NewFriendServiceServer(ctx))
+		core.RegisterStickerServiceServer(grpcServer, stickerserviceServer.NewStickerServiceServer(ctx))
+		core.RegisterChatServiceServer(grpcServer, chatserviceServer.NewChatServiceServer(ctx))
+
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)
 		}
 	})
-	s.AddUnaryInterceptors(rpc.LoggerInterceptor)
 	defer s.Stop()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)

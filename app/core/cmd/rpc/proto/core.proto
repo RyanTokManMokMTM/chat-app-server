@@ -150,7 +150,7 @@ message UpdateUserInfoResp{
 message UploadUserAvatarReq{
   uint32 userId = 1;
   bytes data = 2;
-  string fileName = 3;
+  string format = 3;
 }
 message UploadUserAvatarResp{
   int32 code = 1;
@@ -161,7 +161,7 @@ message UploadUserAvatarResp{
 message UploadUserCoverReq{
   uint32 userId = 1;
   bytes data = 2;
-  string fileName = 3;
+  string format = 3;
 }
 message UploadUserCoverResp{
   int32 code = 1;
@@ -219,7 +219,7 @@ message GetUserStickerResp{
 
 message AddStoryReq{
   uint32 userId = 1;
-  string storyImgFileName = 2;
+  string storyFormat = 2;
   bytes data = 3; //story image data.
 }
 message AddStoryResp{

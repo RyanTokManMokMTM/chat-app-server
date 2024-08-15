@@ -31,6 +31,7 @@ func (l *GetStickerGroupListLogic) GetStickerGroupList(in *core.GetStickerListRe
 		logx.WithContext(l.ctx).Error(err)
 		return nil, err
 	}
+
 	stickerInfos := make([]*core.StickerInfo, 0)
 	for _, info := range list {
 		stickerInfos = append(stickerInfos, &core.StickerInfo{

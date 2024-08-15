@@ -50,9 +50,9 @@ func (l *CreateGroupLogic) CreateGroup(in *core.CreateGroupReq) (*core.CreateGro
 			return nil, errors.Wrapf(errx.NewCustomErrCode(errx.REQ_PARAM_ERROR), "Avatar data format incorrect")
 		}
 
-		rpcResp, rpcErr := l.svcCtx.AssetsRPC.UploadImage(l.ctx, &assetrpc.UploadImageReq{
-			Format:    imgFormat,
-			Base64Str: string(in.AvatarData),
+		rpcResp, rpcErr := l.svcCtx.AssetsRPC.UploadImageByBase64(l.ctx, &assetrpc.UploadImageReq{
+			Format: imgFormat,
+			Data:   in.AvatarData,
 		})
 		if rpcErr != nil {
 			logx.WithContext(l.ctx).Error(rpcErr)
@@ -93,7 +93,7 @@ func (l *CreateGroupLogic) CreateGroup(in *core.CreateGroupReq) (*core.CreateGro
 	go func() {
 		logx.Info("sending a system message", sysMessage)
 		redisContext := context.Background()
-		redisx.SendMessageToChannel(l.svcCtx.RedisCli, redisContext, "notification", types.NotificationMessage{
+		redisx.SendMessageToChannel(l.svcCtx.RedisCli, redisContext, redisx.NOTIFICATION_CHANNEL, types.NotificationMessage{
 			To:      group.Uuid,
 			From:    u.Uuid,
 			Content: sysMessage,

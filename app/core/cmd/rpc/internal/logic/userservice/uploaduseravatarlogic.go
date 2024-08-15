@@ -6,7 +6,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/assetrpc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
-	"github.com/ryantokmanmokmtm/chat-app-server/app/common/util"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
 	"gorm.io/gorm"
@@ -40,14 +39,9 @@ func (l *UploadUserAvatarLogic) UploadUserAvatar(in *core.UploadUserAvatarReq) (
 		return nil, err
 	}
 
-	imgFormat := util.ExtractImgTypeFromBase64(string(in.Data))
-	if imgFormat == "" {
-		return nil, errors.Wrapf(errx.NewCustomErrCode(errx.REQ_PARAM_ERROR), "Avatar data format incorrect")
-	}
-
-	rpcResp, rpcErr := l.svcCtx.AssetsRPC.UploadImage(l.ctx, &assetrpc.UploadImageReq{
-		Format:    imgFormat,
-		Base64Str: string(in.Data),
+	rpcResp, rpcErr := l.svcCtx.AssetsRPC.UploadImageByByte(l.ctx, &assetrpc.UploadImageReq{
+		Format: in.Format,
+		Data:   in.Data,
 	})
 
 	//name, err := uploadx.SaveBytesIntoFile(in.FileName, in.Data, l.svcCtx.Config.ResourcesPath)

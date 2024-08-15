@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/variable"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/types"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
@@ -61,7 +62,7 @@ func (l *CreateStickerGroupLogic) CreateStickerGroup(req *types.CreateStickerGro
 	}
 
 	for key, files := range fileMap {
-		if key == "thum" {
+		if key == variable.STICKER_THUM {
 			thumFile := files[0]
 			data, err := nameExpo(thumFile)
 			if err != nil {
@@ -73,7 +74,7 @@ func (l *CreateStickerGroupLogic) CreateStickerGroup(req *types.CreateStickerGro
 				},
 			}
 
-		} else {
+		} else if key == variable.STICKER_RESOURCES {
 			stickerDatas := make([]*core.StickerData, 0)
 			for _, stickerFile := range files {
 				data, err := nameExpo(stickerFile)
@@ -87,6 +88,7 @@ func (l *CreateStickerGroupLogic) CreateStickerGroup(req *types.CreateStickerGro
 			}
 		}
 	}
+
 	rpcResp, rpcErr := l.svcCtx.StickerService.CreateStickerGroup(l.ctx, &core.CreateStickerGroupReq{
 		UserId:      int32(userID),
 		StickerName: req.StickerName,

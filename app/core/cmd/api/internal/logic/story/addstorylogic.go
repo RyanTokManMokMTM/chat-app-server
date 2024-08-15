@@ -10,6 +10,7 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/rpc/types/core"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/core/cmd/api/internal/types"
@@ -52,10 +53,15 @@ func (l *AddStoryLogic) AddStory(req *types.AddStoryReq) (resp *types.AddStoryRe
 		return nil, errors.Wrapf(errx.NewCustomErrCode(errx.SERVER_COMMON_ERROR), "error:  %+v", err)
 	}
 
+	formatInfo := strings.Split(fileName, ".")
+	if len(formatInfo) < 2 {
+		return nil, errx.NewCustomErrCode(errx.REQ_PARAM_ERROR)
+	}
+
 	rpcResp, rpcErr := l.svcCtx.StoryService.AddStory(l.ctx, &core.AddStoryReq{
-		UserId:           uint32(userID),
-		StoryImgFileName: fileName,
-		Data:             buffer.Bytes(),
+		UserId:      uint32(userID),
+		StoryFormat: formatInfo[1],
+		Data:        buffer.Bytes(),
 	})
 
 	if rpcErr != nil {

@@ -22,14 +22,19 @@ func NewAssetRPCServer(svcCtx *svc.ServiceContext) *AssetRPCServer {
 	}
 }
 
-func (s *AssetRPCServer) UploadImage(ctx context.Context, in *assets_api.UploadImageReq) (*assets_api.UploadImageResp, error) {
-	l := logic.NewUploadImageLogic(ctx, s.svcCtx)
-	return l.UploadImage(in)
+func (s *AssetRPCServer) UploadImageByBase64(ctx context.Context, in *assets_api.UploadImageReq) (*assets_api.UploadImageResp, error) {
+	l := logic.NewUploadImageByBase64Logic(ctx, s.svcCtx)
+	return l.UploadImageByBase64(in)
 }
 
 func (s *AssetRPCServer) UploadFile(ctx context.Context, in *assets_api.UploadFileReq) (*assets_api.UploadFileResp, error) {
 	l := logic.NewUploadFileLogic(ctx, s.svcCtx)
 	return l.UploadFile(in)
+}
+
+func (s *AssetRPCServer) UploadImageByByte(ctx context.Context, in *assets_api.UploadImageReq) (*assets_api.UploadImageResp, error) {
+	l := logic.NewUploadImageByByteLogic(ctx, s.svcCtx)
+	return l.UploadImageByByte(in)
 }
 
 func (s *AssetRPCServer) UploadStickerGroup(ctx context.Context, in *assets_api.UploadStickerGroupReq) (*assets_api.UploadStickerGroupResp, error) {

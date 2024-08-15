@@ -12,5 +12,6 @@ type Config struct {
 		AccessExpire int64
 	}
 
-	CoreRPC zrpc.RpcClientConf
+	AssetsRPC zrpc.RpcClientConf
+	CoreRPC   zrpc.RpcClientConf
 }
