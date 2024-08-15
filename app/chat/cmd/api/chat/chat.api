@@ -41,6 +41,6 @@ type (
 )
 service ChatAPI {
 	@handler HealthCheck
-	post /ping returns (HealthCheckResp)
+	get /chat/ping returns (HealthCheckResp)
 }
 

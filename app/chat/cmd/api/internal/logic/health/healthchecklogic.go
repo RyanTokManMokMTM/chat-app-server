@@ -26,5 +26,7 @@ func NewHealthCheckLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Healt
 func (l *HealthCheckLogic) HealthCheck() (resp *types.HealthCheckResp, err error) {
 	// todo: add your logic here and delete this line
 
-	return
+	return &types.HealthCheckResp{
+		Resp: "pong",
+	}, nil
 }

@@ -22,6 +22,6 @@ type (
 )
 service AssetsAPI {
 	@handler HealthCheck
-	post /ping returns (HealthCheckResp)
+	get /asset/ping returns (HealthCheckResp)
 }
 

@@ -15,16 +15,22 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				// Upload only image
-				Method:  http.MethodPost,
-				Path:    "/file/image/upload",
-				Handler: assets.UploadImageHandler(serverCtx),
-			},
-			{
 				// Upload any file
 				Method:  http.MethodPost,
-				Path:    "/file/upload",
+				Path:    "/asset/file/upload",
 				Handler: assets.UploadFileHandler(serverCtx),
+			},
+			{
+				// Upload image by base64
+				Method:  http.MethodPost,
+				Path:    "/asset/image/base64/upload",
+				Handler: assets.UploadImageByBase64Handler(serverCtx),
+			},
+			{
+				// Upload image by form
+				Method:  http.MethodPost,
+				Path:    "/asset/image/upload",
+				Handler: assets.UploadImageHandler(serverCtx),
 			},
 		},
 		rest.WithPrefix("/api/v1"),
@@ -33,8 +39,8 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				Method:  http.MethodPost,
-				Path:    "/ping",
+				Method:  http.MethodGet,
+				Path:    "/asset/ping",
 				Handler: health.HealthCheckHandler(serverCtx),
 			},
 		},

@@ -9,9 +9,16 @@ info(
 )
 
 type (
-    UploadImageReq {
+    UploadImageByBase64Req {
         ImageType string `json:"image_type"`
         Data string `json:"data"`
+    }
+    UploadImageByBase64Resp {
+        Code uint `json:"code"`
+        Path string `json:"path"`
+    }
+
+    UploadImageReq {
     }
     UploadImageResp {
         Code uint `json:"code"`
@@ -32,15 +39,21 @@ type (
 )
 service AssetsAPI {
     @doc (
-        summary: "Upload only image"
+        summary: "Upload image by base64"
+    )
+    @handler UploadImageByBase64
+    post  /asset/image/base64/upload (UploadImageByBase64Req) returns (UploadImageByBase64Resp);
+
+    @doc (
+        summary: "Upload image by form"
     )
     @handler UploadImage
-    post  /file/image/upload (UploadImageReq) returns (UploadImageResp);
+    post  /asset/image/upload (UploadImageReq) returns (UploadImageResp);
 
     @doc (
         summary: "Upload any file"
     )
     @handler UploadFile
-    post  /file/upload (UploadFileReq) returns (UploadFileResp);
+    post  /asset/file/upload (UploadFileReq) returns (UploadFileResp);
 
 }

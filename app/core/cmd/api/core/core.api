@@ -46,6 +46,6 @@ type (
 )
 service CoreAPI {
 	@handler HealthCheck
-	post /ping returns (HealthCheckResp)
+	get /core/ping returns (HealthCheckResp)
 }
 

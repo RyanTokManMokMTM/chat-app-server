@@ -17,9 +17,9 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/types"
 )
 
-func UploadImageHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func UploadImageByBase64Handler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.UploadImageReq
+		var req types.UploadImageByBase64Req
 		if err := httpx.Parse(r, &req); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
@@ -42,8 +42,8 @@ func UploadImageHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := assets.NewUploadImageLogic(r.Context(), svcCtx, r)
-		resp, err := l.UploadImage(&req)
+		l := assets.NewUploadImageByBase64Logic(r.Context(), svcCtx)
+		resp, err := l.UploadImageByBase64(&req)
 		if err != nil {
 			//convert to customError
 			reqError := errx.NewCustomErrCode(errx.SERVER_COMMON_ERROR)

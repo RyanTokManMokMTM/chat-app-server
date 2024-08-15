@@ -13,9 +13,17 @@ type UploadFileResp struct {
 	Path string `json:"path"`
 }
 
-type UploadImageReq struct {
+type UploadImageByBase64Req struct {
 	ImageType string `json:"image_type"`
 	Data      string `json:"data"`
+}
+
+type UploadImageByBase64Resp struct {
+	Code uint   `json:"code"`
+	Path string `json:"path"`
+}
+
+type UploadImageReq struct {
 }
 
 type UploadImageResp struct {
