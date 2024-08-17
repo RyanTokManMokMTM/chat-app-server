@@ -37,8 +37,9 @@ func (l *UploadImageByByteLogic) UploadImageByByte(in *assets_api.UploadImageReq
 
 	imageName := fmt.Sprintf("%s.%s", uuid.NewString(), in.Format)
 	logx.Info(imageName)
-	path, err := uploadx.SaveBytesIntoFile(imageName, []byte(in.Data), l.svcCtx.Config.ResourcesPath)
+	path, err := uploadx.SaveBytesIntoFile(imageName, in.Data, l.svcCtx.Config.ResourcesPath)
 	if err != nil {
+		logx.WithContext(l.ctx).Error(err)
 		return nil, errx.NewCustomError(errx.SERVER_COMMON_ERROR, err.Error())
 	}
 

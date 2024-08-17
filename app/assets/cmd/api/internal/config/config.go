@@ -7,5 +7,6 @@ import (
 
 type Config struct {
 	rest.RestConf
-	AssetsRPC zrpc.RpcClientConf
+	AssetsRPC     zrpc.RpcClientConf
+	ResourcesPath string
 }

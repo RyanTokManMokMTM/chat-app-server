@@ -2,9 +2,9 @@ package dao
 
 import (
 	"context"
-	socket_message "github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/socket-proto"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/variable"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/internal/models"
+	socket_message "github.com/ryantokmanmokmtm/chat-app-server/app/internal/socket-proto"
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )

@@ -46,6 +46,7 @@ func (l *UploadUserAvatarLogic) UploadUserAvatar(req *types.UploadUserAvatarReq)
 
 	_, err = io.Copy(buffer, file)
 	if err != nil {
+		logx.WithContext(l.ctx).Error(err)
 		return nil, errx.NewCustomErrCode(errx.FILE_UPLOAD_FAILED)
 	}
 

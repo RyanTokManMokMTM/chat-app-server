@@ -1,0 +1,20 @@
+version: '3.5'
+services:
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: ./Dockerfile
+    container_name: app_nginx
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/logs/access.log:/var/log/nginx/chatserver_access.log
+      - ./nginx/logs/err.log:/var/log/nginx/chatserver_err.log
+    networks:
+      - proxy-net
+    ports:
+      - "3333:3333"
+networks:
+  proxy-net:
+    name: chat-app-network
+    external: true

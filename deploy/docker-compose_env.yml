@@ -1,7 +1,34 @@
 version: '3.5'
 services:
+  etcd:
+    image: bitnami/etcd
+    container_name: app_etcd
+    restart: always
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    networks:
+      - app-network
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+
+  redis:
+    image: redis
+    container_name: app_redis
+    restart: always
+    volumes:
+      - ./redis/redis.conf:/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    privileged: true
+    networks:
+      - app-network
+    command: ["redis-server","/etc/redis/redis.conf"]
+
   db:
-    image: mysql
+    container_name: app_db
+    image: mysql:8.0
     ports:
       - 3306:3306
     environment:
@@ -10,16 +37,19 @@ services:
       MYSQL_USER: admin
       TZ: Asia/Taipei
     restart: always
-#    privileged: true
+    privileged: true
+    networks:
+      - app-network
     command:
       # setting mysql
       --default-authentication-plugin=mysql_native_password
-#      --character-set-router=utf8mb4
-#      --collation-router=utf8mb4_general_ci
-#      --init-file ./data/init.sql
-#    volumes:
-#      - ./datas/databases:/var/lib/mysql
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+#      --init-file ../data/init.sql
+    volumes:
+      - ./datas/databases:/var/lib/mysql
 
 networks:
   app-network:
+      name: chat-app-network
       driver: bridge

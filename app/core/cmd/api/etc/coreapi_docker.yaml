@@ -1,0 +1,18 @@
+Name: CoreAPI
+Host: 0.0.0.0
+Port: 8080
+Log:
+  Encoding: plain
+CoreRPC:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    Key: core.rpc
+AssetsRPC:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    Key: assets.rpc
+Auth:
+  AccessSecret: 2BNVfmf0WtyX1HQmzYx5rOKLzlHBEPRX729pZ0gpxujnaikoRRCF78T8fKDNTLWy
+  AccessExpire: 36800

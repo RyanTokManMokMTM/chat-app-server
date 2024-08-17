@@ -1,0 +1,57 @@
+version: '3.5'
+services:
+  socket_server:
+    container_name: chat_socket_server
+    build:
+      context: ../
+      dockerfile: ./deploy/chat/api/Dockerfile
+    networks:
+      - proxy-net
+
+  core_api:
+    container_name: chat_core_api
+    build:
+      context: ../
+      dockerfile: ./deploy/core/api/Dockerfile
+    networks:
+      - proxy-net
+##
+  assets_api:
+    container_name: chat_assets_api
+    build:
+      context: ../
+      dockerfile: ./deploy/assets/api/Dockerfile
+    volumes:
+      - shared-volume:/app/resources
+    networks:
+      - proxy-net
+#
+  core_rpc:
+    container_name: chat_core_rpc
+    build:
+      context: ../
+      dockerfile: ./deploy/core/rpc/Dockerfile
+    networks:
+      - proxy-net
+#    ports:
+#      - "9000:9000"
+
+  assert_rpc:
+    container_name: chat_assert_rpc
+    build:
+      context: ../
+      dockerfile: ./deploy/assets/rpc/Dockerfile
+    networks:
+      - proxy-net
+    volumes:
+      - shared-volume:/app/resources
+#    ports:
+#      - "9001:9001"
+
+networks:
+  proxy-net:
+    external:
+      name: chat-app-network
+volumes:
+  shared-volume:
+    driver: local

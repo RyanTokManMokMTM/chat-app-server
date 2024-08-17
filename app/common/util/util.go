@@ -1,19 +1,16 @@
 package util
 
 import (
-	"path"
-	"path/filepath"
-	"runtime"
 	"strings"
 )
 
-func GetRootDir() string {
-	_, callerFile, _, _ := runtime.Caller(0) //Who
-	dir := path.Join(path.Dir(callerFile))
-	root := filepath.Join(filepath.Dir(dir), "../..")
-
-	return root
-}
+//func GetRootDir() string {
+//	_, callerFile, _, _ := runtime.Caller(0) //Who
+//	dir := path.Join(path.Dir(callerFile))
+//	root := filepath.Join(filepath.Dir(dir), "../..")
+//
+//	return root
+//}
 
 func ExtractImgTypeFromBase64(data string) string {
 	index := strings.Index(data, "base64")

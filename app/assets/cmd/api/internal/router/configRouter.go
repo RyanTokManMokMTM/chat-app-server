@@ -4,10 +4,8 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/config"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/handler"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/api/internal/svc"
-	"github.com/ryantokmanmokmtm/chat-app-server/app/common/util"
 	"github.com/zeromicro/go-zero/rest"
 	"net/http"
-	"path"
 	"strings"
 )
 
@@ -18,8 +16,8 @@ func ConfigRouter(c config.Config) *rest.Server {
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
 
-	dirPath := path.Join(util.GetRootDir(), "/resources/")
-	dirRouterRegister(server, "/resources/", dirPath)
+	//dirPath := path.Join(util.GetRootDir(), "/resources/")
+	dirRouterRegister(server, "/resources/", c.ResourcesPath)
 
 	return server
 }

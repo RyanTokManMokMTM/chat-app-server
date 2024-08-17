@@ -4,7 +4,7 @@ Log:
   Encoding: plain
 Etcd:
   Hosts:
-  - 127.0.0.1:2379
+  - etcd:2379
   Key: assets.rpc
 ResourcesPath : ./resources
 MaxFileSize : 1048576

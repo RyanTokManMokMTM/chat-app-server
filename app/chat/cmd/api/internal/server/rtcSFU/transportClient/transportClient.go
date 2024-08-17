@@ -12,8 +12,8 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/server/rtcSFU/trackGroup"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/server/rtcSFU/types"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/server/socketClient"
-	socket_message "github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/socket-proto"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/variable"
+	socket_message "github.com/ryantokmanmokmtm/chat-app-server/app/internal/socket-proto"
 
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"

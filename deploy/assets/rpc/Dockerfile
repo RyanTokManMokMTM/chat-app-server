@@ -9,9 +9,10 @@ ADD ../../../go.sum .
 ADD ../../../go.mod .
 RUN go mod download
 
-COPY ../../../app/assets/cmd/rpc .
-COPY ../../../app/common .
+COPY ../../../app/assets/cmd/rpc ./app/assets/cmd/rpc
+COPY ../../../app/common ./app/common
 COPY ../../../app/assets/cmd/rpc/etc /rpc/etc
+COPY ../../../resources/default /app/resources/default
 
 RUN go build -ldflags "-s -w" -o /out/assetsrpc ./app/assets/cmd/rpc/assets.go
 
@@ -24,4 +25,5 @@ WORKDIR /app
 
 COPY --from=builder /out/assetsrpc /app/assetsrpc
 COPY --from=builder /rpc/etc /app/etc
-CMD ["./assetsrpc","-f","etc/assets.yaml"]
+COPY --from=builder /app/resources /app/resources
+CMD ["./assetsrpc","-f","etc/assets_docker.yaml"]

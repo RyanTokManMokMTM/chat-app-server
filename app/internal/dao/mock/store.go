@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	socket_message "github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/socket-proto"
+	socket_message "github.com/ryantokmanmokmtm/chat-app-server/app/internal/socket-proto"
 	models "github.com/ryantokmanmokmtm/chat-app-server/app/internal/models"
 )
 

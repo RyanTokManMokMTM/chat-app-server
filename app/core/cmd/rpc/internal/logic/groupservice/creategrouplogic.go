@@ -42,7 +42,7 @@ func (l *CreateGroupLogic) CreateGroup(in *core.CreateGroupReq) (*core.CreateGro
 		}
 		return nil, err
 	}
-	avatar := "/defaultGroup.jpg"
+	avatar := "/default/defaultGroup.jpg"
 
 	if len(in.AvatarData) != 0 {
 		imgFormat := util.ExtractImgTypeFromBase64(string(in.AvatarData))

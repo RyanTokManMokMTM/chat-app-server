@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/ryantokmanmokmtm/chat-app-server/app/common/util"
 	"github.com/zeromicro/go-zero/core/logx"
 	"io"
 	"os"
@@ -109,7 +108,8 @@ func SaveFileWithName(data []byte, name, filePath string) (string, error) {
 
 func SaveBytesIntoFile(fileName string, bytes []byte, filePath string) (string, error) {
 	fileName = strings.ToLower(fileName)
-	tempFile, err := os.Create(path.Join(util.GetRootDir(), filePath, fileName))
+	//logx.Info("path : ", path.Join(util.GetRootDir(), filePath, fileName))
+	tempFile, err := os.Create(path.Join(filePath, fileName))
 	if err != nil {
 		return "", err
 	}
@@ -138,6 +138,7 @@ func SaveBytesIntoFile(fileName string, bytes []byte, filePath string) (string, 
 //}
 
 func SaveImageByBase64(data string, format string, resourcesPath string) (string, error) {
+
 	uri := strings.ToLower(uuid.New().String()) + "." + format
 	index := strings.Index(data, "base64")
 	index += 7 //"data:image/$type;base64,(data stating here)xyz...."
@@ -147,7 +148,7 @@ func SaveImageByBase64(data string, format string, resourcesPath string) (string
 		return "", err
 	}
 
-	pathDir := path.Join(util.GetRootDir(), resourcesPath, uri)
+	pathDir := path.Join(resourcesPath, uri)
 	logx.Info("Path : ", pathDir)
 	tempFile, err := os.Create(pathDir)
 	if err != nil {

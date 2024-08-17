@@ -4,15 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
-	"github.com/ryantokmanmokmtm/chat-app-server/app/common/uploadx"
-	"github.com/ryantokmanmokmtm/chat-app-server/app/common/util"
-	"github.com/ryantokmanmokmtm/chat-app-server/app/common/variable"
-	"os"
-	"path"
-
 	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/assets/cmd/rpc/types/assets_api"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/uploadx"
+	"github.com/ryantokmanmokmtm/chat-app-server/app/common/variable"
+	"os"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -34,8 +31,8 @@ func NewUploadStickerGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 func (l *UploadStickerGroupLogic) UploadStickerGroup(in *assets_api.UploadStickerGroupReq) (*assets_api.UploadStickerGroupResp, error) {
 	// todo: add your logic here and delete this line
 
-	root := util.GetRootDir()
-	stickerDir := path.Join(root, fmt.Sprintf("%s/sticker", l.svcCtx.Config.ResourcesPath))
+	//root := util.GetRootDir()
+	stickerDir := fmt.Sprintf("%s/stickers", l.svcCtx.Config.ResourcesPath)
 
 	if _, err := os.Stat(stickerDir); os.IsNotExist(err) {
 		err := os.Mkdir(stickerDir, 0777)
@@ -46,7 +43,7 @@ func (l *UploadStickerGroupLogic) UploadStickerGroup(in *assets_api.UploadSticke
 	}
 
 	//TODO: Create an sticker file
-	stickerGroupDir := path.Join(root, fmt.Sprintf("%s/sticker/%s", l.svcCtx.Config.ResourcesPath, in.StickerId))
+	stickerGroupDir := fmt.Sprintf("%s/stickers/%s", l.svcCtx.Config.ResourcesPath, in.StickerId)
 	if err := os.Mkdir(stickerGroupDir, 0777); err != nil {
 		logx.WithContext(l.ctx).Error(err)
 		return nil, err

@@ -22,7 +22,6 @@ type Group struct {
 
 func (g *Group) BeforeCreate(tx *gorm.DB) error {
 	g.Uuid = uuid.New().String()
-	//g.GroupAvatar = "/defaultGroup.jpg"
 	return nil
 }
 

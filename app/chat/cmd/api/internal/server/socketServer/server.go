@@ -1,6 +1,5 @@
 package socketServer
 
-import "C"
 import (
 	"context"
 	"encoding/json"
@@ -16,9 +15,9 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/server/socketClient"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/serverTypes"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/internal/svc"
-	socket_message "github.com/ryantokmanmokmtm/chat-app-server/app/chat/cmd/api/socket-proto"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/app/common/variable"
+	socket_message "github.com/ryantokmanmokmtm/chat-app-server/app/internal/socket-proto"
 
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"

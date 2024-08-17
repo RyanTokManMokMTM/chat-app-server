@@ -26,8 +26,8 @@ type User struct {
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
 	u.Uuid = uuid.New().String()
-	u.Avatar = "/default.jpg"
-	u.Cover = "/cover.jpg"
+	u.Avatar = "/default/default.jpg"
+	u.Cover = "/default/cover.jpg"
 	return nil
 }
 
