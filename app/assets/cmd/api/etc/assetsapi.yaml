@@ -8,4 +8,4 @@ AssetsRPC:
     Hosts:
       - 127.0.0.1:2379
     Key: assets.rpc
-ResourcesPath : ./resources
+ResourcesPath : ${project_path}/resources #/Users/xxx/xx/xx/projects/chat-app-server/resources
