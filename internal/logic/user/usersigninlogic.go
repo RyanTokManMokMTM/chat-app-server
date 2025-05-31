@@ -3,6 +3,10 @@ package user
 import (
 	"context"
 	"errors"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/cryptox"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
@@ -10,9 +14,6 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 	"gorm.io/gorm"
-	"net/http"
-	"strings"
-	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -34,8 +35,9 @@ func NewUserSignInLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserSi
 func (l *UserSignInLogic) UserSignIn(req *types.SignInReq) (resp *types.SignInResp, err error) {
 	// todo: add your logic here and delete this line
 	logx.Infof("Call User Sign In with email: %v ", req.Email)
-	u, err := l.svcCtx.DAO.FindOneUserByEmail(l.ctx, req.Email)
+	u, err := l.svcCtx.Uow.UserRepo().FindOneUserByEmail(l.ctx, req.Email)
 	if err != nil {
+		logx.Errorf("Error finding user by email: %v", err)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
 		}

@@ -3,14 +3,16 @@ package user
 import (
 	"context"
 	"errors"
+	"net/http"
+	"time"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/cryptox"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/jwtx"
 	"gorm.io/gorm"
-	"net/http"
-	"time"
 
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 
@@ -34,9 +36,10 @@ func NewUserSignUpLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserSi
 func (l *UserSignUpLogic) UserSignUp(req *types.SignUpReq) (resp *types.SignUpResp, err error) {
 	// todo: add your logic here and delete this line
 	logx.Infof("Call User SignUp API with email : %v, name : %v", req.Email, req.Name)
-	found, err := l.svcCtx.DAO.FindOneUserByEmail(l.ctx, req.Email)
+	found, err := l.svcCtx.Uow.UserRepo().FindOneUserByEmail(l.ctx, req.Email)
 
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		logx.Errorf("faile to get user by email: %v", err)
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
@@ -45,7 +48,11 @@ func (l *UserSignUpLogic) UserSignUp(req *types.SignUpReq) (resp *types.SignUpRe
 	}
 
 	encryptedPW := cryptox.PasswordEncrypt(req.Password, l.svcCtx.Config.Salt)
-	u, err := l.svcCtx.DAO.InsertOneUser(l.ctx, req.Name, req.Email, encryptedPW)
+	u, err := l.svcCtx.Uow.UserRepo().CreateOne(l.ctx, models.User{
+		NickName: req.Name,
+		Email:    req.Email,
+		Password: encryptedPW,
+	})
 	if err != nil {
 		return nil, errx.NewCustomError(errx.USER_SIGN_UP_FAILED, err.Error())
 	}

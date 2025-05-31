@@ -3,10 +3,11 @@ package user
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -32,7 +33,7 @@ func (l *GetUserStickersLogic) GetUserStickers(req *types.GetUserStickerReq) (re
 	// todo: add your logic here and delete this line
 	userID := ctxtool.GetUserIDFromCTX(l.ctx)
 
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -41,7 +42,7 @@ func (l *GetUserStickersLogic) GetUserStickers(req *types.GetUserStickerReq) (re
 	}
 
 	stickerList := make([]types.StickerInfo, 0)
-	stickers, err := l.svcCtx.DAO.FindAllSticker(l.ctx, userID)
+	stickers, err := l.svcCtx.Uow.UserRepo().FindAllSticker(l.ctx, userID)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}

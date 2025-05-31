@@ -3,11 +3,12 @@ package user
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -37,7 +38,7 @@ func (l *GetUserFriendProfileLogic) GetUserFriendProfile(req *types.GetUserFrien
 	}
 
 	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -47,7 +48,7 @@ func (l *GetUserFriendProfileLogic) GetUserFriendProfile(req *types.GetUserFrien
 
 	var u *models.User
 	if req.UserID != 0 {
-		u, err = l.svcCtx.DAO.FindOneUser(l.ctx, req.UserID)
+		u, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, req.UserID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -55,7 +56,7 @@ func (l *GetUserFriendProfileLogic) GetUserFriendProfile(req *types.GetUserFrien
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
 	} else {
-		u, err = l.svcCtx.DAO.FindOneUserByUUID(l.ctx, req.UUID)
+		u, err = l.svcCtx.Uow.UserRepo().FindOneUserByUUID(l.ctx, req.UUID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -65,7 +66,7 @@ func (l *GetUserFriendProfileLogic) GetUserFriendProfile(req *types.GetUserFrien
 	}
 
 	isFriend := true
-	_, err = l.svcCtx.DAO.FindOneFriend(l.ctx, userID, u.Id)
+	_, err = l.svcCtx.Uow.UserFriendsRepo().FindOneByUserIdAndFriendById(l.ctx, userID, u.Id)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())

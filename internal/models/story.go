@@ -2,15 +2,16 @@ package models
 
 import (
 	"context"
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"time"
 )
 
 type StoryModel struct {
-	Id             uint      `gorm:"primaryKey;autoIncrement;types:int"`
-	Uuid           uuid.UUID `gorm:"index"`
-	UserId         uint      `gorm:"not null;index;comment:'belong to which group Id'"`
+	Id             uint   `gorm:"primaryKey;autoIncrement;types:int"`
+	Uuid           string `gorm:"index"`
+	UserId         uint   `gorm:"not null;index;comment:'belong to which group Id'"`
 	StoryMediaPath string
 
 	UserInfo User `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
@@ -18,7 +19,7 @@ type StoryModel struct {
 }
 
 func (s *StoryModel) BeforeCreate(tx *gorm.DB) error {
-	s.Uuid = uuid.New()
+	s.Uuid = uuid.New().String()
 	return nil
 }
 

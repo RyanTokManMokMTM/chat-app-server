@@ -3,13 +3,14 @@ package user
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -32,14 +33,14 @@ func (l *AddUserStickerLogic) AddUserSticker(req *types.AddStickerReq) (resp *ty
 	// todo: add your logic here and delete this line
 	userID := ctxtool.GetUserIDFromCTX(l.ctx)
 
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
 		}
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
-	_, err = l.svcCtx.DAO.FindOneStickerGroupByStickerUUID(l.ctx, req.StickerUUID)
+	_, err = l.svcCtx.Uow.StickerResourcesRepo().FindOneByUuid(l.ctx, req.StickerUUID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.STICKER_NOT_EXIST)
@@ -47,13 +48,13 @@ func (l *AddUserStickerLogic) AddUserSticker(req *types.AddStickerReq) (resp *ty
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	found, err := l.svcCtx.DAO.FindOneStickerFromUser(l.ctx, userID, req.StickerUUID)
+	found, err := l.svcCtx.Uow.UserRepo().FindOneSticker(l.ctx, userID, req.StickerUUID)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 	logx.Info(found)
 
-	if err := l.svcCtx.DAO.InsertOneStickerToUser(l.ctx, userID, &models.Sticker{Uuid: req.StickerUUID}); err != nil {
+	if err := l.svcCtx.Uow.UserRepo().InsertOneSticker(l.ctx, userID, &models.Sticker{Uuid: req.StickerUUID}); err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 

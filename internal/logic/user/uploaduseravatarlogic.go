@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/uploadx"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -35,7 +36,7 @@ func NewUploadUserAvatarLogic(ctx context.Context, svcCtx *svc.ServiceContext, r
 func (l *UploadUserAvatarLogic) UploadUserAvatar(req *types.UploadUserAvatarReq) (resp *types.UploadUserAvatarResp, err error) {
 	// todo: add your logic here and delete this line
 	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -49,7 +50,7 @@ func (l *UploadUserAvatarLogic) UploadUserAvatar(req *types.UploadUserAvatarReq)
 	}
 
 	path := fmt.Sprintf("%v", name)
-	l.svcCtx.DAO.UpdateUserAvatar(l.ctx, userID, path)
+	l.svcCtx.Uow.UserRepo().UpdateOneUserAvatar(l.ctx, userID, path)
 	return &types.UploadUserAvatarResp{
 		Code: uint(http.StatusOK),
 		Path: path,

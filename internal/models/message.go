@@ -2,7 +2,15 @@ package models
 
 import (
 	"context"
+
 	"gorm.io/gorm"
+)
+
+type MessageType uint
+
+const (
+	MessageTypeSingle MessageType = iota + 1
+	MessageTypeGroup
 )
 
 type Message struct {

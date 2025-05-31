@@ -3,10 +3,11 @@ package user
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -35,7 +36,7 @@ func (l *SearchUserLogic) SearchUser(req *types.SearchUserReq) (resp *types.Sear
 	if len(req.Qurey) == 0 {
 		return nil, errx.NewCustomError(errx.REQ_PARAM_ERROR, "Missing Search Keyword.")
 	}
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -43,7 +44,7 @@ func (l *SearchUserLogic) SearchUser(req *types.SearchUserReq) (resp *types.Sear
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	results, err := l.svcCtx.DAO.FindUsers(l.ctx, req.Qurey)
+	results, err := l.svcCtx.Uow.UserRepo().FindUsers(l.ctx, req.Qurey)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &types.SearchUserResp{ //User Not Exist
@@ -61,7 +62,7 @@ func (l *SearchUserLogic) SearchUser(req *types.SearchUserReq) (resp *types.Sear
 		}
 
 		var isFriend = true
-		_, err := l.svcCtx.DAO.FindOneFriend(l.ctx, userID, info.Id)
+		_, err := l.svcCtx.Uow.UserFriendsRepo().FindOneByUserIdAndFriendById(l.ctx, userID, info.Id)
 		if err != nil {
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
 				continue

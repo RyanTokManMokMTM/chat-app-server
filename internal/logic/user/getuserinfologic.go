@@ -3,12 +3,13 @@ package user
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -36,7 +37,7 @@ func (l *GetUserInfoLogic) GetUserInfo(req *types.GetUserInfoReq) (resp *types.G
 
 	var u *models.User
 	if req.UserID != 0 {
-		u, err = l.svcCtx.DAO.FindOneUser(l.ctx, req.UserID)
+		u, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, req.UserID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -44,7 +45,7 @@ func (l *GetUserInfoLogic) GetUserInfo(req *types.GetUserInfoReq) (resp *types.G
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
 	} else {
-		u, err = l.svcCtx.DAO.FindOneUserByUUID(l.ctx, req.UUID)
+		u, err = l.svcCtx.Uow.UserRepo().FindOneUserByUUID(l.ctx, req.UUID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
