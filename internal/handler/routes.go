@@ -205,7 +205,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				// Get owner stories
 				Method:  http.MethodGet,
 				Path:    "/stories/:user_id",
-				Handler: story.GetUserStoriesByuserIdHandler(serverCtx),
+				Handler: story.GetUserStoriesByUserIdHandler(serverCtx),
 			},
 			{
 				// Get friends active story

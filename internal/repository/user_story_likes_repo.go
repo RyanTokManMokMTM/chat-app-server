@@ -9,7 +9,7 @@ import (
 
 type IUserStoryLikesRepo[T any] interface {
 	CreateOne(ctx context.Context, storyLikes T) (*T, error)
-	FindOneByID(ctx context.Context, id uint) (T, error)
+	FindOneByID(ctx context.Context, id uint) (*T, error)
 	FindOneByUserIdAndStoryId(ctx context.Context, userId, storyId uint) (*T, error)
 	UpdateOne(ctx context.Context, storyLikes T) error
 	DeleteOne(ctx context.Context, id uint) error

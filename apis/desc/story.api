@@ -146,7 +146,7 @@ service ChatApp{
     @doc(
         summary : "Get owner stories"
     )
-    @handler GetUserStoriesByuserId
+    @handler GetUserStoriesByUserId
     get /stories/:user_id(GetUserStoryReq) returns (GetUserStoryResp)
 
     @doc(

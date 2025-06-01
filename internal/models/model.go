@@ -1,14 +1,15 @@
 package models
 
 import (
+	"time"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
-	"time"
 )
 
-type CommonField struct {
+type Base struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`

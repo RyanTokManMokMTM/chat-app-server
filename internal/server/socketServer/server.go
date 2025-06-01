@@ -15,6 +15,8 @@ import (
 	"github.com/pion/webrtc/v3"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/helper"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/rtcSFU/sessionManager"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/rtcSFU/transportClient"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/rtcSFU/types"
@@ -123,14 +125,14 @@ func (s *SocketServer) sendGroupMessage(message *socket_message.Message, server 
 	//TODO: GET ALL GROUP MEMBER
 	//TODO: Check if group is exist
 	ctx := context.Background()
-	group, err := svcCtx.DAO.FindOneGroupByUUID(ctx, message.ToUUID)
+	group, err := svcCtx.Uow.GroupRepo().FindOneByUUID(ctx, message.ToUUID)
 	if err != nil {
 		logx.Error(err.Error())
 		return
 	}
 
 	//TODO: Get All Group Members
-	members, err := svcCtx.DAO.FindOneGroupMembers(ctx, group.Id)
+	members, err := svcCtx.Uow.UserGroupRepo().GetGroupMemberList(ctx, group.Id)
 	if err != nil {
 		logx.Error(err.Error())
 		return
@@ -181,10 +183,52 @@ func (s *SocketServer) sendGroupMessage(message *socket_message.Message, server 
 	}
 }
 
+// TESTME
 // saveMessage, TEXT:Save directly and other types need to be store to FS
-func (s *SocketServer) saveMessage(svcCtx *svc.ServiceContext, message *socket_message.Message) {
-	//TODO : Save Message into db
-	svcCtx.DAO.InsertOneMessage(context.Background(), message)
+func (s *SocketServer) saveMessage(svcCtx *svc.ServiceContext, message *socket_message.Message) error {
+	var toGroupInfo *models.Group
+	var fromUserInfo, toUserInfo *models.User
+	var msg *models.Message
+	var err error
+
+	// FIXME
+	ctx := context.Background()
+	// find from user
+	fromUserInfo, err = svcCtx.Uow.UserRepo().FindOneUserByUUID(ctx, message.FromUUID)
+	if err != nil {
+		logx.Errorf("failed to get (from)user %e", err)
+		return err
+	}
+
+	// to get group info and user info
+	switch message.MessageType {
+	case variable.MESSAGE_TYPE_USERCHAT:
+		toUserInfo, err = svcCtx.Uow.UserRepo().FindOneUserByUUID(ctx, message.ToUUID)
+		if err != nil {
+			logx.Errorf("failed to get (to)user %e", err)
+			return err
+		}
+
+		msg = helper.ConvertSocketMessageToMessage(fromUserInfo.Id, toUserInfo.Id, message)
+
+	case variable.MESSAGE_TYPE_GROUPCHAT:
+		toGroupInfo, err = svcCtx.Uow.GroupRepo().FindOneByUUID(ctx, message.ToUUID)
+		if err != nil {
+			logx.Errorf("failed to get (to)group %e", err)
+			return err
+		}
+		msg = helper.ConvertSocketMessageToMessage(fromUserInfo.Id, toGroupInfo.Id, message)
+	default:
+		return fmt.Errorf("message type not support")
+	}
+
+	// //TODO : Save Message into db
+	_, createErr := svcCtx.Uow.MessageRepo().CreateOne(context.Background(), *msg)
+	if createErr != nil {
+		logx.Errorf("faild to save message : ", createErr)
+		return createErr
+	}
+	return nil
 }
 
 func (s *SocketServer) sendAcknowledgement(seqID string, toUUID string) {
@@ -332,7 +376,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 				clients := session.GetSessionClients()
 				sessionProducersList := make([]types.SFUProducerUserInfo, 0)
 
-				currentUser, err := c.SvcCtx.DAO.FindOneUserByUUID(ctx, userId)
+				currentUser, err := c.SvcCtx.Uow.UserRepo().FindOneUserByUUID(ctx, userId)
 				if err != nil {
 					logx.Error("Get User Info err : ", err)
 					break
@@ -340,14 +384,14 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 
 				if isNewRoom {
 					logx.Info("Sending a new session message.")
-					group, err := c.SvcCtx.DAO.FindOneGroupByUUID(ctx, session.SessionId)
+					group, err := c.SvcCtx.Uow.GroupRepo().FindOneByUUID(ctx, session.SessionId)
 					if err != nil {
 						logx.Error(err.Error())
 						return
 					}
 
 					//TODO: Get All Group Members
-					members, err := c.SvcCtx.DAO.FindOneGroupMembers(ctx, group.Id)
+					members, err := c.SvcCtx.Uow.UserGroupRepo().GetGroupMemberList(ctx, group.Id)
 					if err != nil {
 						logx.Error(err.Error())
 						return
@@ -404,7 +448,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 						logx.Info("Getting user info")
 						//TODO: Get Current client info
 						ctx := context.Background()
-						producerInfo, err := curClient.SvcCtx.DAO.FindOneUserByUUID(ctx, clientId)
+						producerInfo, err := curClient.SvcCtx.Uow.UserRepo().FindOneUserByUUID(ctx, clientId)
 						if err != nil {
 							logx.Error("Get User Info err : ", err)
 							continue
@@ -733,20 +777,20 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 			s.sessionManager.RemoveOneSession(session.SessionId)
 			ctx := context.Background()
 
-			currentUser, err := c.SvcCtx.DAO.FindOneUserByUUID(ctx, userId)
+			currentUser, err := c.SvcCtx.Uow.UserRepo().FindOneUserByUUID(ctx, userId)
 			if err != nil {
 				logx.Error("Get User Info err : ", err)
 				break
 			}
 
-			group, err := c.SvcCtx.DAO.FindOneGroupByUUID(ctx, session.SessionId)
+			group, err := c.SvcCtx.Uow.GroupRepo().FindOneByUUID(ctx, session.SessionId)
 			if err != nil {
 				logx.Error(err.Error())
 				break
 			}
 
 			//TODO: Get All Group Members
-			members, err := c.SvcCtx.DAO.FindOneGroupMembers(ctx, group.Id)
+			members, err := c.SvcCtx.Uow.UserGroupRepo().GetGroupMemberList(ctx, group.Id)
 			if err != nil {
 				logx.Error(err.Error())
 				break

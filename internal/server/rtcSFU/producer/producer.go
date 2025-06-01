@@ -2,10 +2,11 @@ package producer
 
 import (
 	"errors"
+	"sync"
+
 	"github.com/pion/webrtc/v3"
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
-	"sync"
 )
 
 type Producer struct {
@@ -50,10 +51,10 @@ func (p *Producer) NewConnection(
 	//	}
 	//}
 
-	if err != nil {
-		logx.Error(err)
-		return err
-	}
+	// if err != nil {
+	// 	logx.Error(err)
+	// 	return err
+	// }
 
 	p.conn = peerConn
 	return nil

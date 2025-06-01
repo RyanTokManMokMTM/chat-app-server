@@ -1,10 +1,25 @@
 package models
 
-import (
-	"context"
+type CreateMessageDTO struct {
+	FromUserId           uint
+	ToUserId             uint
+	Content              string
+	MessageType          uint
+	ContentType          string
+	Url                  string
+	FileName             string
+	FileSize             uint
+	ContentAvailableTime uint
+	ContentId            string
+	ContentUserName      string
+	ContentUserAvatar    string
+	ContentUserUUID      string
+}
 
-	"gorm.io/gorm"
-)
+type UpdateMessageDTO struct {
+	Content              string
+	ContentAvailableTime uint
+}
 
 type MessageType uint
 
@@ -45,7 +60,7 @@ type Message struct {
 	ContentUserName      string `gorm:"comment:'reply content belong to which user name'"`
 	ContentUserAvatar    string `gorm:"comment:'reply content belong to which user avatar'"`
 	ContentUserUUID      string `gorm:"comment:'reply content belong to which user uuid'"`
-	CommonField
+	Base
 }
 
 //func (m *Message) BeforeCreate(tx *gorm.DB) error {
@@ -55,49 +70,4 @@ type Message struct {
 
 func (m *Message) TableName() string {
 	return "messages"
-}
-
-func (m *Message) InsertOne(ctx context.Context, db *gorm.DB) error {
-	return db.WithContext(ctx).Debug().Create(&m).Error
-}
-
-func (m *Message) FindOne(ctx context.Context, db *gorm.DB) error {
-	return db.WithContext(ctx).Debug().First(&m).Error
-}
-
-func (m *Message) DeleteOne(ctx context.Context, db *gorm.DB) error {
-	return db.WithContext(ctx).Debug().Delete(&m).Error
-}
-
-func (m *Message) CountMessage(ctx context.Context, db *gorm.DB) (int64, error) {
-	var count int64 = 0
-	if err := db.WithContext(ctx).Model(&m).
-		Where("message_type = ? AND (from_user_id in (?,?) or to_user_id in (?,?))", m.MessageType, m.FromUserId, m.ToUserId, m.FromUserId, m.ToUserId).
-		Debug().Count(&count).Error; err != nil {
-		return 0, err
-	}
-	return count, nil
-}
-
-func (m *Message) GetMessages(ctx context.Context, db *gorm.DB, pageLimit int) ([]*Message, error) {
-	var message = make([]*Message, 0)
-	if err := db.WithContext(ctx).Debug().
-		Where("message_type = ? and (from_user_id in (?,?) or to_user_id in (?,?)) ", m.MessageType, m.FromUserId, m.ToUserId, m.ToUserId, m.FromUserId).
-		Limit(pageLimit).Order("created_at DESC").
-		Find(&message).Error; err != nil {
-		return nil, err
-	}
-	return message, nil
-}
-
-func (m *Message) GetMessagesByLatestId(ctx context.Context, db *gorm.DB, pageLimit int) ([]*Message, error) {
-	var message = make([]*Message, 0)
-
-	if err := db.WithContext(ctx).Debug().
-		Where("message_type = ? and (from_user_id in (?,?) or to_user_id in (?,?)) AND id < ?", m.MessageType, m.FromUserId, m.ToUserId, m.ToUserId, m.FromUserId, m.ID).
-		Limit(pageLimit).Order("created_at DESC").
-		Find(&message).Error; err != nil {
-		return nil, err
-	}
-	return message, nil
 }
