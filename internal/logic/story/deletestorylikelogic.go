@@ -3,10 +3,11 @@ package story
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -30,8 +31,8 @@ func NewDeleteStoryLikeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *D
 
 func (l *DeleteStoryLikeLogic) DeleteStoryLike(req *types.DeleteStoryLikeReq) (resp *types.DeleteStoryLikeResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -39,12 +40,12 @@ func (l *DeleteStoryLikeLogic) DeleteStoryLike(req *types.DeleteStoryLikeReq) (r
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	likes, err := l.svcCtx.DAO.FindOneUserStoryLike(l.ctx, userID, req.StoryId)
+	likes, err := l.svcCtx.Uow.UserStoryLikesRepo().FindOneByUserIdAndStoryId(l.ctx, userId, req.StoryId)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	err = l.svcCtx.DAO.DeleteOneUserStoryLike(l.ctx, likes.ID)
+	err = l.svcCtx.Uow.UserStoryLikesRepo().DeleteOne(l.ctx, likes.ID)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}

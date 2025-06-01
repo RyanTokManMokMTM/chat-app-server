@@ -8,10 +8,11 @@ import (
 )
 
 type IStickerResourcesRepo[T any] interface {
-	CreateOne(ctx context.Context, user *T) error
+	CreateOne(ctx context.Context, stickerResource T) error
 	FindOneByID(ctx context.Context, uuid string) (T, error)
 	FindOneByUuid(ctx context.Context, uuid string) (T, error)
-	UpdateOne(ctx context.Context, data *T) error
+
+	UpdateOne(ctx context.Context, stickerResource T) error
 	DeleteOne(ctx context.Context, uuid string) error
 	CreateMany(ctx context.Context, paths []string) ([]T, error)
 }
@@ -30,8 +31,8 @@ func NewStickerResourcesRepo(engine *gorm.DB) *StickerResourcesRepo {
 	}
 }
 
-func (stickerResourcesRepo *StickerResourcesRepo) CreateOne(ctx context.Context, data *models.StickerResource) error {
-	return stickerResourcesRepo.Create(ctx, data)
+func (stickerResourcesRepo *StickerResourcesRepo) CreateOne(ctx context.Context, stickerResource models.StickerResource) error {
+	return stickerResourcesRepo.Create(ctx, &stickerResource)
 }
 
 func (stickerResourcesRepo *StickerResourcesRepo) CreateMany(
@@ -55,8 +56,8 @@ func (stickerResourcesRepo *StickerResourcesRepo) FindOneByID(ctx context.Contex
 	return stickerResourcesRepo.Find(ctx, &models.StickerResource{Uuid: uuid})
 }
 
-func (stickerResourcesRepo *StickerResourcesRepo) UpdateOne(ctx context.Context, data *models.StickerResource) error {
-	return stickerResourcesRepo.Update(ctx, data)
+func (stickerResourcesRepo *StickerResourcesRepo) UpdateOne(ctx context.Context, stickerResource models.StickerResource) error {
+	return stickerResourcesRepo.Update(ctx, &stickerResource)
 }
 
 func (stickerResourcesRepo *StickerResourcesRepo) DeleteOne(ctx context.Context, uuid string) error {

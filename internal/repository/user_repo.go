@@ -20,7 +20,7 @@ const (
 type IUserRepo[T any] interface {
 	CreateOne(ctx context.Context, user T) (*T, error)
 	FindOne(ctx context.Context, user T) (*T, error)
-	UpdateOne(ctx context.Context, user T) error
+	UpdateOne(ctx context.Context, user T) (*T, error)
 	DeleteOne(ctx context.Context, uuid string) error
 
 	// TODO: Add other methods
@@ -33,12 +33,12 @@ type IUserRepo[T any] interface {
 	UpdateOneUserNickName(ctx context.Context, id uint, name string) error
 	FindUsersByNickName(ctx context.Context, query string) ([]T, error)
 	FindUsers(ctx context.Context, query string) ([]models.User, error)
-	CountUserStory(ctx context.Context, id uint) (int64, error)
-	CountUserGroup(ctx context.Context, id uint) int64
+	CountUserStorys(ctx context.Context, id uint) (int64, error)
+	CountUserGroups(ctx context.Context, id uint) int64
 	JoinGroup(ctx context.Context, group models.Group) error
 
 	// Sticker related methods
-	InsertOneSticker(ctx context.Context, userId uint, sticker *models.Sticker) error
+	InsertOneSticker(ctx context.Context, userId uint, sticker models.Sticker) error
 	FindOneSticker(ctx context.Context, userId uint, stickerUUID string) (*models.Sticker, error)
 	FindAllSticker(ctx context.Context, userId uint) ([]*models.Sticker, error)
 	DeleteOneSticker(ctx context.Context, userId uint, sticker *models.Sticker) error
@@ -73,8 +73,11 @@ func (userRepo *UserRepo) FindOne(ctx context.Context, user models.User) (*model
 	return &result, nil
 }
 
-func (userRepo *UserRepo) UpdateOne(ctx context.Context, user models.User) error {
-	return userRepo.Update(ctx, &user)
+func (userRepo *UserRepo) UpdateOne(ctx context.Context, user models.User) (*models.User, error) {
+	if err := userRepo.Update(ctx, &user); err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
 func (userRepo *UserRepo) DeleteOne(ctx context.Context, uuid string) error {
@@ -152,7 +155,7 @@ func (userRepo *UserRepo) FindUsers(ctx context.Context, query string) ([]models
 	return results, nil
 }
 
-func (userRepo *UserRepo) CountUserStory(ctx context.Context, id uint) (int64, error) {
+func (userRepo *UserRepo) CountUserStorys(ctx context.Context, id uint) (int64, error) {
 	now := time.Now().Unix()
 	availableTime := now - 86400 // 24 hours ago
 	var count int64
@@ -167,7 +170,7 @@ func (userRepo *UserRepo) CountUserStory(ctx context.Context, id uint) (int64, e
 	return count, nil
 }
 
-func (userRepo *UserRepo) CountUserGroup(ctx context.Context, id uint) int64 {
+func (userRepo *UserRepo) CountUserGroups(ctx context.Context, id uint) int64 {
 	var count int64
 	userRepo.engine.WithContext(ctx).Model(&models.UserGroup{}).
 		Where("user_id = ?", id).
@@ -183,12 +186,12 @@ func (userRepo *UserRepo) JoinGroup(ctx context.Context, group models.Group) err
 	return userRepo.engine.WithContext(ctx).Debug().Create(userGroup).Error
 }
 
-func (userRepo *UserRepo) InsertOneSticker(ctx context.Context, userId uint, sticker *models.Sticker) error {
+func (userRepo *UserRepo) InsertOneSticker(ctx context.Context, userId uint, sticker models.Sticker) error {
 	user := &models.User{Id: userId}
 	return userRepo.engine.WithContext(ctx).Debug().
 		Model(user).
 		Association("StickerGroups").
-		Append(sticker)
+		Append(&sticker)
 }
 
 func (userRepo *UserRepo) FindOneSticker(ctx context.Context, userId uint, stickerUUID string) (*models.Sticker, error) {

@@ -3,10 +3,11 @@ package friend
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -30,8 +31,8 @@ func NewDeleteFriendReqLogic(ctx context.Context, svcCtx *svc.ServiceContext) *D
 
 func (l *DeleteFriendReqLogic) DeleteFriendReq(req *types.DeleteFriendReq) (resp *types.DeleteFriendResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -39,7 +40,7 @@ func (l *DeleteFriendReqLogic) DeleteFriendReq(req *types.DeleteFriendReq) (resp
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, req.UserID)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, req.UserId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -48,7 +49,7 @@ func (l *DeleteFriendReqLogic) DeleteFriendReq(req *types.DeleteFriendReq) (resp
 	}
 
 	//TODO: Check is friend
-	_, err = l.svcCtx.DAO.FindOneFriend(l.ctx, userID, req.UserID)
+	_, err = l.svcCtx.Uow.UserFriendsRepo().FindOneByUserIdAndFriendId(l.ctx, userId, req.UserId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.NOT_YET_FRIEND)
@@ -57,7 +58,7 @@ func (l *DeleteFriendReqLogic) DeleteFriendReq(req *types.DeleteFriendReq) (resp
 	}
 
 	//TODO: Break the friend relationship
-	err = l.svcCtx.DAO.DeleteOneFriend(l.ctx, userID, req.UserID)
+	err = l.svcCtx.Uow.UserFriendsRepo().DeleteOneByUserIdAndFriendID(l.ctx, userId, req.UserId)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}

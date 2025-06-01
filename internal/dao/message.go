@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 	socket_message "github.com/ryantokmanmokmtm/chat-app-server/socket-proto"
@@ -30,8 +31,8 @@ func (d *DAO) DeleteOneMessage(ctx context.Context, messageID uint) error {
 func (d *DAO) GetMessage(ctx context.Context, from, to, messageType uint, pageLimit int, latestId uint) ([]*models.Message, error) {
 	msg := &models.Message{
 		ID:          latestId,
-		FromUserID:  from,
-		ToUserID:    to,
+		FromuserId:  from,
+		TouserId:    to,
 		MessageType: messageType,
 	}
 
@@ -77,8 +78,8 @@ func insertUserMessage(ctx context.Context, message *socket_message.Message, eng
 
 	return &models.Message{
 		Uuid:                 message.MessageID,
-		FromUserID:           fromUser.Id,
-		ToUserID:             toUser.Id,
+		FromuserId:           fromUser.Id,
+		TouserId:             toUser.Id,
 		Content:              message.Content,
 		MessageType:          uint(message.MessageType),
 		ContentType:          message.ContentType,
@@ -95,8 +96,8 @@ func insertUserMessage(ctx context.Context, message *socket_message.Message, eng
 }
 func (d *DAO) CountMessage(ctx context.Context, messageType, id uint) (int64, error) {
 	m := &models.Message{
-		FromUserID:  id,
-		ToUserID:    id,
+		FromuserId:  id,
+		TouserId:    id,
 		MessageType: messageType,
 	}
 
@@ -122,8 +123,8 @@ func insertOneGroupMessage(ctx context.Context, message *socket_message.Message,
 
 	return &models.Message{
 		Uuid:                 message.MessageID,
-		FromUserID:           fromUser.Id,
-		ToUserID:             groupInfo.Id,
+		FromuserId:           fromUser.Id,
+		TouserId:             groupInfo.Id,
 		Content:              message.Content,
 		ContentType:          message.ContentType,
 		MessageType:          uint(message.MessageType),

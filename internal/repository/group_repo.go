@@ -8,15 +8,17 @@ import (
 )
 
 type IGroupRepo[T any] interface {
-	CreateOne(ctx context.Context, user *T) error
-	FindOneByID(ctx context.Context, uuid string) (T, error)
-	UpdateOne(ctx context.Context, data *T) error
-	DeleteOne(ctx context.Context, uuid string) error
-
+	CreateOne(ctx context.Context, group T) (*T, error)
+	FindOneById(ctx context.Context, id uint) (*T, error)
 	FindOneByUUID(ctx context.Context, uuid string) (*T, error)
+	FindOneByGroupIdAndUserId(ctx context.Context, groupId, userId uint) (*T, error)
+	UpdateOne(ctx context.Context, group T) error
+	DeleteOne(ctx context.Context, uuid string) error
+	DeleteOneById(ctx context.Context, id uint) error
+
 	UpdateOneByNameAndDesc(ctx context.Context, id uint, name, desc string) error
 	UpdateOneAvatar(ctx context.Context, id uint, avatarPath string) error
-	FindOneByQuery(ctx context.Context, db *gorm.DB, query string) ([]*models.Group, error)
+	FindOneByQuery(ctx context.Context, query string) ([]*models.Group, error)
 }
 
 var _ IGroupRepo[models.Group] = (*GroupRepo)(nil)
@@ -33,31 +35,49 @@ func NewGroupRepo(engine *gorm.DB) IGroupRepo[models.Group] {
 	}
 }
 
-func (groupRepo *GroupRepo) CreateOne(ctx context.Context, data *models.Group) error {
-	return groupRepo.Create(ctx, data)
+func (groupRepo *GroupRepo) CreateOne(ctx context.Context, group models.Group) (*models.Group, error) {
+	if err := groupRepo.Create(ctx, &group); err != nil {
+		return nil, err
+	}
+	return &group, nil
 }
 
-func (groupRepo *GroupRepo) FindOneByID(ctx context.Context, uuid string) (models.Group, error) {
-	return groupRepo.Find(ctx, &models.Group{Uuid: uuid})
+func (groupRepo *GroupRepo) FindOneById(ctx context.Context, id uint) (*models.Group, error) {
+	result, err := groupRepo.Find(ctx, &models.Group{Id: id})
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
-func (groupRepo *GroupRepo) UpdateOne(ctx context.Context, data *models.Group) error {
-	return groupRepo.Update(ctx, data)
+func (groupRepo *GroupRepo) FindOneByUUID(ctx context.Context, uuid string) (*models.Group, error) {
+	result, err := groupRepo.Find(ctx, &models.Group{Uuid: uuid})
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (groupRepo *GroupRepo) UpdateOne(ctx context.Context, group models.Group) error {
+	return groupRepo.Update(ctx, &group)
 }
 
 func (groupRepo *GroupRepo) DeleteOne(ctx context.Context, uuid string) error {
 	return groupRepo.Delete(ctx, &models.Group{Uuid: uuid})
 }
 
+func (groupRepo *GroupRepo) DeleteOneById(ctx context.Context, id uint) error {
+	return groupRepo.Delete(ctx, &models.Group{Id: id})
+}
+
 // Other
 
 func (groupRepo *GroupRepo) FindOneByUUID(ctx context.Context, uuid string) (*models.Group, error) {
-	result := new(models.Group)
-	err := groupRepo.engine.WithContext(ctx).Where("uuid = ?", uuid).Preload("LeadInfo").First(result).Error
+	result, err := groupRepo.Find(ctx, &models.Group{Uuid: uuid})
 	if err != nil {
 		return nil, err
 	}
-	return result, nil
+	return &result, nil
 }
 
 func (groupRepo *GroupRepo) UpdateOneByNameAndDesc(ctx context.Context, id uint, name, desc string) error {
@@ -80,7 +100,7 @@ func (groupRepo *GroupRepo) UpdateOneAvatar(ctx context.Context, id uint, avatar
 	return groupRepo.engine.WithContext(ctx).Debug().Model(group).Where("id = ?", group.Id).Update("GroupAvatar", group.GroupAvatar).Error
 }
 
-func (groupRepo *GroupRepo) FindOneByQuery(ctx context.Context, db *gorm.DB, query string) ([]*models.Group, error) {
+func (groupRepo *GroupRepo) FindOneByQuery(ctx context.Context, query string) ([]*models.Group, error) {
 	var groups []*models.Group
 	if err := groupRepo.
 		engine.
@@ -91,4 +111,13 @@ func (groupRepo *GroupRepo) FindOneByQuery(ctx context.Context, db *gorm.DB, que
 		return nil, err
 	}
 	return groups, nil
+}
+
+func (groupRepo *GroupRepo) FindOneByGroupIdAndUserId(ctx context.Context, groupId, userId uint) (*models.Group, error) {
+	var group models.Group
+	err := groupRepo.engine.WithContext(ctx).Debug().Where("group_id = ? AND user_id = ?", groupId, userId).First(&group).Error
+	if err != nil {
+		return nil, err
+	}
+	return &group, nil
 }

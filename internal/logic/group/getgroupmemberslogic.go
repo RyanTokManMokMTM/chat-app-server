@@ -3,11 +3,12 @@ package group
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/pagerx"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -31,8 +32,8 @@ func NewGetGroupMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 
 func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GetGroupMembersReq) (resp *types.GetGroupMembersResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -40,7 +41,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GetGroupMembersReq) (r
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	_, err = l.svcCtx.DAO.FindOneGroup(l.ctx, req.GroupID)
+	_, err = l.svcCtx.Uow.GroupRepo().FindOneById(l.ctx, req.GroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.GROUP_NOT_EXIST)
@@ -48,7 +49,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GetGroupMembersReq) (r
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	total, err := l.svcCtx.DAO.CountGroupMembers(l.ctx, req.GroupID)
+	total, err := l.svcCtx.Uow.UserGroupRepo().CountGroupMembers(l.ctx, req.GroupID)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -57,7 +58,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GetGroupMembersReq) (r
 	pageSize := pagerx.GetTotalPageByPageSize(uint(total), pageLimit)
 	pageOffset := pagerx.PageOffset(pageSize, req.Page)
 
-	members, err := l.svcCtx.DAO.GetGroupMembers(l.ctx, req.GroupID, int(pageOffset), int(pageLimit))
+	members, err := l.svcCtx.Uow.UserGroupRepo().GetGroupMemberListByPage(l.ctx, req.GroupID, int(pageOffset), int(pageLimit))
 
 	var membersList = make([]types.GroupMemberInfo, 0)
 	for _, mem := range members {

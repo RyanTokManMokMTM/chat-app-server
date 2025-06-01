@@ -98,8 +98,8 @@ type (
         Result FullGroupInfo `json:"result"`
     }
 
-    CountUserGroupReq{}
-    CountUserGroupResp{
+    CountUserGroupsReq{}
+    CountUserGroupsResp{
         Code uint `json:"code"`
         Total uint `json:"total"`
     }
@@ -201,6 +201,6 @@ service  ChatApp {
     @doc(
         summary : "Count user group"
     )
-    @handler CountUserGroup
-    get /group/count(CountUserGroupReq) returns (CountUserGroupResp)
+    @handler CountUserGroups
+    get /group/count(CountUserGroupsReq) returns (CountUserGroupsResp)
 }

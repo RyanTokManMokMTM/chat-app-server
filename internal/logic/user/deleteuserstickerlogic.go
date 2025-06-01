@@ -31,8 +31,8 @@ func NewDeleteUserStickerLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 
 func (l *DeleteUserStickerLogic) DeleteUserSticker(req *types.DeleteStickerReq) (resp *types.DeleteStickerResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -40,7 +40,7 @@ func (l *DeleteUserStickerLogic) DeleteUserSticker(req *types.DeleteStickerReq) 
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	sticker, err := l.svcCtx.Uow.UserRepo().FindOneSticker(l.ctx, userID, req.StickerUUID)
+	sticker, err := l.svcCtx.Uow.UserRepo().FindOneSticker(l.ctx, userId, req.StickerUUID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.STICKER_NOT_EXIST)
@@ -48,7 +48,7 @@ func (l *DeleteUserStickerLogic) DeleteUserSticker(req *types.DeleteStickerReq) 
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	if err := l.svcCtx.Uow.UserRepo().DeleteOneSticker(l.ctx, userID, sticker); err != nil {
+	if err := l.svcCtx.Uow.UserRepo().DeleteOneSticker(l.ctx, userId, sticker); err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 

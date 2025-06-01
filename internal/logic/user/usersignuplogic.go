@@ -60,7 +60,7 @@ func (l *UserSignUpLogic) UserSignUp(req *types.SignUpReq) (resp *types.SignUpRe
 	now := time.Now().Unix()
 	exp := now + l.svcCtx.Config.Auth.AccessExpire
 	payLoad := map[string]interface{}{
-		ctxtool.CTXJWTUserID: u.Id,
+		ctxtool.CTXJWTUserId: u.Id,
 	}
 
 	token, err := jwtx.GetToken(now, exp, l.svcCtx.Config.Auth.AccessSecret, payLoad)

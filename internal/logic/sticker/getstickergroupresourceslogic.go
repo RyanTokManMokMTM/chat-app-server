@@ -3,9 +3,10 @@ package sticker
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -29,7 +30,7 @@ func NewGetStickerGroupResourcesLogic(ctx context.Context, svcCtx *svc.ServiceCo
 
 func (l *GetStickerGroupResourcesLogic) GetStickerGroupResources(req *types.GetStickerResourcesReq) (resp *types.GetStickerResourcesResp, err error) {
 	// todo: add your logic here and delete this line
-	sticker, err := l.svcCtx.DAO.FindOneStickerGroupByStickerUUID(l.ctx, req.StickerGroupUUID)
+	sticker, err := l.svcCtx.Uow.StickerRepo().FindOneByUUID(l.ctx, req.StickerGroupUUID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.STICKER_NOT_EXIST)

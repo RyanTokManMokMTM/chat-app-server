@@ -10,14 +10,14 @@ info(
 
 type (
     AddFriendReq {
-        userID uint `json:"user_id"`
+        userId uint `json:"user_id"`
     }
     AddFriendResp {
         Code uint `json:"code"`
     }
 
     DeleteFriendReq {
-        userID uint `json:"user_id"`
+        userId uint `json:"user_id"`
     }
     DeleteFriendResp {
         Code uint `json:"code"`

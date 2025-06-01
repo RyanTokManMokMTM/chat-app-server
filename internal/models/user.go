@@ -83,7 +83,7 @@ func (u *User) TableName() string {
 // 	return results, nil
 // }
 
-// func (u *User) CountUserStory(db *gorm.DB, ctx context.Context) (int64, error) {
+// func (u *User) CountUserStorys(db *gorm.DB, ctx context.Context) (int64, error) {
 // 	now := time.Now().Unix()
 // 	availableTime := now - 86400
 // 	if err := db.WithContext(ctx).Debug().Preload("Stories", "created_at BETWEEN FROM_UINXTIME(?) AND FROM_UNIXTIME(?)", availableTime, now).Where("id = ?", u.Id).First(&u).Error; err != nil {
@@ -93,7 +93,7 @@ func (u *User) TableName() string {
 // 	return int64(len(u.Stories)), nil
 // }
 
-// func (u *User) CountUserGroup(db *gorm.DB, ctx context.Context) int64 {
+// func (u *User) CountUserGroups(db *gorm.DB, ctx context.Context) int64 {
 // 	count := db.WithContext(ctx).Model(&u).Association("Groups").Count()
 // 	return count
 // }

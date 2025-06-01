@@ -5,6 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+	"sync"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/pion/webrtc/v3"
@@ -20,10 +25,6 @@ import (
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/protobuf/encoding/protojson"
-	"log"
-	"net/http"
-	"sync"
-	"time"
 )
 
 var Upgrader = websocket.Upgrader{
@@ -385,7 +386,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 
 				time.Sleep(2 * time.Second) //waiting for 2 sec to received all the track from producer.
 				currentUserInfo := types.SFUProducerUserInfo{
-					ProducerUserId:     currentUser.Uuid,
+					ProduceruserId:     currentUser.Uuid,
 					ProducerUserName:   currentUser.NickName,
 					ProducerUserAvatar: currentUser.Avatar,
 				}
@@ -410,7 +411,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 						}
 
 						producerUserInfo := types.SFUProducerUserInfo{
-							ProducerUserId:     producerInfo.Uuid,
+							ProduceruserId:     producerInfo.Uuid,
 							ProducerUserName:   producerInfo.NickName,
 							ProducerUserAvatar: producerInfo.Avatar,
 						}
@@ -420,7 +421,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 
 						resp := types.SfuNewProducerResp{
 							SessionId:    session.SessionId,
-							ProducerId:   currentUserInfo.ProducerUserId,
+							ProducerId:   currentUserInfo.ProduceruserId,
 							ProducerInfo: currentUserInfo,
 						}
 
@@ -598,7 +599,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 		fallthrough
 	case variable.SFU_EVENT_PRODUCER_ICE:
 		//Add to ice candindate info into the peer connection that data is provided
-		//MARK: Get All producer -> return a list of producerUserId
+		//MARK: Get All producer -> return a list of produceruserId
 		iceCandidateReq := types.SFUSendIceCandidateReq{}
 		jsonString := msg.Content //Can be a json string?
 		iceCandidateType := types.IceCandidateType{}

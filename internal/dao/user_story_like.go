@@ -2,21 +2,22 @@ package dao
 
 import (
 	"context"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 )
 
-func (d *DAO) InsertOneUserStoryLike(ctx context.Context, userID, storyId uint) error {
+func (d *DAO) InsertOneUserStoryLike(ctx context.Context, userId, storyId uint) error {
 	model := &models.UserStoryLikes{
-		UserId:  userID,
+		userId:  userId,
 		StoryId: storyId,
 	}
 
 	return model.InsertOne(ctx, d.engine)
 }
 
-func (d *DAO) FindOneUserStoryLike(ctx context.Context, userID, storyId uint) (*models.UserStoryLikes, error) {
+func (d *DAO) FindOneUserStoryLike(ctx context.Context, userId, storyId uint) (*models.UserStoryLikes, error) {
 	model := &models.UserStoryLikes{
-		UserId:  userID,
+		userId:  userId,
 		StoryId: storyId,
 	}
 

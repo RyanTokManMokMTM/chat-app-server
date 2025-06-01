@@ -15,9 +15,9 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func CountUserGroupHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func CountUserGroupsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.CountUserGroupReq
+		var req types.CountUserGroupsReq
 		if err := httpx.Parse(r, &req); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
@@ -36,8 +36,8 @@ func CountUserGroupHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := group.NewCountUserGroupLogic(r.Context(), svcCtx)
-		resp, err := l.CountUserGroup(&req)
+		l := group.NewCountUserGroupsLogic(r.Context(), svcCtx)
+		resp, err := l.CountUserGroups(&req)
 		if err != nil {
 			//convert to customError
 			if e, ok := err.(*errx.CustomError); ok {

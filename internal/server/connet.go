@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+
 	"github.com/gorilla/websocket"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
@@ -10,10 +11,11 @@ import (
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/socketServer"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/serverTypes"
 
-	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
-	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
 	"time"
+
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request, wsServer serverTypes.ISocketServer) {
@@ -24,10 +26,10 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 		w.Write([]byte("Websocket upgrade error"))
 		return
 	}
-	//TODO : Get UserID from Context
-	userID := ctxtool.GetUserIDFromCTX(r.Context())
+	//TODO : Get userId from Context
+	userId := ctxtool.GetUserIDFromCTX(r.Context())
 	//TODO : Find User Info from DB
-	u, err := svcCtx.DAO.FindOneUser(r.Context(), userID)
+	u, err := svcCtx.Uow.UserRepo().FindOneUserByID(r.Context(), userId)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(errx.NewCustomErrCode(errx.USER_NOT_EXIST).GetMessage()))

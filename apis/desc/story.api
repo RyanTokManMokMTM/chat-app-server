@@ -16,7 +16,7 @@ type (
     }
 
     GetUserStoryReq {
-        userID uint `path:"user_id"`
+        userId uint `path:"user_id"`
         StoryCreatedTime uint `form:"story_created_time,default=0"`
     }
     GetUserStoryResp {
@@ -107,7 +107,7 @@ type (
 
 type (
     FriendStroy {
-        UserID uint `json:"id"`
+        userId uint `json:"id"`
         Uuid string `json:"uuid"`
         UserName string `json:"name"`
         UserAvatar string `json:"avatar"`
@@ -116,7 +116,7 @@ type (
     }
 
     StorySeenInfo {
-        UserID uint `json:"id"`
+        userId uint `json:"id"`
         Uuid string `json:"uuid"`
         UserName string `json:"name"`
         UserAvatar string `json:"avatar"`
@@ -146,7 +146,7 @@ service ChatApp{
     @doc(
         summary : "Get owner stories"
     )
-    @handler GetUserStoriesByUserId
+    @handler GetUserStoriesByuserId
     get /stories/:user_id(GetUserStoryReq) returns (GetUserStoryResp)
 
     @doc(

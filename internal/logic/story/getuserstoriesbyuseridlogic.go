@@ -3,11 +3,12 @@ package story
 import (
 	"context"
 	"errors"
+	"net/http"
+	"time"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"gorm.io/gorm"
-	"net/http"
-	"time"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -15,24 +16,24 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type GetUserStoriesByUserIdLogic struct {
+type GetUserStoriesByuserIdLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewGetUserStoriesByUserIdLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserStoriesByUserIdLogic {
-	return &GetUserStoriesByUserIdLogic{
+func NewGetUserStoriesByuserIdLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserStoriesByuserIdLogic {
+	return &GetUserStoriesByuserIdLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *GetUserStoriesByUserIdLogic) GetUserStoriesByUserId(req *types.GetUserStoryReq) (resp *types.GetUserStoryResp, err error) {
+func (l *GetUserStoriesByuserIdLogic) GetUserStoriesByuserId(req *types.GetUserStoryReq) (resp *types.GetUserStoryResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -45,13 +46,13 @@ func (l *GetUserStoriesByUserIdLogic) GetUserStoriesByUserId(req *types.GetUserS
 		storyTimeStamp = time.Now().Unix()
 	}
 
-	storys, err := l.svcCtx.DAO.GetUserStoriesByTimeStamp(l.ctx, req.UserID, storyTimeStamp)
+	storys, err := l.svcCtx.Uow.StoryRepo().FindAllUserStoriesByTimeStamp(l.ctx, req.UserId, storyTimeStamp)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
 	var lastStoryID uint = 0
-	seenStory, err := l.svcCtx.DAO.FindOneLatestUserStorySeen(l.ctx, userID, req.UserID)
+	seenStory, err := l.svcCtx.Uow.UserStorySeenRepo().FindLatestOne(l.ctx, userId, req.UserId)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -64,7 +65,7 @@ func (l *GetUserStoriesByUserIdLogic) GetUserStoriesByUserId(req *types.GetUserS
 	for _, s := range storys {
 		storiesList = append(storiesList, types.StoryInfo{
 			StoryID:       s.Id,
-			StoryUUID:     s.Uuid.String(),
+			StoryUUID:     s.Uuid,
 			StoryMediaURL: s.StoryMediaPath,
 		})
 	}

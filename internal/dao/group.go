@@ -2,13 +2,14 @@ package dao
 
 import (
 	"context"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 )
 
-func (d *DAO) InsertOneGroup(ctx context.Context, groupName, avatar string, userID uint) (*models.Group, error) {
+func (d *DAO) InsertOneGroup(ctx context.Context, groupName, avatar string, userId uint) (*models.Group, error) {
 	g := &models.Group{
 		GroupName:   groupName,
-		GroupLead:   userID,
+		GroupLead:   userId,
 		GroupAvatar: avatar, // leave it empty now
 	}
 

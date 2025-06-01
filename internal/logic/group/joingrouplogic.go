@@ -4,13 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/handler/ws"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -31,15 +33,15 @@ func NewJoinGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *JoinGro
 
 func (l *JoinGroupLogic) JoinGroup(req *types.JoinGroupReq) (resp *types.JoinGroupResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	u, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	u, err := l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
 		}
 	}
 
-	g, err := l.svcCtx.DAO.FindOneGroup(l.ctx, req.GroupID)
+	g, err := l.svcCtx.Uow.GroupRepo().FindOneById(l.ctx, req.GroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.GROUP_NOT_EXIST)
@@ -47,7 +49,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.JoinGroupReq) (resp *types.JoinGro
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	member, err := l.svcCtx.DAO.FindOneGroupMember(l.ctx, req.GroupID, userID)
+	member, err := l.svcCtx.Uow.UserGroupRepo().FindOneByGroupIdAndUserId(l.ctx, req.GroupID, userId)
 	if member != nil {
 		return nil, errx.NewCustomErrCode(errx.ALREADY_IN_GROUP)
 	}
@@ -56,7 +58,10 @@ func (l *JoinGroupLogic) JoinGroup(req *types.JoinGroupReq) (resp *types.JoinGro
 	}
 
 	//TODO: Add it to group
-	err = l.svcCtx.DAO.InsertOneGroupMember(l.ctx, req.GroupID, userID)
+	_, err = l.svcCtx.Uow.UserGroupRepo().CreateOne(l.ctx, models.UserGroup{
+		GroupId: req.GroupID,
+		UserId:  userId,
+	})
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}

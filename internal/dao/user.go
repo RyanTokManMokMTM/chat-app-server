@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 )
 
@@ -85,37 +86,37 @@ func (d *DAO) FindUsers(ctx context.Context, query string) ([]*models.User, erro
 	return (&models.User{}).FindUsers(d.engine, ctx, query)
 }
 
-func (d *DAO) CountUserAvailableStory(ctx context.Context, userID uint) (int64, error) {
+func (d *DAO) CountUserAvailableStory(ctx context.Context, userId uint) (int64, error) {
 	u := &models.User{
-		Id: userID,
+		Id: userId,
 	}
-	return u.CountUserStory(d.engine, ctx)
+	return u.CountUserStorys(d.engine, ctx)
 }
 
-func (d *DAO) InsertOneStickerToUser(ctx context.Context, userID uint, sticker *models.Sticker) error {
+func (d *DAO) InsertOneStickerToUser(ctx context.Context, userId uint, sticker *models.Sticker) error {
 	u := &models.User{
-		Id: userID,
+		Id: userId,
 	}
 
 	return u.InsertOneSticker(d.engine, ctx, sticker)
 }
-func (d *DAO) FindOneStickerFromUser(ctx context.Context, userID uint, stickerUUID string) (*models.Sticker, error) {
+func (d *DAO) FindOneStickerFromUser(ctx context.Context, userId uint, stickerUUID string) (*models.Sticker, error) {
 	u := &models.User{
-		Id: userID,
+		Id: userId,
 	}
 	return u.FindOneSticker(d.engine, ctx, stickerUUID)
 }
-func (d *DAO) DeleteOneStickerFromUser(ctx context.Context, userID uint, sticker *models.Sticker) error {
+func (d *DAO) DeleteOneStickerFromUser(ctx context.Context, userId uint, sticker *models.Sticker) error {
 	u := &models.User{
-		Id: userID,
+		Id: userId,
 	}
 
 	return u.DeleteOneSticker(d.engine, ctx, sticker)
 }
 
-func (d *DAO) FindAllSticker(ctx context.Context, userID uint) ([]*models.Sticker, error) {
+func (d *DAO) FindAllSticker(ctx context.Context, userId uint) ([]*models.Sticker, error) {
 	u := &models.User{
-		Id: userID,
+		Id: userId,
 	}
 	return u.FindAllSticker(d.engine, ctx)
 }

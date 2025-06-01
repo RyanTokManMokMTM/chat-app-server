@@ -3,11 +3,13 @@ package story
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"gorm.io/gorm"
-	"net/http"
 
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 
@@ -30,8 +32,8 @@ func NewUpdateStorySeenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *U
 
 func (l *UpdateStorySeenLogic) UpdateStorySeen(req *types.UpdateStorySeenReq) (resp *types.UpdateStorySeenResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -39,13 +41,18 @@ func (l *UpdateStorySeenLogic) UpdateStorySeen(req *types.UpdateStorySeenReq) (r
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	_, err = l.svcCtx.DAO.FindOneUserStorySeen(l.ctx, userID, req.FriendId, req.StoryId)
+	_, err = l.svcCtx.Uow.UserStorySeenRepo().FindOneByUserIdAndFriendIdAndStroyId(l.ctx, userId, req.FriendId, req.StoryId)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		if err := l.svcCtx.DAO.InsertOneUserStorySeen(l.ctx, userID, req.FriendId, req.StoryId); err != nil {
+		_, err := l.svcCtx.Uow.UserStorySeenRepo().CreateOne(l.ctx, models.UserStorySeen{
+			UserId:   userId,
+			FriendId: req.FriendId,
+			StoryId:  req.StoryId,
+		})
+		if err != nil {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
 	}

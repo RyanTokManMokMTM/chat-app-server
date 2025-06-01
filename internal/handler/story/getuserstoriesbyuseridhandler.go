@@ -36,8 +36,8 @@ func GetUserStoriesByUserIdHandler(svcCtx *svc.ServiceContext) http.HandlerFunc 
 			return
 		}
 
-		l := story.NewGetUserStoriesByUserIdLogic(r.Context(), svcCtx)
-		resp, err := l.GetUserStoriesByUserId(&req)
+		l := story.NewGetUserStoriesByuserIdLogic(r.Context(), svcCtx)
+		resp, err := l.GetUserStoriesByuserId(&req)
 		if err != nil {
 			//convert to customError
 			if e, ok := err.(*errx.CustomError); ok {

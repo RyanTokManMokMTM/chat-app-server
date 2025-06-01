@@ -2,8 +2,9 @@ package sticker
 
 import (
 	"context"
-	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"net/http"
+
+	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -25,9 +26,10 @@ func NewGetStickerGroupListLogic(ctx context.Context, svcCtx *svc.ServiceContext
 	}
 }
 
+// FIXME: added page info
 func (l *GetStickerGroupListLogic) GetStickerGroupList(req *types.GetStickerListReq) (resp *types.GetStickerListResp, err error) {
 	// todo: add your logic here and delete this line
-	list, err := l.svcCtx.DAO.GetStickerGroupList(l.ctx)
+	list, err := l.svcCtx.Uow.StickerRepo().FindAll(l.ctx)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}

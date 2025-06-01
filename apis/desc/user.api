@@ -32,7 +32,7 @@ type (
     }
 
     GetUserInfoReq {
-        UserID uint `form:"id,optional"`
+        userId uint `form:"id,optional"`
         UUID string `form:"uuid,optional"`
     }
 
@@ -47,7 +47,7 @@ type (
     }
 
     GetUserFriendProfileReq {
-        UserID uint `form:"id,optional"`
+        userId uint `form:"id,optional"`
         UUID string `form:"uuid,optional"`
     }
     GetUserFriendProfileResp {

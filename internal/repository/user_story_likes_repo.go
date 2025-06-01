@@ -8,9 +8,10 @@ import (
 )
 
 type IUserStoryLikesRepo[T any] interface {
-	CreateOne(ctx context.Context, user *T) error
+	CreateOne(ctx context.Context, storyLikes T) (*T, error)
 	FindOneByID(ctx context.Context, id uint) (T, error)
-	UpdateOne(ctx context.Context, data *T) error
+	FindOneByUserIdAndStoryId(ctx context.Context, userId, storyId uint) (*T, error)
+	UpdateOne(ctx context.Context, storyLikes T) error
 	DeleteOne(ctx context.Context, id uint) error
 
 	CountStoryLikes(ctx context.Context, storyId uint) (int64, error)
@@ -30,16 +31,34 @@ func NewUserStoryLikesRepo(engine *gorm.DB) *UserStoryLikesRepo {
 	}
 }
 
-func (userRepo *UserStoryLikesRepo) CreateOne(ctx context.Context, data *models.UserStoryLikes) error {
-	return userRepo.Create(ctx, data)
+func (userRepo *UserStoryLikesRepo) CreateOne(ctx context.Context, storyLikes models.UserStoryLikes) (*models.UserStoryLikes, error) {
+	if err := userRepo.Create(ctx, &storyLikes); err != nil {
+		return nil, err
+	}
+	return &storyLikes, nil
 }
 
-func (userRepo *UserStoryLikesRepo) FindOneByID(ctx context.Context, id uint) (models.UserStoryLikes, error) {
-	return userRepo.Find(ctx, &models.UserStoryLikes{ID: id})
+func (userRepo *UserStoryLikesRepo) FindOneByID(ctx context.Context, id uint) (*models.UserStoryLikes, error) {
+	result, err := userRepo.Find(ctx, &models.UserStoryLikes{ID: id})
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
-func (userRepo *UserStoryLikesRepo) UpdateOne(ctx context.Context, data *models.UserStoryLikes) error {
-	return userRepo.Update(ctx, data)
+func (userRepo *UserStoryLikesRepo) FindOneByUserIdAndStoryId(ctx context.Context, UserId, storyId uint) (*models.UserStoryLikes, error) {
+	result, err := userRepo.Find(ctx, &models.UserStoryLikes{
+		UserId:  UserId,
+		StoryId: storyId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (userRepo *UserStoryLikesRepo) UpdateOne(ctx context.Context, storyLikes models.UserStoryLikes) error {
+	return userRepo.Update(ctx, &storyLikes)
 }
 
 func (userRepo *UserStoryLikesRepo) DeleteOne(ctx context.Context, id uint) error {

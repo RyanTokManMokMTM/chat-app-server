@@ -3,11 +3,13 @@ package group
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"gorm.io/gorm"
-	"net/http"
 
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 
@@ -30,8 +32,8 @@ func NewUpdateGroupInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *U
 
 func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (resp *types.UpdateGroupInfoResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -39,7 +41,7 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	group, err := l.svcCtx.DAO.FindOneGroup(l.ctx, req.GroupID)
+	group, err := l.svcCtx.Uow.GroupRepo().FindOneById(l.ctx, req.GroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.GROUP_NOT_EXIST)
@@ -47,11 +49,14 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	if group.GroupLead != userID {
+	if group.GroupLead != userId {
 		return nil, errx.NewCustomErrCode(errx.NO_GROUP_AUTHORITY)
 	}
-
-	if err := l.svcCtx.DAO.UpdateOneGroup(l.ctx, group.Id, req.GroupName, req.GroupDesc); err != nil {
+	if err := l.svcCtx.Uow.GroupRepo().UpdateOne(l.ctx, models.Group{
+		Id:        group.Id,
+		GroupName: req.GroupName,
+		GroupDesc: req.GroupDesc,
+	}); err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 

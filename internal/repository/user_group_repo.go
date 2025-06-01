@@ -8,10 +8,13 @@ import (
 )
 
 type IUserGroupRepo[T any] interface {
-	CreateOne(ctx context.Context, user *T) error
-	FindOneByID(ctx context.Context, id uint) (T, error)
-	UpdateOne(ctx context.Context, data *T) error
+	CreateOne(ctx context.Context, userGroup T) (*T, error)
+	FindOneById(ctx context.Context, id uint) (*T, error)
+	FindOneByGroupIdAndUserId(ctx context.Context, groupId, userId uint) (*T, error)
+	UpdateOne(ctx context.Context, userGroup T) error
 	DeleteOne(ctx context.Context, id uint) error
+	DeleteOneByGroupIdAndUserId(ctx context.Context, groupId, userId uint) error
+	DeleteAll(ctx context.Context, groupId uint) error
 
 	GetGroupMemberList(ctx context.Context, groupId uint) ([]models.UserGroup, error)
 	GetGroupMemberListByPage(ctx context.Context, groupId uint, pageOffset, pageLimit int) ([]models.UserGroup, error)
@@ -33,24 +36,31 @@ func NewUserGroupRepo(engine *gorm.DB) *UserGroupRepo {
 	}
 }
 
-func (userGroupRepo *UserGroupRepo) CreateOne(ctx context.Context, data *models.UserGroup) error {
-	return userGroupRepo.Create(ctx, data)
+func (userGroupRepo *UserGroupRepo) CreateOne(ctx context.Context, userGroup models.UserGroup) (*models.UserGroup, error) {
+	if err := userGroupRepo.Create(ctx, &userGroup); err != nil {
+		return nil, err
+	}
+	return &userGroup, nil
 }
 
-func (userGroupRepo *UserGroupRepo) FindOneByID(ctx context.Context, id uint) (models.UserGroup, error) {
-	return userGroupRepo.Find(ctx, &models.UserGroup{ID: id})
+func (userGroupRepo *UserGroupRepo) FindOneById(ctx context.Context, id uint) (*models.UserGroup, error) {
+	result, err := userGroupRepo.Find(ctx, &models.UserGroup{ID: id})
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
-func (userGroupRepo *UserGroupRepo) UpdateOne(ctx context.Context, data *models.UserGroup) error {
-	return userGroupRepo.Update(ctx, data)
+func (userGroupRepo *UserGroupRepo) UpdateOne(ctx context.Context, userGroup models.UserGroup) error {
+	return userGroupRepo.Update(ctx, &userGroup)
 }
 
 func (userGroupRepo *UserGroupRepo) DeleteOne(ctx context.Context, id uint) error {
 	return userGroupRepo.Delete(ctx, &models.UserGroup{ID: id})
 }
 
-func (userGroupRepo *UserGroupRepo) DeleteAll(ctx context.Context, id uint) error {
-	return userGroupRepo.engine.WithContext(ctx).Debug().Where("group_id = ?", id).Delete(&models.UserGroup{}).Error
+func (userGroupRepo *UserGroupRepo) DeleteAll(ctx context.Context, groupId uint) error {
+	return userGroupRepo.engine.WithContext(ctx).Debug().Where("group_id = ?", groupId).Delete(&models.UserGroup{}).Error
 }
 
 func (userGroupRepo *UserGroupRepo) GetGroupMemberList(ctx context.Context, groupId uint) ([]models.UserGroup, error) {
@@ -98,4 +108,20 @@ func (userGroupRepo *UserGroupRepo) CountGroupMembers(ctx context.Context, group
 		return 0, err
 	}
 	return count, nil
+}
+
+func (userGroupRepo *UserGroupRepo) FindOneByGroupIdAndUserId(ctx context.Context, groupId, userId uint) (*models.UserGroup, error) {
+	var result models.UserGroup
+	if err := userGroupRepo.engine.WithContext(ctx).Debug().
+		Where("group_id = ? AND user_id = ?", groupId, userId).
+		First(&result).Error; err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (userGroupRepo *UserGroupRepo) DeleteOneByGroupIdAndUserId(ctx context.Context, groupId, userId uint) error {
+	return userGroupRepo.engine.WithContext(ctx).Debug().
+		Where("group_id = ? AND user_id = ?", groupId, userId).
+		Delete(&models.UserGroup{}).Error
 }

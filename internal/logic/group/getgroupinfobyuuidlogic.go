@@ -3,10 +3,11 @@ package group
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -30,8 +31,8 @@ func NewGetGroupInfoByUUIDLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUUIDReq) (resp *types.GetGroupInfoByUUIDResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -39,7 +40,7 @@ func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUU
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	group, err := l.svcCtx.DAO.FindOneGroupByUUID(l.ctx, req.UUID)
+	group, err := l.svcCtx.Uow.GroupRepo().FindOneByUUID(l.ctx, req.UUID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.GROUP_NOT_EXIST)
@@ -48,7 +49,7 @@ func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUU
 	}
 
 	isJoined := true
-	_, err = l.svcCtx.DAO.FindOneGroupMember(l.ctx, group.Id, userID)
+	_, err = l.svcCtx.Uow.UserGroupRepo().FindOneByGroupIdAndUserId(l.ctx, group.Id, userId)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
@@ -56,7 +57,7 @@ func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUU
 		isJoined = false
 	}
 
-	count, err := l.svcCtx.DAO.CountGroupMembers(l.ctx, group.Id)
+	count, err := l.svcCtx.Uow.UserGroupRepo().CountGroupMembers(l.ctx, group.Id)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -74,7 +75,7 @@ func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUU
 			},
 			Members:   uint(count),
 			IsJoined:  isJoined,
-			IsOwner:   group.GroupLead == userID,
+			IsOwner:   group.GroupLead == userId,
 			CreatedBy: group.LeadInfo.NickName,
 		},
 	}, nil

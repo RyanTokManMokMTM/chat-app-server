@@ -3,12 +3,13 @@ package story
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,8 +30,8 @@ func NewGetStoryInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetS
 
 func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *types.GetStoryInfoByIdResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -38,7 +39,7 @@ func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	story, err := l.svcCtx.DAO.FindOneStory(l.ctx, req.StoryID)
+	story, err := l.svcCtx.Uow.StoryRepo().FindOneByID(l.ctx, req.StoryID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.STORY_NOT_EXIST)
@@ -51,14 +52,14 @@ func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *
 
 	var isLiked = false
 	var seenUserList []types.StorySeenUserBasicInfo = nil
-	if story.UserId == userID {
-		count, err := l.svcCtx.DAO.CountStoryLikes(l.ctx, req.StoryID)
+	if story.UserId == userId {
+		count, err := l.svcCtx.Uow.UserStoryLikesRepo().CountStoryLikes(l.ctx, req.StoryID)
 		if err != nil {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
 		isLiked = count > 0
 
-		users, err := l.svcCtx.DAO.GetStorySeenUserList(l.ctx, req.StoryID, 3) // MARK: the latest 3 user
+		users, err := l.svcCtx.Uow.UserStorySeenRepo().GetStoryLikedUserSeen(l.ctx, req.StoryID, 3) // MARK: the latest 3 user
 		if err != nil {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
@@ -70,7 +71,7 @@ func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *
 			})
 		}
 	} else {
-		userLiked, err := l.svcCtx.DAO.FindOneUserStoryLike(l.ctx, userID, req.StoryID)
+		userLiked, err := l.svcCtx.Uow.UserStoryLikesRepo().FindOneByUserIdAndStoryId(l.ctx, userId, req.StoryID)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
@@ -85,7 +86,7 @@ func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *
 		Code: uint(http.StatusOK),
 		StoryInfo: types.StoryInfo{
 			StoryID:       story.Id,
-			StoryUUID:     story.Uuid.String(),
+			StoryUUID:     story.Uuid,
 			StoryMediaURL: story.StoryMediaPath,
 		},
 		IsLiked:       isLiked,

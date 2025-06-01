@@ -3,11 +3,12 @@ package group
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/pagerx"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -31,8 +32,8 @@ func NewGetUserGroupsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 
 func (l *GetUserGroupsLogic) GetUserGroups(req *types.GetUserGroupReq) (resp *types.GetUserGroupResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -40,13 +41,13 @@ func (l *GetUserGroupsLogic) GetUserGroups(req *types.GetUserGroupReq) (resp *ty
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	total := l.svcCtx.DAO.CountUserGroups(l.ctx, userID)
+	total := l.svcCtx.Uow.UserRepo().CountUserGroups(l.ctx, userId)
 	//
 	pageLimit := pagerx.GetLimit(req.Limit)
 	pageSize := pagerx.GetTotalPageByPageSize(uint(total), pageLimit)
 	pageOffset := pagerx.PageOffset(pageSize, req.Page)
 
-	groups, err := l.svcCtx.DAO.GetUserGroups(l.ctx, userID, int(pageOffset), int(pageLimit))
+	groups, err := l.svcCtx.Uow.UserGroupRepo().FindUserGroup(l.ctx, userId, int(pageOffset), int(pageLimit))
 	if err != nil {
 		logx.Infof(err.Error())
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())

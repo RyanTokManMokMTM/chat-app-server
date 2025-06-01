@@ -3,12 +3,14 @@ package story
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/uploadx"
 	"gorm.io/gorm"
-	"net/http"
 
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 
@@ -33,8 +35,8 @@ func NewAddStoryLogic(ctx context.Context, svcCtx *svc.ServiceContext, r *http.R
 
 func (l *AddStoryLogic) AddStory(req *types.AddStoryReq) (resp *types.AddStoryResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -50,7 +52,10 @@ func (l *AddStoryLogic) AddStory(req *types.AddStoryReq) (resp *types.AddStoryRe
 
 	mediaPath := "/" + path
 	logx.Info("media url " + mediaPath)
-	story, err := l.svcCtx.DAO.InsertOneStory(l.ctx, userID, mediaPath)
+	story, err := l.svcCtx.Uow.StoryRepo().CreateOne(l.ctx, models.StoryModel{
+		UserId:         userId,
+		StoryMediaPath: mediaPath,
+	})
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -59,7 +64,7 @@ func (l *AddStoryLogic) AddStory(req *types.AddStoryReq) (resp *types.AddStoryRe
 		Code: uint(http.StatusOK),
 		Info: types.StoryInfo{
 			StoryID:       story.Id,
-			StoryUUID:     story.Uuid.String(),
+			StoryUUID:     story.Uuid,
 			StoryMediaURL: story.StoryMediaPath,
 		},
 	}, nil

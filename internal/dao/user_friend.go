@@ -2,19 +2,20 @@ package dao
 
 import (
 	"context"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 )
 
-func (d *DAO) InsertOneFriend(ctx context.Context, userID, friendID uint) error {
+func (d *DAO) InsertOneFriend(ctx context.Context, userId, friendID uint) error {
 	uf := &models.UserFriend{
-		UserID:   userID,
+		userId:   userId,
 		FriendID: friendID,
 	}
 	return uf.InsertOne(ctx, d.engine)
 }
-func (d *DAO) FindOneFriend(ctx context.Context, userID, friendID uint) (*models.User, error) {
+func (d *DAO) FindOneFriend(ctx context.Context, userId, friendID uint) (*models.User, error) {
 	uf := &models.UserFriend{
-		UserID:   userID,
+		userId:   userId,
 		FriendID: friendID,
 	}
 	if err := uf.FindOne(ctx, d.engine); err != nil {
@@ -23,25 +24,25 @@ func (d *DAO) FindOneFriend(ctx context.Context, userID, friendID uint) (*models
 
 	return &uf.FriendInfo, nil
 }
-func (d *DAO) DeleteOneFriend(ctx context.Context, userID, friendID uint) error {
+func (d *DAO) DeleteOneFriend(ctx context.Context, userId, friendID uint) error {
 	uf := &models.UserFriend{
-		UserID:   userID,
+		userId:   userId,
 		FriendID: friendID,
 	}
 	return uf.DeleteOne(ctx, d.engine)
 }
 
-func (d *DAO) GetUserFriendListByPageSize(ctx context.Context, userID uint, pageOffset, PageLimit int) ([]*models.UserFriend, error) {
+func (d *DAO) GetUserFriendListByPageSize(ctx context.Context, userId uint, pageOffset, PageLimit int) ([]*models.UserFriend, error) {
 	uf := &models.UserFriend{
-		UserID: userID,
+		userId: userId,
 	}
 
 	return uf.GetFriendList(ctx, d.engine, pageOffset, PageLimit)
 }
 
-func (d *DAO) CountUserFriend(ctx context.Context, userID uint) (int64, error) {
+func (d *DAO) CountUserFriend(ctx context.Context, userId uint) (int64, error) {
 	uf := &models.UserFriend{
-		UserID: userID,
+		userId: userId,
 	}
 
 	return uf.CountUserFriends(ctx, d.engine)

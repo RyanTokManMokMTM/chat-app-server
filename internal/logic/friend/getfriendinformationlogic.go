@@ -3,10 +3,11 @@ package friend
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -30,8 +31,8 @@ func NewGetFriendInformationLogic(ctx context.Context, svcCtx *svc.ServiceContex
 
 func (l *GetFriendInformationLogic) GetFriendInformation(req *types.GetFriendInfoReq) (resp *types.GetFriendInfoResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -39,7 +40,7 @@ func (l *GetFriendInformationLogic) GetFriendInformation(req *types.GetFriendInf
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	friend, err := l.svcCtx.DAO.FindOneUserByUUID(l.ctx, req.Uuid)
+	friend, err := l.svcCtx.Uow.UserRepo().FindOneUserByUUID(l.ctx, req.Uuid)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)

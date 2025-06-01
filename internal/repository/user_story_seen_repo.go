@@ -8,12 +8,13 @@ import (
 )
 
 type IUserStorySeenRepo[T any] interface {
-	CreateOne(ctx context.Context, user *T) error
-	FindOneByID(ctx context.Context, id uint) (T, error)
-	UpdateOne(ctx context.Context, data *T) error
+	CreateOne(ctx context.Context, storySeen T) (*T, error)
+	FindOneByID(ctx context.Context, id uint) (*T, error)
+	FindOneByUserIdAndFriendIdAndStroyId(ctx context.Context, UserId, friendId, storyId uint) (*models.UserStorySeen, error)
+	UpdateOne(ctx context.Context, storySeen T) error
 	DeleteOne(ctx context.Context, id uint) error
 
-	FindLatestOne(ctx context.Context, userId uint, friendId uint) (models.UserStorySeen, error)
+	FindLatestOne(ctx context.Context, UserId uint, friendId uint) (*models.UserStorySeen, error)
 	GetStoryLikedUserSeen(ctx context.Context, storyId uint, limit int) ([]*models.UserStorySeen, error)
 	CountOneStorySeen(ctx context.Context, storyId uint) (int64, error)
 }
@@ -32,16 +33,23 @@ func NewUserStorySeenRepo(engine *gorm.DB) *UserStorySeenRepo {
 	}
 }
 
-func (userStorySeenRepo *UserStorySeenRepo) CreateOne(ctx context.Context, data *models.UserStorySeen) error {
-	return userStorySeenRepo.Create(ctx, data)
+func (userStorySeenRepo *UserStorySeenRepo) CreateOne(ctx context.Context, storySeen models.UserStorySeen) (*models.UserStorySeen, error) {
+	if err := userStorySeenRepo.Create(ctx, &storySeen); err != nil {
+		return nil, err
+	}
+	return &storySeen, nil
 }
 
-func (userStorySeenRepo *UserStorySeenRepo) FindOneByID(ctx context.Context, id uint) (models.UserStorySeen, error) {
-	return userStorySeenRepo.Find(ctx, &models.UserStorySeen{ID: id})
+func (userStorySeenRepo *UserStorySeenRepo) FindOneByID(ctx context.Context, id uint) (*models.UserStorySeen, error) {
+	result, err := userStorySeenRepo.Find(ctx, &models.UserStorySeen{ID: id})
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
-func (userStorySeenRepo *UserStorySeenRepo) UpdateOne(ctx context.Context, data *models.UserStorySeen) error {
-	return userStorySeenRepo.Update(ctx, data)
+func (userStorySeenRepo *UserStorySeenRepo) UpdateOne(ctx context.Context, storySeen models.UserStorySeen) error {
+	return userStorySeenRepo.Update(ctx, &storySeen)
 }
 
 func (userStorySeenRepo *UserStorySeenRepo) DeleteOne(ctx context.Context, id uint) error {
@@ -49,16 +57,16 @@ func (userStorySeenRepo *UserStorySeenRepo) DeleteOne(ctx context.Context, id ui
 }
 
 func (userStorySeenRepo *UserStorySeenRepo) FindLatestOne(
-	ctx context.Context, userId uint, friendId uint) (models.UserStorySeen, error) {
+	ctx context.Context, UserId uint, friendId uint) (*models.UserStorySeen, error) {
 	var result models.UserStorySeen
 	if err := userStorySeenRepo.engine.
 		WithContext(ctx).
 		Debug().
 		Preload("StoryInfo").
-		Where("user_id = ? AND friend_id = ?", userId, friendId).Last(&result).Error; err != nil {
-		return models.UserStorySeen{}, err
+		Where("user_id = ? AND friend_id = ?", UserId, friendId).Last(&result).Error; err != nil {
+		return nil, err
 	}
-	return result, nil
+	return &result, nil
 }
 
 func (userStorySeenRepo *UserStorySeenRepo) GetStoryLikedUserSeen(
@@ -83,4 +91,18 @@ func (userStorySeenRepo *UserStorySeenRepo) CountOneStorySeen(ctx context.Contex
 		return 0, nil
 	}
 	return count, nil
+}
+
+func (userStorySeenRepo *UserStorySeenRepo) FindOneByUserIdAndFriendIdAndStroyId(ctx context.Context, UserId, friendId, storyId uint) (*models.UserStorySeen, error) {
+	var result models.UserStorySeen
+	if err := userStorySeenRepo.engine.
+		WithContext(ctx).
+		Debug().
+		Preload("StoryInfo").
+		Where("user_id = ? AND friend_id = ? AND story_id = ?", UserId, friendId, storyId).
+		First(&result).Error; err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }

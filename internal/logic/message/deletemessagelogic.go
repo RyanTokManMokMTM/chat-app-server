@@ -3,10 +3,11 @@ package message
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"gorm.io/gorm"
-	"net/http"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -31,8 +32,8 @@ func NewDeleteMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 func (l *DeleteMessageLogic) DeleteMessage(req *types.DeleteMessageReq) (resp *types.DeleteMessageResp, err error) {
 	// todo: add your logic here and delete this line
 
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -40,7 +41,7 @@ func (l *DeleteMessageLogic) DeleteMessage(req *types.DeleteMessageReq) (resp *t
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	msg, err := l.svcCtx.DAO.FindOneMessage(l.ctx, req.MesssageID)
+	msg, err := l.svcCtx.Uow.MessageRepo().FindOneByID(l.ctx, req.MesssageID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.MESSAGE_NOT_EXIST)
@@ -48,11 +49,11 @@ func (l *DeleteMessageLogic) DeleteMessage(req *types.DeleteMessageReq) (resp *t
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	if msg.FromUserID != userID {
+	if msg.FromUserId != userId {
 		return nil, errx.NewCustomErrCode(errx.NO_MESSAGE_DELETE_AUTHORITY)
 	}
 
-	if err := l.svcCtx.DAO.DeleteOneMessage(l.ctx, req.MesssageID); err != nil {
+	if err := l.svcCtx.Uow.MessageRepo().DeleteOneByID(l.ctx, req.MesssageID); err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 	return &types.DeleteMessageResp{

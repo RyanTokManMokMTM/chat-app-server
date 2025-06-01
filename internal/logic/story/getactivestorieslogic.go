@@ -3,14 +3,15 @@ package story
 import (
 	"context"
 	"errors"
+	"net/http"
+	"time"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/pagerx"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 	"gorm.io/gorm"
-	"net/http"
-	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -31,8 +32,8 @@ func NewGetActiveStoriesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 func (l *GetActiveStoriesLogic) GetActiveStories(req *types.GetActiveStoryReq) (resp *types.GetActiveStoryResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -46,7 +47,7 @@ func (l *GetActiveStoriesLogic) GetActiveStories(req *types.GetActiveStoryReq) (
 	}
 
 	//friend
-	total, err := l.svcCtx.DAO.CountActiveStoryByTimeStamp(l.ctx, userID, storyTimeStamp)
+	total, err := l.svcCtx.Uow.StoryRepo().CountFriendActiveStoryByTime(l.ctx, userId, storyTimeStamp)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -56,7 +57,7 @@ func (l *GetActiveStoriesLogic) GetActiveStories(req *types.GetActiveStoryReq) (
 	pageOffset := pagerx.PageOffset(pageLimit, req.Page)               //TO WHICH PAGE
 	logx.Info(pageLimit, totalPage, pageOffset)
 
-	stories, err := l.svcCtx.DAO.GetFriendActiveStoriesByTimeStamp(l.ctx, userID, int(pageOffset), int(pageLimit), storyTimeStamp)
+	stories, err := l.svcCtx.Uow.StoryRepo().GetActiveStoryListByTime(l.ctx, userId, int(pageOffset), int(pageLimit), storyTimeStamp)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -64,12 +65,12 @@ func (l *GetActiveStoriesLogic) GetActiveStories(req *types.GetActiveStoryReq) (
 	activeStories := make([]types.FriendStroy, 0)
 	for _, story := range stories {
 		//Get story seen record...
-		lastStorySeen, err := l.svcCtx.DAO.FindOneLatestUserStorySeen(l.ctx, userID, story.UserId)
+		lastStorySeen, err := l.svcCtx.Uow.UserStorySeenRepo().FindLatestOne(l.ctx, userId, story.UserId)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
 
-		userStories, err := l.svcCtx.DAO.GetUserStories(l.ctx, story.UserId)
+		userStories, err := l.svcCtx.Uow.StoryRepo().FindAllUserStories(l.ctx, story.UserId)
 		if err != nil {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
@@ -80,7 +81,7 @@ func (l *GetActiveStoriesLogic) GetActiveStories(req *types.GetActiveStoryReq) (
 			isSeen = lastStorySeen.StoryInfo.Id == userStories[len(userStories)-1]
 		}
 		activeStories = append(activeStories, types.FriendStroy{
-			UserID:               story.UserInfo.Id,
+			UserId:               story.UserInfo.Id,
 			Uuid:                 story.UserInfo.Uuid,
 			UserName:             story.UserInfo.NickName,
 			UserAvatar:           story.UserInfo.Avatar,

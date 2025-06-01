@@ -3,7 +3,7 @@ package models
 type UserFriend struct {
 	//user A added user B ,but it doesn't mean user B has added userA ?
 	ID       uint `gorm:"primaryKey;autoIncrement"`
-	UserID   uint `gorm:"not null;index"`
+	UserId   uint `gorm:"not null;index"`
 	FriendID uint `gorm:"not null;index"`
 
 	//UserInfo   User `gorm:"foreignKey:UserId"`
@@ -21,17 +21,17 @@ func (uf *UserFriend) TableName() string {
 // 	return db.WithContext(ctx).Debug().Create(&uf).Error
 // }
 // func (uf *UserFriend) FindOne(ctx context.Context, db *gorm.DB) error {
-// 	return db.WithContext(ctx).Debug().Model(&uf).Preload("FriendInfo").Where("user_id = ? AND friend_id = ? ", uf.UserID, uf.FriendID).First(&uf).Error
+// 	return db.WithContext(ctx).Debug().Model(&uf).Preload("FriendInfo").Where("user_id = ? AND friend_id = ? ", uf.UserId, uf.FriendID).First(&uf).Error
 // }
 // func (uf *UserFriend) DeleteOne(ctx context.Context, db *gorm.DB) error {
-// 	return db.WithContext(ctx).Debug().Where("user_id = ? AND friend_id = ?", uf.UserID, uf.FriendID).Delete(&uf).Error
+// 	return db.WithContext(ctx).Debug().Where("user_id = ? AND friend_id = ?", uf.UserId, uf.FriendID).Delete(&uf).Error
 // }
 
 // func (uf *UserFriend) GetFriendList(ctx context.Context, db *gorm.DB, pageOffset, pageSize int) ([]*UserFriend, error) {
 // 	var list []*UserFriend
 // 	if err := db.WithContext(ctx).Debug().Model(&uf).
 // 		Preload("FriendInfo").
-// 		Where("user_id = ?", uf.UserID).
+// 		Where("user_id = ?", uf.UserId).
 // 		Offset(pageOffset).
 // 		Limit(pageSize).
 // 		Find(&list).Error; err != nil {

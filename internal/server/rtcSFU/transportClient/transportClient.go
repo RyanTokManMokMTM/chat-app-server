@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
+	"time"
+
 	"github.com/gorilla/websocket"
 	"github.com/pion/rtcp"
 	"github.com/pion/webrtc/v3"
@@ -16,8 +19,6 @@ import (
 	socket_message "github.com/ryantokmanmokmtm/chat-app-server/socket-proto"
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
-	"sync"
-	"time"
 )
 
 type TransportClient struct {

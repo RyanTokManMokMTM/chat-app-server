@@ -31,12 +31,12 @@ func NewSearchUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Search
 
 func (l *SearchUserLogic) SearchUser(req *types.SearchUserReq) (resp *types.SearchUserResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
 
 	if len(req.Qurey) == 0 {
 		return nil, errx.NewCustomError(errx.REQ_PARAM_ERROR, "Missing Search Keyword.")
 	}
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -57,12 +57,12 @@ func (l *SearchUserLogic) SearchUser(req *types.SearchUserReq) (resp *types.Sear
 
 	var users = make([]types.SearchUserResult, 0)
 	for _, info := range results {
-		if info.Id == userID {
+		if info.Id == userId {
 			continue
 		}
 
 		var isFriend = true
-		_, err := l.svcCtx.Uow.UserFriendsRepo().FindOneByUserIdAndFriendById(l.ctx, userID, info.Id)
+		_, err := l.svcCtx.Uow.UserFriendsRepo().FindOneByUserIdAndFriendId(l.ctx, userId, info.Id)
 		if err != nil {
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
 				continue

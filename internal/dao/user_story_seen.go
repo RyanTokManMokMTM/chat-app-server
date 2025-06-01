@@ -2,21 +2,22 @@ package dao
 
 import (
 	"context"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 )
 
-func (d *DAO) InsertOneUserStorySeen(ctx context.Context, userID, friendId, storyId uint) error {
+func (d *DAO) InsertOneUserStorySeen(ctx context.Context, userId, friendId, storyId uint) error {
 	model := &models.UserStorySeen{
-		UserId:   userID,
+		userId:   userId,
 		FriendId: friendId,
 		StoryId:  storyId,
 	}
 	return model.InsertOne(ctx, d.engine)
 }
 
-func (d *DAO) FindOneUserStorySeen(ctx context.Context, userID, friendId, storyId uint) (*models.UserStorySeen, error) {
+func (d *DAO) FindOneUserStorySeen(ctx context.Context, userId, friendId, storyId uint) (*models.UserStorySeen, error) {
 	model := &models.UserStorySeen{
-		UserId:   userID,
+		UserId:   userId,
 		FriendId: friendId,
 		StoryId:  storyId,
 	}
@@ -26,9 +27,9 @@ func (d *DAO) FindOneUserStorySeen(ctx context.Context, userID, friendId, storyI
 	return model, nil
 }
 
-func (d *DAO) FindOneLatestUserStorySeen(ctx context.Context, userID, friendId uint) (*models.UserStorySeen, error) {
+func (d *DAO) FindOneLatestUserStorySeen(ctx context.Context, userId, friendId uint) (*models.UserStorySeen, error) {
 	model := &models.UserStorySeen{
-		UserId:   userID,
+		userId:   userId,
 		FriendId: friendId,
 	}
 	if err := model.FindLatestOne(ctx, d.engine); err != nil {

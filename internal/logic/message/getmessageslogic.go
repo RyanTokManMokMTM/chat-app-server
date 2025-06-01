@@ -3,13 +3,15 @@ package message
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/pagerx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
 	"gorm.io/gorm"
-	"net/http"
 
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 
@@ -33,8 +35,8 @@ func NewGetMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetMe
 func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.GetMessagesResp, err error) {
 	// todo: add your logic here and delete this line
 	var respMessages = make([]types.MessageUser, 0)
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -44,7 +46,7 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 
 	if req.MessageType == variable.MESSAGE_TYPE_USERCHAT {
 		//TODO: Check User is friend
-		_, err = l.svcCtx.DAO.FindOneFriend(l.ctx, userID, req.SouceId)
+		_, err = l.svcCtx.Uow.UserFriendsRepo().FindOneByUserIdAndFriendId(l.ctx, userId, req.SouceId)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errx.NewCustomErrCode(errx.NOT_YET_FRIEND)
@@ -53,7 +55,7 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 		}
 	} else if req.MessageType == variable.MESSAGE_TYPE_GROUPCHAT {
 		//TODO: Check User is group member
-		_, err := l.svcCtx.DAO.FindOneGroupMember(l.ctx, req.SouceId, userID)
+		_, err := l.svcCtx.Uow.GroupRepo().FindOneByGroupIdAndUserId(l.ctx, req.SouceId, userId)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errx.NewCustomErrCode(errx.NOT_JOIN_GROUP_YET)
@@ -63,7 +65,7 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 	}
 
 	pageLimit := pagerx.GetLimit(req.Limit)
-	messages, err := l.svcCtx.DAO.GetMessage(l.ctx, userID, req.SouceId, req.MessageType, int(pageLimit), req.LatestID)
+	messages, err := l.svcCtx.Uow.MessageRepo().FindMessages(l.ctx, userId, req.SouceId, models.MessageType(req.MessageType), int(pageLimit), req.LatestID)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -71,8 +73,8 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 	for _, msg := range messages {
 		respMessages = append(respMessages, types.MessageUser{
 			MessageID:   msg.ID,
-			FromID:      msg.FromUserID,
-			ToID:        msg.ToUserID,
+			FromID:      msg.FromUserId,
+			ToID:        msg.ToUserId,
 			Content:     msg.Content,
 			ContentType: msg.ContentType,
 			MessageType: msg.MessageType,

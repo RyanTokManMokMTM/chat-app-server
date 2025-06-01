@@ -25,15 +25,15 @@ type Message struct {
 			Uuid: edf -> Uuid:abc....
 		MessageType: 2 -> group
 		But it different to group chat
-		ToUserID will always be the group Uuid
+		ToUserId will always be the group Uuid
 		example:
 
 			Uuid - group member(abc) -> group's Uuid(aaa)
 			Uuid - group member(efd) -> group's Uuid(aaa)
 			in group's with Uuid aaa have 2 message which send from Uuid abc and Uuid efd
 	*/
-	FromUserID           uint   `gorm:"index;comment:'sender userID'"`
-	ToUserID             uint   `gorm:"index;comment:'receiver userID'"`
+	FromUserId           uint   `gorm:"index;comment:'sender UserId'"`
+	ToUserId             uint   `gorm:"index;comment:'receiver UserId'"`
 	Content              string `gorm:"comment:'message content'"`
 	MessageType          uint   `gorm:"comment;'sent message types: 1:single ,2: group'"`
 	ContentType          string `gorm:"comment:'content types : text,image,audio..."`
@@ -72,7 +72,7 @@ func (m *Message) DeleteOne(ctx context.Context, db *gorm.DB) error {
 func (m *Message) CountMessage(ctx context.Context, db *gorm.DB) (int64, error) {
 	var count int64 = 0
 	if err := db.WithContext(ctx).Model(&m).
-		Where("message_type = ? AND (from_user_id in (?,?) or to_user_id in (?,?))", m.MessageType, m.FromUserID, m.ToUserID, m.FromUserID, m.ToUserID).
+		Where("message_type = ? AND (from_user_id in (?,?) or to_user_id in (?,?))", m.MessageType, m.FromUserId, m.ToUserId, m.FromUserId, m.ToUserId).
 		Debug().Count(&count).Error; err != nil {
 		return 0, err
 	}
@@ -82,7 +82,7 @@ func (m *Message) CountMessage(ctx context.Context, db *gorm.DB) (int64, error) 
 func (m *Message) GetMessages(ctx context.Context, db *gorm.DB, pageLimit int) ([]*Message, error) {
 	var message = make([]*Message, 0)
 	if err := db.WithContext(ctx).Debug().
-		Where("message_type = ? and (from_user_id in (?,?) or to_user_id in (?,?)) ", m.MessageType, m.FromUserID, m.ToUserID, m.ToUserID, m.FromUserID).
+		Where("message_type = ? and (from_user_id in (?,?) or to_user_id in (?,?)) ", m.MessageType, m.FromUserId, m.ToUserId, m.ToUserId, m.FromUserId).
 		Limit(pageLimit).Order("created_at DESC").
 		Find(&message).Error; err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func (m *Message) GetMessagesByLatestId(ctx context.Context, db *gorm.DB, pageLi
 	var message = make([]*Message, 0)
 
 	if err := db.WithContext(ctx).Debug().
-		Where("message_type = ? and (from_user_id in (?,?) or to_user_id in (?,?)) AND id < ?", m.MessageType, m.FromUserID, m.ToUserID, m.ToUserID, m.FromUserID, m.ID).
+		Where("message_type = ? and (from_user_id in (?,?) or to_user_id in (?,?)) AND id < ?", m.MessageType, m.FromUserId, m.ToUserId, m.ToUserId, m.FromUserId, m.ID).
 		Limit(pageLimit).Order("created_at DESC").
 		Find(&message).Error; err != nil {
 		return nil, err

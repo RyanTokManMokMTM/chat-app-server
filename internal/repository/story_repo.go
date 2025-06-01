@@ -8,10 +8,13 @@ import (
 )
 
 type IStoryRepo[T any] interface {
-	CreateOne(ctx context.Context, user *T) error
-	FindOneByID(ctx context.Context, uuid string) (T, error)
-	UpdateOne(ctx context.Context, data *T) error
+	CreateOne(ctx context.Context, story T) (*T, error)
+	FindOneByUUID(ctx context.Context, uuid string) (*T, error)
+	FindOneByID(ctx context.Context, id uint) (*T, error)
+	FindOneUserStory(ctx context.Context, id uint, userId uint) (*T, error)
+	UpdateOne(ctx context.Context, story T) (*T, error)
 	DeleteOne(ctx context.Context, uuid string) error
+	DeleteOneById(ctx context.Context, id uint) error
 
 	GetActiveStoryList(
 		ctx context.Context,
@@ -34,6 +37,9 @@ type IStoryRepo[T any] interface {
 		ctx context.Context,
 		userId uint,
 		timeStamp int64) (int64, error)
+
+	FindAllUserStories(ctx context.Context, userId uint) ([]uint, error)
+	FindAllUserStoriesByTimeStamp(ctx context.Context, userId uint, timeStamp int64) ([]*models.StoryModel, error)
 }
 
 var _ IStoryRepo[models.StoryModel] = (*StoryRepo)(nil)
@@ -50,26 +56,48 @@ func NewStoryRepo(engine *gorm.DB) IStoryRepo[models.StoryModel] {
 	}
 }
 
-func (storyRepo *StoryRepo) CreateOne(ctx context.Context, data *models.StoryModel) error {
-	return storyRepo.Create(ctx, data)
+func (storyRepo *StoryRepo) CreateOne(ctx context.Context, story models.StoryModel) (*models.StoryModel, error) {
+	if err := storyRepo.Create(ctx, &story); err != nil {
+		return nil, err
+	}
+	return &story, nil
 }
 
-func (storyRepo *StoryRepo) FindOneByID(ctx context.Context, uuid string) (models.StoryModel, error) {
-	return storyRepo.Find(ctx, &models.StoryModel{Uuid: uuid})
+func (storyRepo *StoryRepo) FindOneByUUID(ctx context.Context, uuid string) (*models.StoryModel, error) {
+	result, err := storyRepo.Find(ctx, &models.StoryModel{Uuid: uuid})
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
-func (storyRepo *StoryRepo) UpdateOne(ctx context.Context, data *models.StoryModel) error {
-	return storyRepo.Update(ctx, data)
+func (storyRepo *StoryRepo) FindOneByID(ctx context.Context, id uint) (*models.StoryModel, error) {
+	result, err := storyRepo.Find(ctx, &models.StoryModel{Id: id})
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (storyRepo *StoryRepo) UpdateOne(ctx context.Context, story models.StoryModel) (*models.StoryModel, error) {
+	if err := storyRepo.Update(ctx, &story); err != nil {
+		return nil, err
+	}
+	return &story, nil
 }
 
 func (storyRepo *StoryRepo) DeleteOne(ctx context.Context, uuid string) error {
 	return storyRepo.Delete(ctx, &models.StoryModel{Uuid: uuid})
 }
 
-func (storyRepo *StoryRepo) FindOneUserStory(ctx context.Context, id uint, userId uint) (models.StoryModel, error) {
-	result := models.StoryModel{}
-	if err := storyRepo.engine.WithContext(ctx).Debug().Where("id = ? AND user_id = ?", id, userId).First(&result).Error; err != nil {
-		return models.StoryModel{}, err
+func (storyRepo *StoryRepo) DeleteOneById(ctx context.Context, id uint) error {
+	return storyRepo.Delete(ctx, &models.StoryModel{Id: id})
+}
+
+func (storyRepo *StoryRepo) FindOneUserStory(ctx context.Context, id uint, userId uint) (*models.StoryModel, error) {
+	result := &models.StoryModel{}
+	if err := storyRepo.engine.WithContext(ctx).Debug().Where("id = ? AND user_id = ?", id, userId).First(result).Error; err != nil {
+		return nil, err
 	}
 	return result, nil
 }

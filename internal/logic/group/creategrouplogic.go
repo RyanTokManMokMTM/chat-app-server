@@ -4,13 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/ryantokmanmokmtm/chat-app-server/common/ctxtool"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/uploadx"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/handler/ws"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 	"gorm.io/gorm"
-	"net/http"
-	"strings"
 
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
@@ -36,8 +38,8 @@ func NewCreateGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext, r *htt
 
 func (l *CreateGroupLogic) CreateGroup(req *types.CreateGroupReq) (resp *types.CreateGroupResp, err error) {
 	// todo: add your logic here and delete this line
-	userID := ctxtool.GetUserIDFromCTX(l.ctx)
-	u, err := l.svcCtx.DAO.FindOneUser(l.ctx, userID)
+	userId := ctxtool.GetUserIDFromCTX(l.ctx)
+	u, err := l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -54,8 +56,11 @@ func (l *CreateGroupLogic) CreateGroup(req *types.CreateGroupReq) (resp *types.C
 
 		avatar = path
 	}
-
-	group, err := l.svcCtx.DAO.InsertOneGroup(l.ctx, req.GroupName, avatar, userID)
+	group, err := l.svcCtx.Uow.GroupRepo().CreateOne(l.ctx, models.Group{
+		GroupName:   req.GroupName,
+		GroupAvatar: avatar,
+		GroupLead:   userId,
+	})
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -64,13 +69,16 @@ func (l *CreateGroupLogic) CreateGroup(req *types.CreateGroupReq) (resp *types.C
 	if len(req.GroupMembers) > 0 {
 		var members []string
 		for _, memberID := range req.GroupMembers {
-			err := l.svcCtx.DAO.InsertOneGroupMember(l.ctx, group.Id, memberID)
+			_, err := l.svcCtx.Uow.UserGroupRepo().CreateOne(l.ctx, models.UserGroup{
+				GroupId: group.Id,
+				UserId:  memberID,
+			})
 			if err != nil {
 				logx.Error(err.Error())
 				continue
 			}
 
-			mem, err := l.svcCtx.DAO.FindOneUser(l.ctx, memberID)
+			mem, err := l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, memberID)
 			if err != nil {
 				logx.Error(err.Error())
 				continue

@@ -3,14 +3,16 @@ package sticker
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"os"
+
 	"github.com/google/uuid"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/errx"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/uploadx"
+	"github.com/ryantokmanmokmtm/chat-app-server/internal/models"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/svc"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/types"
 	"github.com/zeromicro/go-zero/core/logx"
-	"net/http"
-	"os"
 )
 
 type CreateStickerGroupLogic struct {
@@ -39,7 +41,9 @@ func (l *CreateStickerGroupLogic) CreateStickerGroup(req *types.CreateStickerGro
 		}
 	}
 
-	stickerModel, err := l.svcCtx.DAO.InsertOneStickerGroup(l.ctx, req.StickerName)
+	stickerModel, err := l.svcCtx.Uow.StickerRepo().CreateOne(l.ctx, models.Sticker{
+		StickerName: req.StickerName,
+	})
 
 	//TODO: Create an sticker file
 	stickerGroupDir := fmt.Sprintf("%s/sticker/%s", l.svcCtx.Config.ResourcesPath, stickerModel.Uuid)
@@ -63,7 +67,7 @@ func (l *CreateStickerGroupLogic) CreateStickerGroup(req *types.CreateStickerGro
 			f.Close()
 
 			stickerModel.StickerThum = fmt.Sprintf("/%s%s", stickerModel.Uuid, path)
-			if err := l.svcCtx.DAO.UpdateOneStickerGroup(l.ctx, stickerModel); err != nil {
+			if err := l.svcCtx.Uow.StickerRepo().UpdateOne(l.ctx, *stickerModel); err != nil {
 				return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 			}
 		} else {
@@ -87,7 +91,7 @@ func (l *CreateStickerGroupLogic) CreateStickerGroup(req *types.CreateStickerGro
 	}
 	logx.Info(filePaths)
 
-	if err := l.svcCtx.DAO.InsertStickerListIntoGroup(l.ctx, stickerModel, filePaths); err != nil {
+	if err := l.svcCtx.Uow.StickerRepo().InsertResources(l.ctx, stickerModel, filePaths); err != nil {
 		return nil, errx.NewCustomError(errx.STORY_CREATED_FAILED, err.Error())
 	}
 

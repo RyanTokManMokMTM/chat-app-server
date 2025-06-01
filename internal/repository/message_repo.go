@@ -8,10 +8,12 @@ import (
 )
 
 type IMessageRepo[T any] interface {
-	CreateOne(ctx context.Context, user *T) error
-	FindOneByID(ctx context.Context, uuid string) (T, error)
-	UpdateOne(ctx context.Context, data *T) error
-	DeleteOne(ctx context.Context, uuid string) error
+	CreateOne(ctx context.Context, msg T) (*T, error)
+	FindOneByID(ctx context.Context, id uint) (*T, error)
+	FindOneByUUID(ctx context.Context, uuid string) (*T, error)
+	UpdateOne(ctx context.Context, msg T) error
+	DeleteOneByUUID(ctx context.Context, uuid string) error
+	DeleteOneByID(ctx context.Context, id uint) error
 
 	CountMessage(
 		ctx context.Context,
@@ -19,20 +21,27 @@ type IMessageRepo[T any] interface {
 		from, to uint,
 	) (int64, error)
 
-	GetMessages(
+	FindMessages(
 		ctx context.Context,
-		messageType models.MessageType,
 		from, to uint,
+		messageType models.MessageType,
 		pageLimit int,
-	) ([]*models.Message, error)
+		latestId uint) ([]*models.Message, error)
 
-	GetMessagesByLatestId(
-		ctx context.Context,
-		messageType models.MessageType,
-		from, to uint,
-		latestId uint,
-		pageLimit int,
-	) ([]*models.Message, error)
+	// GetMessages(
+	// 	ctx context.Context,
+	// 	messageType models.MessageType,
+	// 	from, to uint,
+	// 	pageLimit int,
+	// ) ([]*models.Message, error)
+
+	// GetMessagesByLatestId(
+	// 	ctx context.Context,
+	// 	messageType models.MessageType,
+	// 	from, to uint,
+	// 	latestId uint,
+	// 	pageLimit int,
+	// ) ([]*models.Message, error)
 }
 
 var _ IMessageRepo[models.Message] = (*MessageRepo)(nil)
@@ -49,20 +58,39 @@ func NewMessageRepo(engine *gorm.DB) IMessageRepo[models.Message] {
 	}
 }
 
-func (messageRepo *MessageRepo) CreateOne(ctx context.Context, data *models.Message) error {
-	return messageRepo.Create(ctx, data)
+func (messageRepo *MessageRepo) CreateOne(ctx context.Context, msg models.Message) (*models.Message, error) {
+	if err := messageRepo.Create(ctx, &msg); err != nil {
+		return nil, err
+	}
+	return &msg, nil
 }
 
-func (messageRepo *MessageRepo) FindOneByID(ctx context.Context, uuid string) (models.Message, error) {
-	return messageRepo.Find(ctx, &models.Message{Uuid: uuid})
+func (messageRepo *MessageRepo) FindOneByID(ctx context.Context, id uint) (*models.Message, error) {
+	result, err := messageRepo.Find(ctx, &models.Message{ID: id})
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
-func (messageRepo *MessageRepo) UpdateOne(ctx context.Context, data *models.Message) error {
-	return messageRepo.Update(ctx, data)
+func (messageRepo *MessageRepo) FindOneByUUID(ctx context.Context, uuid string) (*models.Message, error) {
+	result, err := messageRepo.Find(ctx, &models.Message{Uuid: uuid})
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
-func (messageRepo *MessageRepo) DeleteOne(ctx context.Context, uuid string) error {
+func (messageRepo *MessageRepo) UpdateOne(ctx context.Context, msg models.Message) error {
+	return messageRepo.Update(ctx, &msg)
+}
+
+func (messageRepo *MessageRepo) DeleteOneByUUID(ctx context.Context, uuid string) error {
 	return messageRepo.Delete(ctx, &models.Message{Uuid: uuid})
+}
+
+func (messageRepo *MessageRepo) DeleteOneByID(ctx context.Context, id uint) error {
+	return messageRepo.Delete(ctx, &models.Message{ID: id})
 }
 
 func (messageRepo *MessageRepo) CountMessage(
@@ -79,7 +107,7 @@ func (messageRepo *MessageRepo) CountMessage(
 	return count, nil
 }
 
-func (messageRepo *MessageRepo) GetMessages(
+func (messageRepo *MessageRepo) getMessages(
 	ctx context.Context,
 	messageType models.MessageType,
 	from, to uint,
@@ -95,7 +123,7 @@ func (messageRepo *MessageRepo) GetMessages(
 	return message, nil
 }
 
-func (messageRepo *MessageRepo) GetMessagesByLatestId(
+func (messageRepo *MessageRepo) getMessagesByLatestId(
 	ctx context.Context,
 	messageType models.MessageType,
 	from, to uint,
@@ -110,4 +138,17 @@ func (messageRepo *MessageRepo) GetMessagesByLatestId(
 		return nil, err
 	}
 	return message, nil
+}
+
+func (messageRepo *MessageRepo) FindMessages(
+	ctx context.Context,
+	from, to uint,
+	messageType models.MessageType,
+	pageLimit int,
+	latestId uint) ([]*models.Message, error) {
+
+	if latestId <= 0 {
+		return messageRepo.getMessages(ctx, messageType, from, to, pageLimit)
+	}
+	return messageRepo.getMessagesByLatestId(ctx, messageType, from, to, latestId, pageLimit)
 }

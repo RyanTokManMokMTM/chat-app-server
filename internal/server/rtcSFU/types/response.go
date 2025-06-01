@@ -14,7 +14,7 @@ type SFUConnectSessionResp struct {
 }
 
 type SFUProducerUserInfo struct {
-	ProducerUserId     string `json:"producer_user_id"`
+	ProduceruserId     string `json:"producer_user_id"`
 	ProducerUserName   string `json:"producer_user_name"`
 	ProducerUserAvatar string `json:"producer_user_avatar"`
 }
