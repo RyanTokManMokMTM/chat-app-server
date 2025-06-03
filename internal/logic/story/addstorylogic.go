@@ -35,8 +35,8 @@ func NewAddStoryLogic(ctx context.Context, svcCtx *svc.ServiceContext, r *http.R
 
 func (l *AddStoryLogic) AddStory(req *types.AddStoryReq) (resp *types.AddStoryResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -52,8 +52,8 @@ func (l *AddStoryLogic) AddStory(req *types.AddStoryReq) (resp *types.AddStoryRe
 
 	mediaPath := "/" + path
 	logx.Info("media url " + mediaPath)
-	story, err := l.svcCtx.Uow.StoryRepo().CreateOne(l.ctx, models.StoryModel{
-		UserId:         userId,
+	story, err := l.svcCtx.Uow.StoryRepo().CreateOne(l.ctx, &models.StoryModel{
+		UserID:         userID,
 		StoryMediaPath: mediaPath,
 	})
 	if err != nil {
@@ -63,8 +63,8 @@ func (l *AddStoryLogic) AddStory(req *types.AddStoryReq) (resp *types.AddStoryRe
 	return &types.AddStoryResp{
 		Code: uint(http.StatusOK),
 		Info: types.StoryInfo{
-			StoryID:       story.Id,
-			StoryUUID:     story.Uuid,
+			StoryID:       story.ID,
+			StoryUUID:     story.UUID,
 			StoryMediaURL: story.StoryMediaPath,
 		},
 	}, nil

@@ -1,6 +1,9 @@
 package socketClient
 
 import (
+	"sync"
+	"time"
+
 	"github.com/gorilla/websocket"
 	"github.com/ryantokmanmokmtm/chat-app-server/common/variable"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/serverTypes"
@@ -8,8 +11,6 @@ import (
 	socket_message "github.com/ryantokmanmokmtm/chat-app-server/socket-proto"
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/protobuf/encoding/protojson"
-	"sync"
-	"time"
 )
 
 var _ serverTypes.ISocketClient = (*SocketClient)(nil)

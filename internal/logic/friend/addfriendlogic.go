@@ -32,8 +32,8 @@ func NewAddFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddFrie
 
 func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFriendResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -41,7 +41,7 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, req.UserId)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, req.UserID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -50,14 +50,14 @@ func (l *AddFriendLogic) AddFriend(req *types.AddFriendReq) (resp *types.AddFrie
 	}
 
 	//TODO: Check is friend
-	_, err = l.svcCtx.Uow.UserFriendsRepo().FindOneByUserIdAndFriendId(l.ctx, userId, req.UserId)
+	_, err = l.svcCtx.Uow.UserFriendsRepo().FindOneByUserIDAndFriendID(l.ctx, userID, req.UserID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			//TODO: Create FriendID Relationship
 			logx.Infof("create")
-			_, err = l.svcCtx.Uow.UserFriendsRepo().CreateOne(l.ctx, models.UserFriend{
-				UserId:   userId,
-				FriendID: req.UserId,
+			_, err = l.svcCtx.Uow.UserFriendsRepo().CreateOne(l.ctx, &models.UserFriend{
+				UserID:   userID,
+				FriendID: req.UserID,
 			})
 			if err != nil {
 				return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())

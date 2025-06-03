@@ -31,8 +31,8 @@ func NewGetFriendInformationLogic(ctx context.Context, svcCtx *svc.ServiceContex
 
 func (l *GetFriendInformationLogic) GetFriendInformation(req *types.GetFriendInfoReq) (resp *types.GetFriendInfoResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -40,7 +40,7 @@ func (l *GetFriendInformationLogic) GetFriendInformation(req *types.GetFriendInf
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	friend, err := l.svcCtx.Uow.UserRepo().FindOneUserByUUID(l.ctx, req.Uuid)
+	friend, err := l.svcCtx.Uow.UserRepo().FindOneUserByUUID(l.ctx, req.UUID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -51,8 +51,8 @@ func (l *GetFriendInformationLogic) GetFriendInformation(req *types.GetFriendInf
 	return &types.GetFriendInfoResp{
 		Code: uint(http.StatusOK),
 		FriendInfo: types.FriendInfo{
-			ID:       friend.Id,
-			Uuid:     friend.Uuid,
+			ID:       friend.ID,
+			UUID:     friend.UUID,
 			NickName: friend.NickName,
 			Avatar:   friend.Avatar,
 		},

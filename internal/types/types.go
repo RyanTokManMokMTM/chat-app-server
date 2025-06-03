@@ -5,7 +5,7 @@ package types
 
 type CommonUserInfo struct {
 	ID            uint   `json:"id,omitempty"`
-	Uuid          string `json:"uuid,omitempty"`
+	UUID          string `json:"uuid,omitempty"`
 	NickName      string `json:"name,omitempty"`
 	Avatar        string `json:"avatar,omitempty"`
 	Email         string `json:"email,omitempty"`
@@ -15,14 +15,14 @@ type CommonUserInfo struct {
 
 type FriendInfo struct {
 	ID       uint   `json:"id,omitempty"`
-	Uuid     string `json:"uuid,omitempty"`
+	UUID     string `json:"uuid,omitempty"`
 	NickName string `json:"name,omitempty"`
 	Avatar   string `json:"avatar,omitempty"`
 }
 
 type FriendStroy struct {
-	UserId               uint   `json:"id"`
-	Uuid                 string `json:"uuid"`
+	UserID               uint   `json:"id"`
+	UUID                 string `json:"uuid"`
 	UserName             string `json:"name"`
 	UserAvatar           string `json:"avatar"`
 	IsSeen               bool   `json:"is_seen"`
@@ -39,7 +39,7 @@ type FullGroupInfo struct {
 
 type GroupInfo struct {
 	ID        uint   `json:"id"`
-	Uuid      string `json:"uuid"`
+	UUID      string `json:"uuid"`
 	Name      string `json:"name"`
 	Avatar    string `json:"avatar"`
 	Desc      string `json:"desc"`
@@ -88,8 +88,8 @@ type StoryInfo struct {
 }
 
 type StorySeenInfo struct {
-	UserId     uint   `json:"id"`
-	Uuid       string `json:"uuid"`
+	UserID     uint   `json:"id"`
+	UUID       string `json:"uuid"`
 	UserName   string `json:"name"`
 	UserAvatar string `json:"avatar"`
 	IsLiked    bool   `json:"is_liked"`
@@ -97,7 +97,7 @@ type StorySeenInfo struct {
 }
 
 type StorySeenUserBasicInfo struct {
-	Id     uint   `json:"user_id"`
+	ID     uint   `json:"user_id"`
 	Avatar string `json:"avatar"`
 }
 

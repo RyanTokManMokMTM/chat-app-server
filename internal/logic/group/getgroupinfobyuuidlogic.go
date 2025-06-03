@@ -31,8 +31,8 @@ func NewGetGroupInfoByUUIDLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUUIDReq) (resp *types.GetGroupInfoByUUIDResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -49,7 +49,7 @@ func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUU
 	}
 
 	isJoined := true
-	_, err = l.svcCtx.Uow.UserGroupRepo().FindOneByGroupIdAndUserId(l.ctx, group.Id, userId)
+	_, err = l.svcCtx.Uow.UserGroupRepo().FindOneByGroupIDAndUserID(l.ctx, group.ID, userID)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
@@ -57,7 +57,7 @@ func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUU
 		isJoined = false
 	}
 
-	count, err := l.svcCtx.Uow.UserGroupRepo().CountGroupMembers(l.ctx, group.Id)
+	count, err := l.svcCtx.Uow.UserGroupRepo().CountGroupMembers(l.ctx, group.ID)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -66,8 +66,8 @@ func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUU
 		Code: uint(http.StatusOK),
 		Result: types.FullGroupInfo{
 			GroupInfo: types.GroupInfo{
-				ID:        group.Id,
-				Uuid:      group.Uuid,
+				ID:        group.ID,
+				UUID:      group.UUID,
 				Name:      group.GroupName,
 				Avatar:    group.GroupAvatar,
 				Desc:      group.GroupDesc,
@@ -75,7 +75,7 @@ func (l *GetGroupInfoByUUIDLogic) GetGroupInfoByUUID(req *types.GetGroupInfoByUU
 			},
 			Members:   uint(count),
 			IsJoined:  isJoined,
-			IsOwner:   group.GroupLead == userId,
+			IsOwner:   group.GroupLead == userID,
 			CreatedBy: group.LeadInfo.NickName,
 		},
 	}, nil

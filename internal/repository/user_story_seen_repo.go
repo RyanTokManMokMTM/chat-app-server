@@ -8,70 +8,63 @@ import (
 )
 
 type IUserStorySeenRepo[T any] interface {
-	CreateOne(ctx context.Context, storySeen T) (*T, error)
-	FindOneByID(ctx context.Context, id uint) (*T, error)
-	FindOneByUserIdAndFriendIdAndStroyId(ctx context.Context, UserId, friendId, storyId uint) (*models.UserStorySeen, error)
+	CreateOne(ctx context.Context, storySeen T) (T, error)
+	FindOneByID(ctx context.Context, ID uint) (T, error)
+	FindOneByUserIDAndFriendIDAndStroyID(ctx context.Context, UserID, friendID, storyID uint) (T, error)
 	UpdateOne(ctx context.Context, storySeen T) error
-	DeleteOne(ctx context.Context, id uint) error
+	DeleteOne(ctx context.Context, ID uint) error
 
-	FindLatestOne(ctx context.Context, UserId uint, friendId uint) (*models.UserStorySeen, error)
-	GetStoryLikedUserSeen(ctx context.Context, storyId uint, limit int) ([]*models.UserStorySeen, error)
-	CountOneStorySeen(ctx context.Context, storyId uint) (int64, error)
+	FindLatestOne(ctx context.Context, UserID uint, friendID uint) (T, error)
+	GetStoryLikedUserSeen(ctx context.Context, storyID uint, limit int) ([]T, error)
+	CountOneStorySeen(ctx context.Context, storyID uint) (int64, error)
 }
 
-var _ IUserStorySeenRepo[models.UserStorySeen] = (*UserStorySeenRepo)(nil)
+var _ IUserStorySeenRepo[*models.UserStorySeen] = (*userStorySeenRepo)(nil)
 
-type UserStorySeenRepo struct {
+type userStorySeenRepo struct {
 	engine *gorm.DB
 	IRepository[*models.UserStorySeen, models.UserStorySeen]
 }
 
-func NewUserStorySeenRepo(engine *gorm.DB) *UserStorySeenRepo {
-	return &UserStorySeenRepo{
+func NewUserStorySeenRepo(engine *gorm.DB) IUserStorySeenRepo[*models.UserStorySeen] {
+	return &userStorySeenRepo{
 		engine:      engine,
 		IRepository: NewRepository[*models.UserStorySeen, models.UserStorySeen](engine),
 	}
 }
 
-func (userStorySeenRepo *UserStorySeenRepo) CreateOne(ctx context.Context, storySeen models.UserStorySeen) (*models.UserStorySeen, error) {
-	if err := userStorySeenRepo.Create(ctx, &storySeen); err != nil {
-		return nil, err
-	}
-	return &storySeen, nil
+func (userStorySeenRepo *userStorySeenRepo) CreateOne(ctx context.Context, storySeen *models.UserStorySeen) (*models.UserStorySeen, error) {
+	return userStorySeenRepo.Create(ctx, storySeen)
 }
 
-func (userStorySeenRepo *UserStorySeenRepo) FindOneByID(ctx context.Context, id uint) (*models.UserStorySeen, error) {
-	result, err := userStorySeenRepo.Find(ctx, &models.UserStorySeen{ID: id})
-	if err != nil {
-		return nil, err
-	}
-	return &result, nil
+func (userStorySeenRepo *userStorySeenRepo) FindOneByID(ctx context.Context, ID uint) (*models.UserStorySeen, error) {
+	return userStorySeenRepo.Find(ctx, &models.UserStorySeen{Base: models.Base{ID: ID}})
 }
 
-func (userStorySeenRepo *UserStorySeenRepo) UpdateOne(ctx context.Context, storySeen models.UserStorySeen) error {
-	return userStorySeenRepo.Update(ctx, &storySeen)
+func (userStorySeenRepo *userStorySeenRepo) UpdateOne(ctx context.Context, storySeen *models.UserStorySeen) error {
+	return userStorySeenRepo.Update(ctx, storySeen)
 }
 
-func (userStorySeenRepo *UserStorySeenRepo) DeleteOne(ctx context.Context, id uint) error {
-	return userStorySeenRepo.Delete(ctx, &models.UserStorySeen{ID: id})
+func (userStorySeenRepo *userStorySeenRepo) DeleteOne(ctx context.Context, ID uint) error {
+	return userStorySeenRepo.Delete(ctx, &models.UserStorySeen{Base: models.Base{ID: ID}})
 }
 
-func (userStorySeenRepo *UserStorySeenRepo) FindLatestOne(
-	ctx context.Context, UserId uint, friendId uint) (*models.UserStorySeen, error) {
+func (userStorySeenRepo *userStorySeenRepo) FindLatestOne(
+	ctx context.Context, UserID uint, friendID uint) (*models.UserStorySeen, error) {
 	var result models.UserStorySeen
 	if err := userStorySeenRepo.engine.
 		WithContext(ctx).
 		Debug().
 		Preload("StoryInfo").
-		Where("user_id = ? AND friend_id = ?", UserId, friendId).Last(&result).Error; err != nil {
+		Where("user_ID = ? AND friend_ID = ?", UserID, friendID).Last(&result).Error; err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-func (userStorySeenRepo *UserStorySeenRepo) GetStoryLikedUserSeen(
+func (userStorySeenRepo *userStorySeenRepo) GetStoryLikedUserSeen(
 	ctx context.Context,
-	storyId uint,
+	storyID uint,
 	limit int) ([]*models.UserStorySeen, error) {
 	var userList []*models.UserStorySeen
 	if err := userStorySeenRepo.engine.
@@ -79,30 +72,30 @@ func (userStorySeenRepo *UserStorySeenRepo) GetStoryLikedUserSeen(
 		Debug().
 		Model(models.UserStorySeen{}).
 		Preload("UserInfo").
-		Where("story_id= ?", storyId).Order("created_at DESC").Limit(limit).Find(&userList).Error; err != nil {
+		Where("story_ID= ?", storyID).Order("created_at DESC").Limit(limit).Find(&userList).Error; err != nil {
 		return nil, err
 	}
 	return userList, nil
 }
 
-func (userStorySeenRepo *UserStorySeenRepo) CountOneStorySeen(ctx context.Context, storyId uint) (int64, error) {
+func (userStorySeenRepo *userStorySeenRepo) CountOneStorySeen(ctx context.Context, storyID uint) (int64, error) {
 	var count int64
-	if err := userStorySeenRepo.engine.WithContext(ctx).Debug().Model(models.UserStorySeen{}).Where("story_id= ?", storyId).Count(&count).Error; err != nil {
+	if err := userStorySeenRepo.engine.WithContext(ctx).Debug().Model(models.UserStorySeen{}).Where("story_ID= ?", storyID).Count(&count).Error; err != nil {
 		return 0, nil
 	}
 	return count, nil
 }
 
-func (userStorySeenRepo *UserStorySeenRepo) FindOneByUserIdAndFriendIdAndStroyId(ctx context.Context, UserId, friendId, storyId uint) (*models.UserStorySeen, error) {
-	var result models.UserStorySeen
+func (userStorySeenRepo *userStorySeenRepo) FindOneByUserIDAndFriendIDAndStroyID(ctx context.Context, UserID, friendID, storyID uint) (*models.UserStorySeen, error) {
+	var result *models.UserStorySeen
 	if err := userStorySeenRepo.engine.
 		WithContext(ctx).
 		Debug().
 		Preload("StoryInfo").
-		Where("user_id = ? AND friend_id = ? AND story_id = ?", UserId, friendId, storyId).
-		First(&result).Error; err != nil {
+		Where("user_ID = ? AND friend_ID = ? AND story_ID = ?", UserID, friendID, storyID).
+		First(result).Error; err != nil {
 		return nil, err
 	}
 
-	return &result, nil
+	return result, nil
 }

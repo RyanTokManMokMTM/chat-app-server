@@ -28,10 +28,10 @@ func NewGetStoryInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetS
 	}
 }
 
-func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *types.GetStoryInfoByIdResp, err error) {
+func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIDRep) (resp *types.GetStoryInfoByIDResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -52,7 +52,7 @@ func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *
 
 	var isLiked = false
 	var seenUserList []types.StorySeenUserBasicInfo = nil
-	if story.UserId == userId {
+	if story.UserID == userID {
 		count, err := l.svcCtx.Uow.UserStoryLikesRepo().CountStoryLikes(l.ctx, req.StoryID)
 		if err != nil {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
@@ -66,12 +66,12 @@ func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *
 
 		for _, u := range users {
 			seenUserList = append(seenUserList, types.StorySeenUserBasicInfo{
-				Id:     u.UserInfo.Id,
+				ID:     u.UserInfo.ID,
 				Avatar: u.UserInfo.Avatar,
 			})
 		}
 	} else {
-		userLiked, err := l.svcCtx.Uow.UserStoryLikesRepo().FindOneByUserIdAndStoryId(l.ctx, userId, req.StoryID)
+		userLiked, err := l.svcCtx.Uow.UserStoryLikesRepo().FindOneByUserIDAndStoryID(l.ctx, userID, req.StoryID)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
@@ -82,11 +82,11 @@ func (l *GetStoryInfoLogic) GetStoryInfo(req *types.GetStoryInfoByIdRep) (resp *
 
 	}
 
-	return &types.GetStoryInfoByIdResp{
+	return &types.GetStoryInfoByIDResp{
 		Code: uint(http.StatusOK),
 		StoryInfo: types.StoryInfo{
-			StoryID:       story.Id,
-			StoryUUID:     story.Uuid,
+			StoryID:       story.ID,
+			StoryUUID:     story.UUID,
 			StoryMediaURL: story.StoryMediaPath,
 		},
 		IsLiked:       isLiked,

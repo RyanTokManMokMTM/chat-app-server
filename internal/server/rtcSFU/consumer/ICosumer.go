@@ -7,7 +7,7 @@ type IConsumer interface {
 	CreateAnswer(sdp string) (*webrtc.SessionDescription, error)
 	UpdateIceCandidate(data []byte) error
 	Close() error
-	ClientId() string
+	ClientID() string
 
 	AddLocalTrack(track *webrtc.TrackLocalStaticRTP) error
 	RemoveLocal(track *webrtc.TrackLocalStaticRTP) error

@@ -33,12 +33,12 @@ func NewGetUserFriendProfileLogic(ctx context.Context, svcCtx *svc.ServiceContex
 func (l *GetUserFriendProfileLogic) GetUserFriendProfile(req *types.GetUserFriendProfileReq) (resp *types.GetUserFriendProfileResp, err error) {
 	// todo: add your logic here and delete this line
 
-	if req.UUID == "" && req.UserId == 0 {
+	if req.UUID == "" && req.UserID == 0 {
 		return nil, errx.NewCustomErrCode(errx.REQ_PARAM_ERROR)
 	}
 
-	UserId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, UserId)
+	UserID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, UserID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -47,8 +47,8 @@ func (l *GetUserFriendProfileLogic) GetUserFriendProfile(req *types.GetUserFrien
 	}
 
 	var u *models.User
-	if req.UserId != 0 {
-		u, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, req.UserId)
+	if req.UserID != 0 {
+		u, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, req.UserID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -66,7 +66,7 @@ func (l *GetUserFriendProfileLogic) GetUserFriendProfile(req *types.GetUserFrien
 	}
 
 	isFriend := true
-	_, err = l.svcCtx.Uow.UserFriendsRepo().FindOneByUserIdAndFriendId(l.ctx, UserId, u.Id)
+	_, err = l.svcCtx.Uow.UserFriendsRepo().FindOneByUserIDAndFriendID(l.ctx, UserID, u.ID)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
@@ -76,8 +76,8 @@ func (l *GetUserFriendProfileLogic) GetUserFriendProfile(req *types.GetUserFrien
 	return &types.GetUserFriendProfileResp{
 		Code: uint(http.StatusOK),
 		UserInfo: types.CommonUserInfo{
-			ID:            u.Id,
-			Uuid:          u.Uuid,
+			ID:            u.ID,
+			UUID:          u.UUID,
 			NickName:      u.NickName,
 			Email:         u.Email,
 			Avatar:        u.Avatar,

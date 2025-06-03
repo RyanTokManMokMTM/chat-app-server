@@ -14,19 +14,19 @@ type IceCandidateType struct {
 }
 
 const (
-	OFFER     = "offer"
-	ANSWER    = "answer"
-	CANDIDATE = "candidate"
+	OFFER      = "offer"
+	ANSWER     = "answer"
+	CANDINDATE = "candidate"
 )
 
 const (
 	SIGNALING_OFFER     = "offer"
 	SIGNALING_ANSWER    = "answer"
-	SIGNALING_CANDIDATE = "candidate"
+	SIGNALING_CANDIdATE = "candidate"
 	SIGNALING_BYE       = "bye"
 )
 
 const (
 	RTC_CALLING__VOICE = iota + 1
-	RTC_CALLING__VIDEO
+	RTC_CALLING__VIdEO
 )

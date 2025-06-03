@@ -10,16 +10,16 @@ import (
 
 type UOW struct {
 	engine               *gorm.DB
-	userRepo             repository.IUserRepo[models.User]
-	groupRepo            repository.IGroupRepo[models.Group]
-	messageRepo          repository.IMessageRepo[models.Message]
-	stickerRepo          repository.IStickerRepo[models.Sticker]
-	stickerResourcesRepo repository.IStickerResourcesRepo[models.StickerResource]
-	storyRepo            repository.IStoryRepo[models.StoryModel]
-	userFriendsRepo      repository.IUserFriendsRepo[models.UserFriend]
-	userGroupRepo        repository.IUserGroupRepo[models.UserGroup]
-	userStoryLikesRepo   repository.IUserStoryLikesRepo[models.UserStoryLikes]
-	userStorySeenRepo    repository.IUserStorySeenRepo[models.UserStorySeen]
+	userRepo             repository.IUserRepo[*models.User]
+	groupRepo            repository.IGroupRepo[*models.Group]
+	messageRepo          repository.IMessageRepo[*models.Message]
+	stickerRepo          repository.IStickerRepo[*models.Sticker]
+	stickerResourcesRepo repository.IStickerResourcesRepo[*models.StickerResource]
+	storyRepo            repository.IStoryRepo[*models.StoryModel]
+	userFriendsRepo      repository.IUserFriendsRepo[*models.UserFriend]
+	userGroupRepo        repository.IUserGroupRepo[*models.UserGroup]
+	userStoryLikesRepo   repository.IUserStoryLikesRepo[*models.UserStoryLikes]
+	userStorySeenRepo    repository.IUserStorySeenRepo[*models.UserStorySeen]
 }
 
 func NewUOW(engine *gorm.DB) *UOW {
@@ -38,43 +38,43 @@ func NewUOW(engine *gorm.DB) *UOW {
 	}
 }
 
-func (u *UOW) UserRepo() repository.IUserRepo[models.User] {
+func (u *UOW) UserRepo() repository.IUserRepo[*models.User] {
 	return u.userRepo
 }
 
-func (u *UOW) GroupRepo() repository.IGroupRepo[models.Group] {
+func (u *UOW) GroupRepo() repository.IGroupRepo[*models.Group] {
 	return u.groupRepo
 }
 
-func (u *UOW) MessageRepo() repository.IMessageRepo[models.Message] {
+func (u *UOW) MessageRepo() repository.IMessageRepo[*models.Message] {
 	return u.messageRepo
 }
 
-func (u *UOW) StickerRepo() repository.IStickerRepo[models.Sticker] {
+func (u *UOW) StickerRepo() repository.IStickerRepo[*models.Sticker] {
 	return u.stickerRepo
 }
 
-func (u *UOW) StickerResourcesRepo() repository.IStickerResourcesRepo[models.StickerResource] {
+func (u *UOW) StickerResourcesRepo() repository.IStickerResourcesRepo[*models.StickerResource] {
 	return u.stickerResourcesRepo
 }
 
-func (u *UOW) StoryRepo() repository.IStoryRepo[models.StoryModel] {
+func (u *UOW) StoryRepo() repository.IStoryRepo[*models.StoryModel] {
 	return u.storyRepo
 }
 
-func (u *UOW) UserFriendsRepo() repository.IUserFriendsRepo[models.UserFriend] {
+func (u *UOW) UserFriendsRepo() repository.IUserFriendsRepo[*models.UserFriend] {
 	return u.userFriendsRepo
 }
 
-func (u *UOW) UserGroupRepo() repository.IUserGroupRepo[models.UserGroup] {
+func (u *UOW) UserGroupRepo() repository.IUserGroupRepo[*models.UserGroup] {
 	return u.userGroupRepo
 }
 
-func (u *UOW) UserStoryLikesRepo() repository.IUserStoryLikesRepo[models.UserStoryLikes] {
+func (u *UOW) UserStoryLikesRepo() repository.IUserStoryLikesRepo[*models.UserStoryLikes] {
 	return u.userStoryLikesRepo
 }
 
-func (u *UOW) UserStorySeenRepo() repository.IUserStorySeenRepo[models.UserStorySeen] {
+func (u *UOW) UserStorySeenRepo() repository.IUserStorySeenRepo[*models.UserStorySeen] {
 	return u.userStorySeenRepo
 }
 

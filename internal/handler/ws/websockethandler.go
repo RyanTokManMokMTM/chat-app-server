@@ -26,12 +26,12 @@ func WebSocketHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	}
 }
 
-func SendGroupSystemNotification(FromUUID, groupUUID, content string) {
+func SendGroupSystemNotification(FromUUId, groupUUId, content string) {
 	logx.Info("Sending notification")
 	msg := &socket_message.Message{
-		MessageID:   uuid.New().String(),
-		FromUUID:    FromUUID,
-		ToUUID:      groupUUID,
+		MessageId:   uuid.New().String(),
+		FromUUId:    FromUUId,
+		ToUUId:      groupUUId,
 		ContentType: variable.SYS,
 		Content:     content,
 		MessageType: variable.MESSAGE_TYPE_GROUPCHAT,

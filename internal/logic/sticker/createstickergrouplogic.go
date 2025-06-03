@@ -41,12 +41,12 @@ func (l *CreateStickerGroupLogic) CreateStickerGroup(req *types.CreateStickerGro
 		}
 	}
 
-	stickerModel, err := l.svcCtx.Uow.StickerRepo().CreateOne(l.ctx, models.Sticker{
+	stickerModel, err := l.svcCtx.Uow.StickerRepo().CreateOne(l.ctx, &models.Sticker{
 		StickerName: req.StickerName,
 	})
 
 	//TODO: Create an sticker file
-	stickerGroupDir := fmt.Sprintf("%s/sticker/%s", l.svcCtx.Config.ResourcesPath, stickerModel.Uuid)
+	stickerGroupDir := fmt.Sprintf("%s/sticker/%s", l.svcCtx.Config.ResourcesPath, stickerModel.UUID)
 	if err := os.Mkdir(stickerGroupDir, 0777); err != nil {
 		return nil, errx.NewCustomError(errx.SERVER_COMMON_ERROR, err.Error())
 	}
@@ -66,8 +66,8 @@ func (l *CreateStickerGroupLogic) CreateStickerGroup(req *types.CreateStickerGro
 			}
 			f.Close()
 
-			stickerModel.StickerThum = fmt.Sprintf("/%s%s", stickerModel.Uuid, path)
-			if err := l.svcCtx.Uow.StickerRepo().UpdateOne(l.ctx, *stickerModel); err != nil {
+			stickerModel.StickerThum = fmt.Sprintf("/%s%s", stickerModel.UUID, path)
+			if err := l.svcCtx.Uow.StickerRepo().UpdateOne(l.ctx, stickerModel); err != nil {
 				return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 			}
 		} else {
@@ -83,7 +83,7 @@ func (l *CreateStickerGroupLogic) CreateStickerGroup(req *types.CreateStickerGro
 					return nil, errx.NewCustomError(errx.FILE_UPLOAD_FAILED, err.Error())
 				}
 
-				filePaths = append(filePaths, fmt.Sprintf("/%s%s", stickerModel.Uuid, path))
+				filePaths = append(filePaths, fmt.Sprintf("/%s%s", stickerModel.UUID, path))
 				f.Close()
 			}
 		}
@@ -91,12 +91,12 @@ func (l *CreateStickerGroupLogic) CreateStickerGroup(req *types.CreateStickerGro
 	}
 	logx.Info(filePaths)
 
-	if err := l.svcCtx.Uow.StickerRepo().InsertResources(l.ctx, stickerModel, filePaths); err != nil {
+	if err := l.svcCtx.Uow.StickerRepo().CreateStickerResources(l.ctx, stickerModel, filePaths); err != nil {
 		return nil, errx.NewCustomError(errx.STORY_CREATED_FAILED, err.Error())
 	}
 
 	return &types.CreateStickerGroupResp{
 		Code:             uint(http.StatusOK),
-		StickerGroupUUID: stickerModel.Uuid,
+		StickerGroupUUID: stickerModel.UUID,
 	}, nil
 }

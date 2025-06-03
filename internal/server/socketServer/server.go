@@ -111,9 +111,9 @@ func (s *SocketServer) MulticastMessage(message []byte) {
 	s.multicast <- message
 }
 
-func (s *SocketServer) GetOneClient(clientUUId string) (*socketClient.SocketClient, error) {
+func (s *SocketServer) GetOneClient(clientUUID string) (*socketClient.SocketClient, error) {
 	for _, client := range s.Clients {
-		if client.UUID == clientUUId {
+		if client.UUID == clientUUID {
 			return client, nil
 		}
 	}
@@ -132,18 +132,18 @@ func (s *SocketServer) sendGroupMessage(message *socket_message.Message, server 
 	}
 
 	//TODO: Get All Group Members
-	members, err := svcCtx.Uow.UserGroupRepo().GetGroupMemberList(ctx, group.Id)
+	members, err := svcCtx.Uow.UserGroupRepo().GetGroupMemberList(ctx, group.ID)
 	if err != nil {
 		logx.Error(err.Error())
 		return
 
 	}
 	for _, mem := range members {
-		if mem.MemberInfo.Uuid == message.FromUUID && message.ContentType != variable.SYS {
+		if mem.MemberInfo.UUID == message.FromUUID && message.ContentType != variable.SYS {
 			continue
 		}
 
-		conn, ok := server.Clients[mem.MemberInfo.Uuid]
+		conn, ok := server.Clients[mem.MemberInfo.UUID]
 
 		socketMessage := &socket_message.Message{
 			MessageID:      message.MessageID,
@@ -170,9 +170,9 @@ func (s *SocketServer) sendGroupMessage(message *socket_message.Message, server 
 		}
 
 		if !ok {
-			logx.Infof("Group %v 's member %v is offline", message.ToUUID, mem.MemberInfo.Uuid)
+			logx.Infof("Group %v 's member %v is offline", message.ToUUID, mem.MemberInfo.UUID)
 			ctx := context.Background()
-			_, err := variable.RedisConnection.RPush(ctx, mem.MemberInfo.Uuid, messageBytes).Result()
+			_, err := variable.RedisConnection.RPush(ctx, mem.MemberInfo.UUID, messageBytes).Result()
 			if err != nil {
 				logx.Error("offline message to redis err %s", err.Error())
 			}
@@ -209,7 +209,7 @@ func (s *SocketServer) saveMessage(svcCtx *svc.ServiceContext, message *socket_m
 			return err
 		}
 
-		msg = helper.ConvertSocketMessageToMessage(fromUserInfo.Id, toUserInfo.Id, message)
+		msg = helper.ConvertSocketMessageToMessage(fromUserInfo.ID, toUserInfo.ID, message)
 
 	case variable.MESSAGE_TYPE_GROUPCHAT:
 		toGroupInfo, err = svcCtx.Uow.GroupRepo().FindOneByUUID(ctx, message.ToUUID)
@@ -217,13 +217,13 @@ func (s *SocketServer) saveMessage(svcCtx *svc.ServiceContext, message *socket_m
 			logx.Errorf("failed to get (to)group %e", err)
 			return err
 		}
-		msg = helper.ConvertSocketMessageToMessage(fromUserInfo.Id, toGroupInfo.Id, message)
+		msg = helper.ConvertSocketMessageToMessage(fromUserInfo.ID, toGroupInfo.ID, message)
 	default:
 		return fmt.Errorf("message type not support")
 	}
 
 	// //TODO : Save Message into db
-	_, createErr := svcCtx.Uow.MessageRepo().CreateOne(context.Background(), *msg)
+	_, createErr := svcCtx.Uow.MessageRepo().CreateOne(context.Background(), msg)
 	if createErr != nil {
 		logx.Errorf("faild to save message : ", createErr)
 		return createErr
@@ -310,7 +310,7 @@ func (s *SocketServer) onHandleNormalMessage(msg *socket_message.Message) error 
 
 		if msg.ContentType != variable.SYS {
 			//MARK: system message no need to ack??
-			logx.Infof("Sending ack with seqId %s to userId :%s", msg.MessageID, msg.FromUUID)
+			logx.Infof("Sending ack with seqID %s to userID :%s", msg.MessageID, msg.FromUUID)
 			s.sendAcknowledgement(msg.MessageID, msg.FromUUID)
 		}
 
@@ -329,7 +329,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 	case variable.SFU_EVENT_PRODUCER_SDP:
 		var joinRoomData types.SFUConnectSessionReq
 		jsonString := msg.Content //Can be a json string?
-		userId := msg.FromUUID
+		userID := msg.FromUUID
 		if err := jsonx.Unmarshal([]byte(jsonString), &joinRoomData); err != nil {
 			logx.Error("json unmarshal error", err)
 			return err
@@ -341,29 +341,29 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 			return err
 		}
 
-		c, err := s.GetOneClient(userId)
+		c, err := s.GetOneClient(userID)
 		if err != nil {
 			logx.Error("SocketClient not found")
 			return err
 		}
-		logx.Info("Joining to session : ", joinRoomData.SessionId)
+		logx.Info("Joining to session : ", joinRoomData.SessionID)
 
 		//Find a session
 		isNewRoom := false
-		session, err := s.sessionManager.GetOneSession(joinRoomData.SessionId)
+		session, err := s.sessionManager.GetOneSession(joinRoomData.SessionID)
 		if err != nil {
 			logx.Info("Session not found")
-			session = s.sessionManager.CreateOneSession(joinRoomData.SessionId, joinRoomData.CallType)
+			session = s.sessionManager.CreateOneSession(joinRoomData.SessionID, joinRoomData.CallType)
 			isNewRoom = true
 		}
 
-		logx.Info("Current session Id : ", session.SessionId)
+		logx.Info("Current session ID : ", session.SessionID)
 
 		//Create transport client
-		tc := transportClient.NewTransportClient(userId, joinRoomData.SessionId, c)
-		logx.Info("Created transport client for ", userId)
+		tc := transportClient.NewTransportClient(userID, joinRoomData.SessionID, c)
+		logx.Info("Created transport client for ", userID)
 
-		session.AddNewSessionClient(userId, tc)
+		session.AddNewSessionClient(userID, tc)
 
 		err = tc.NewConnection(c.SvcCtx.Config.IceServer.Urls, sdpType, func(state webrtc.PeerConnectionState) {
 			logx.Info("Connection State changed : ", state)
@@ -376,7 +376,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 				clients := session.GetSessionClients()
 				sessionProducersList := make([]types.SFUProducerUserInfo, 0)
 
-				currentUser, err := c.SvcCtx.Uow.UserRepo().FindOneUserByUUID(ctx, userId)
+				currentUser, err := c.SvcCtx.Uow.UserRepo().FindOneUserByUUID(ctx, userID)
 				if err != nil {
 					logx.Error("Get User Info err : ", err)
 					break
@@ -384,14 +384,14 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 
 				if isNewRoom {
 					logx.Info("Sending a new session message.")
-					group, err := c.SvcCtx.Uow.GroupRepo().FindOneByUUID(ctx, session.SessionId)
+					group, err := c.SvcCtx.Uow.GroupRepo().FindOneByUUID(ctx, session.SessionID)
 					if err != nil {
 						logx.Error(err.Error())
 						return
 					}
 
 					//TODO: Get All Group Members
-					members, err := c.SvcCtx.Uow.UserGroupRepo().GetGroupMemberList(ctx, group.Id)
+					members, err := c.SvcCtx.Uow.UserGroupRepo().GetGroupMemberList(ctx, group.ID)
 					if err != nil {
 						logx.Error(err.Error())
 						return
@@ -402,8 +402,8 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 						newMessage := &socket_message.Message{
 							MessageID:    uuid.NewString(),
 							FromUserName: currentUser.NickName,
-							FromUUID:     session.SessionId,      //From Group UUID
-							ToUUID:       member.MemberInfo.Uuid, //To Member UUID
+							FromUUID:     session.SessionID,      //From Group UUID
+							ToUUID:       member.MemberInfo.UUID, //To Member UUID
 							Content:      fmt.Sprintf("%s started a group %s's call", currentUser.NickName, joinRoomData.CallType),
 							ContentType:  variable.TEXT,
 							MessageType:  variable.MESSAGE_TYPE_GROUPCHAT,
@@ -418,7 +418,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 							continue
 						}
 
-						memberClient, err := s.GetOneClient(member.MemberInfo.Uuid)
+						memberClient, err := s.GetOneClient(member.MemberInfo.UUID)
 						if err != nil {
 							logx.Error("Client not exist")
 							continue
@@ -430,17 +430,17 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 
 				time.Sleep(2 * time.Second) //waiting for 2 sec to received all the track from producer.
 				currentUserInfo := types.SFUProducerUserInfo{
-					ProduceruserId:     currentUser.Uuid,
+					ProduceruserID:     currentUser.UUID,
 					ProducerUserName:   currentUser.NickName,
 					ProducerUserAvatar: currentUser.Avatar,
 				}
 
 				//time.Sleep(1 * time.Second)
-				for _, clientId := range clients {
-					if clientId != userId {
-						//sessionProducersList = append(sessionProducersList, clientId)
-						//logx.Infof("Current user %s is Producer", clientId)
-						curClient, err := s.GetOneClient(clientId)
+				for _, clientID := range clients {
+					if clientID != userID {
+						//sessionProducersList = append(sessionProducersList, clientID)
+						//logx.Infof("Current user %s is Producer", clientID)
+						curClient, err := s.GetOneClient(clientID)
 						if err != nil {
 							logx.Error("Get client err : ", err)
 							continue
@@ -448,14 +448,14 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 						logx.Info("Getting user info")
 						//TODO: Get Current client info
 						ctx := context.Background()
-						producerInfo, err := curClient.SvcCtx.Uow.UserRepo().FindOneUserByUUID(ctx, clientId)
+						producerInfo, err := curClient.SvcCtx.Uow.UserRepo().FindOneUserByUUID(ctx, clientID)
 						if err != nil {
 							logx.Error("Get User Info err : ", err)
 							continue
 						}
 
 						producerUserInfo := types.SFUProducerUserInfo{
-							ProduceruserId:     producerInfo.Uuid,
+							ProduceruserID:     producerInfo.UUID,
 							ProducerUserName:   producerInfo.NickName,
 							ProducerUserAvatar: producerInfo.Avatar,
 						}
@@ -464,8 +464,8 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 						sessionProducersList = append(sessionProducersList, producerUserInfo)
 
 						resp := types.SfuNewProducerResp{
-							SessionId:    session.SessionId,
-							ProducerId:   currentUserInfo.ProduceruserId,
+							SessionID:    session.SessionID,
+							ProducerID:   currentUserInfo.ProduceruserID,
 							ProducerInfo: currentUserInfo,
 						}
 
@@ -476,8 +476,8 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 						}
 
 						msg := &socket_message.Message{
-							FromUUID:    userId,
-							ToUUID:      clientId,
+							FromUUID:    userID,
+							ToUUID:      clientID,
 							Content:     string(respStr),
 							ContentType: variable.SFU,
 							EventType:   variable.SFU_EVENT_SEND_NEW_PRODUCER, //join room.
@@ -488,15 +488,15 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 							logx.Error(err)
 							break
 						}
-						logx.Info("Sending new producer in to client : ", clientId)
+						logx.Info("Sending new producer in to client : ", clientID)
 						curClient.SendMessage(websocket.BinaryMessage, msgBytes)
 					}
 				}
 
 				//Response to producer.
 				resp := types.SFUConnectSessionResp{
-					SessionId:        session.SessionId,
-					ProducerId:       msg.FromUUID,
+					SessionID:        session.SessionID,
+					ProducerID:       msg.FromUUID,
 					SessionProducers: sessionProducersList,
 				}
 
@@ -538,13 +538,13 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 				break
 			}
 
-		}, func(clientId string, track *webrtc.TrackLocalStaticRTP) {
-			logx.Infof("Producer %s new track comes in : Kind %s", userId, track.Kind())
+		}, func(clientID string, track *webrtc.TrackLocalStaticRTP) {
+			logx.Infof("Producer %s new track comes in : Kind %s", userID, track.Kind())
 			if track == nil {
 				logx.Error("Track is nil - new track listener")
 				return
 			}
-			session.OnNewTrack(userId, track)
+			session.OnNewTrack(userID, track)
 		})
 		if err != nil {
 			logx.Error("Create ans error ", err)
@@ -556,9 +556,9 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 		//MARK: Same as Create?
 		consumeReq := types.SFUConsumeProducerReq{}
 		jsonString := msg.Content //Can be a json string?
-		userId := msg.FromUUID
+		userID := msg.FromUUID
 
-		c, err := s.GetOneClient(userId)
+		c, err := s.GetOneClient(userID)
 		if err != nil {
 			logx.Error("Get SocketClient error : ", err)
 			return err
@@ -568,7 +568,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 			logx.Error("Unmarshal error")
 			return err
 		}
-		logx.Info("Receive offer for consumer : Producer Id : ", consumeReq.ProducerId)
+		logx.Info("Receive offer for consumer : Producer ID : ", consumeReq.ProducerID)
 
 		sdpType := &types.Signaling{}
 		if err := jsonx.Unmarshal([]byte(consumeReq.SDPType), &sdpType); err != nil {
@@ -576,19 +576,19 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 			return err
 		}
 
-		session, err := s.sessionManager.GetOneSession(consumeReq.SessionId)
+		session, err := s.sessionManager.GetOneSession(consumeReq.SessionID)
 		if err != nil {
 			logx.Error("Get session error : ", err)
 			return err
 		}
 
-		transC, err := session.GetTransportClient(userId)
+		transC, err := session.GetTransportClient(userID)
 		if err != nil {
 			logx.Error("Get transportClient error : ", err)
 			return err
 		}
 
-		producerClient, err := session.GetTransportClient(consumeReq.ProducerId)
+		producerClient, err := session.GetTransportClient(consumeReq.ProducerID)
 		if err != nil {
 			logx.Error(err)
 			return err
@@ -599,9 +599,9 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 			logx.Error(err)
 			return err
 		}
-		logx.Info("Consuming ID ,", producerClient.GetClientId())
+		logx.Info("Consuming ID ,", producerClient.GetClientID())
 		if err := transC.Consume(
-			consumeReq.ProducerId,
+			consumeReq.ProducerID,
 			c.SvcCtx.Config.IceServer.Urls,
 			sdpType,
 			producer,
@@ -614,14 +614,14 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 				case webrtc.PeerConnectionStateDisconnected:
 				case webrtc.PeerConnectionStateClosed:
 					logx.Info("(Consumer)Connection State Change : Disconnected")
-					if err := transC.CloseConsumer(consumeReq.ProducerId); err != nil {
+					if err := transC.CloseConsumer(consumeReq.ProducerID); err != nil {
 						logx.Error(err)
 					}
 					break
 				case webrtc.PeerConnectionStateFailed:
 					logx.Info("(Consumer)Connection State Change : Failed")
 					//TODO: Close the connection when failed
-					if err := transC.CloseConsumer(consumeReq.ProducerId); err != nil {
+					if err := transC.CloseConsumer(consumeReq.ProducerID); err != nil {
 
 						logx.Error(err)
 					}
@@ -629,13 +629,13 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 				default:
 					break
 				}
-			}, func(clientId string, track *webrtc.TrackLocalStaticRTP) {
+			}, func(clientID string, track *webrtc.TrackLocalStaticRTP) {
 				if track == nil {
 					return
 				}
-				logx.Infof("Consumer %s new track comes in , Kind %s", userId, track.Kind())
+				logx.Infof("Consumer %s new track comes in , Kind %s", userID, track.Kind())
 			}); err != nil {
-			logx.Errorf("Consume %s error %s", consumeReq.ProducerId, err)
+			logx.Errorf("Consume %s error %s", consumeReq.ProducerID, err)
 			return err
 		}
 		break
@@ -643,13 +643,13 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 		fallthrough
 	case variable.SFU_EVENT_PRODUCER_ICE:
 		//Add to ice candindate info into the peer connection that data is provided
-		//MARK: Get All producer -> return a list of produceruserId
+		//MARK: Get All producer -> return a list of produceruserID
 		iceCandidateReq := types.SFUSendIceCandidateReq{}
 		jsonString := msg.Content //Can be a json string?
 		iceCandidateType := types.IceCandidateType{}
-		userId := msg.FromUUID
+		userID := msg.FromUUID
 		//logx.Info("Received ice candidate from client")
-		_, err := s.GetOneClient(userId)
+		_, err := s.GetOneClient(userID)
 		if err != nil {
 			logx.Error("SocketClient not found")
 			return err
@@ -664,12 +664,12 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 			return err
 		}
 
-		session, err := s.sessionManager.GetOneSession(iceCandidateReq.SessionId)
+		session, err := s.sessionManager.GetOneSession(iceCandidateReq.SessionID)
 		if err != nil {
 			logx.Error(err)
 			return err
 		}
-		transC, err := session.GetTransportClient(userId) //get current user - transport client obj
+		transC, err := session.GetTransportClient(userID) //get current user - transport client obj
 		if err != nil {
 			logx.Error("Get Transport client error,", err)
 			return err
@@ -680,7 +680,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 				return err
 			}
 		} else {
-			if err := transC.ExchangeIceCandidateForConsumers(iceCandidateReq.ClientId, iceCandidateReq.IceCandidateType); err != nil {
+			if err := transC.ExchangeIceCandidateForConsumers(iceCandidateReq.ClientID, iceCandidateReq.IceCandidateType); err != nil {
 				logx.Error("Exchange ice candidate for consumer error,", err)
 				return err
 			}
@@ -689,7 +689,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 	case variable.SFU_EVENT_PRODUCER_CLOSE:
 		closeConnReq := types.SFUCloseConnectionReq{}
 		jsonString := msg.Content //Can be a json string?
-		userId := msg.FromUUID
+		userID := msg.FromUUID
 
 		c, err := s.GetOneClient(msg.FromUUID)
 		if err != nil {
@@ -702,24 +702,24 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 			return err
 		}
 
-		session, err := s.sessionManager.GetOneSession(closeConnReq.SessionId)
+		session, err := s.sessionManager.GetOneSession(closeConnReq.SessionID)
 		if err != nil {
 			logx.Error("Get one session error , ", err)
 			return err
 		}
 
 		//Send a close message to all session client.
-		//Disconnect consumer with userId
-		for _, clientId := range session.GetSessionClients() {
-			if clientId != userId {
-				sessionClient, err := s.GetOneClient(clientId)
+		//Disconnect consumer with userID
+		for _, clientID := range session.GetSessionClients() {
+			if clientID != userID {
+				sessionClient, err := s.GetOneClient(clientID)
 				if err != nil {
 					logx.Error("Socket client error : ", err)
 					continue
 				}
 
 				closeResp := types.SFUCloseConnectionResp{
-					ProducerId: userId,
+					ProducerID: userID,
 				}
 
 				respStr, err := jsonx.Marshal(closeResp)
@@ -729,7 +729,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 				}
 
 				msg := &socket_message.Message{
-					ToUUID:      clientId,
+					ToUUID:      clientID,
 					Content:     string(respStr),
 					ContentType: variable.SFU,
 					EventType:   variable.SFU_EVENT_CONSUMER_CLOSE, // a producer is left
@@ -744,13 +744,13 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 				sessionClient.SendMessage(websocket.BinaryMessage, msgBytes)
 
 				//Disconnect consumer
-				transClient, err := session.GetTransportClient(clientId)
+				transClient, err := session.GetTransportClient(clientID)
 				if err != nil {
 					logx.Error(err)
 					return err
 				}
 
-				if err := transClient.CloseConsumer(userId); err != nil {
+				if err := transClient.CloseConsumer(userID); err != nil {
 					logx.Error(err)
 					return err
 				}
@@ -774,23 +774,23 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 
 		if session.IsEmpty() {
 			logx.Info("Session is empty --- removing.....")
-			s.sessionManager.RemoveOneSession(session.SessionId)
+			s.sessionManager.RemoveOneSession(session.SessionID)
 			ctx := context.Background()
 
-			currentUser, err := c.SvcCtx.Uow.UserRepo().FindOneUserByUUID(ctx, userId)
+			currentUser, err := c.SvcCtx.Uow.UserRepo().FindOneUserByUUID(ctx, userID)
 			if err != nil {
 				logx.Error("Get User Info err : ", err)
 				break
 			}
 
-			group, err := c.SvcCtx.Uow.GroupRepo().FindOneByUUID(ctx, session.SessionId)
+			group, err := c.SvcCtx.Uow.GroupRepo().FindOneByUUID(ctx, session.SessionID)
 			if err != nil {
 				logx.Error(err.Error())
 				break
 			}
 
 			//TODO: Get All Group Members
-			members, err := c.SvcCtx.Uow.UserGroupRepo().GetGroupMemberList(ctx, group.Id)
+			members, err := c.SvcCtx.Uow.UserGroupRepo().GetGroupMemberList(ctx, group.ID)
 			if err != nil {
 				logx.Error(err.Error())
 				break
@@ -801,8 +801,8 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 				newMessage := &socket_message.Message{
 					MessageID:    uuid.NewString(),
 					FromUserName: currentUser.NickName,
-					FromUUID:     session.SessionId,      //From Group UUID
-					ToUUID:       member.MemberInfo.Uuid, //To Member UUID
+					FromUUID:     session.SessionID,      //From Group UUID
+					ToUUID:       member.MemberInfo.UUID, //To Member UUID
 					Content:      fmt.Sprintf("%s ended a group %s's call", currentUser.NickName, session.CallType),
 					ContentType:  variable.TEXT,
 					MessageType:  variable.MESSAGE_TYPE_GROUPCHAT,
@@ -817,7 +817,7 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 					continue
 				}
 
-				memberClient, err := s.GetOneClient(member.MemberInfo.Uuid)
+				memberClient, err := s.GetOneClient(member.MemberInfo.UUID)
 				if err != nil {
 					logx.Error("Client not exist")
 					continue
@@ -835,30 +835,30 @@ func (s *SocketServer) onHandleSFUMessage(msg *socket_message.Message) error {
 		logx.Info("Event : SFU_EVENT_PRODUCER_MEIDA_STATUS")
 		mediaStatusReq := types.SFUProducerMediaStatusReq{}
 		jsonString := msg.Content //Can be a json string?
-		userId := msg.FromUUID
+		userID := msg.FromUUID
 
 		if err := jsonx.Unmarshal([]byte(jsonString), &mediaStatusReq); err != nil {
 			logx.Error("Unmarshal get producers request error : ", err)
 			return err
 		}
 
-		session, err := s.sessionManager.GetOneSession(mediaStatusReq.SessionId)
+		session, err := s.sessionManager.GetOneSession(mediaStatusReq.SessionID)
 		if err != nil {
 			logx.Error("Get one session error , ", err)
 			return err
 		}
 
 		//Send the message to all client in the room
-		for _, clientId := range session.GetSessionClients() {
-			if clientId != userId {
-				sessionClient, err := s.GetOneClient(clientId)
+		for _, clientID := range session.GetSessionClients() {
+			if clientID != userID {
+				sessionClient, err := s.GetOneClient(clientID)
 				if err != nil {
 					logx.Error("Socket client error : ", err)
 					continue
 				}
 
 				msg := &socket_message.Message{
-					ToUUID:      clientId,
+					ToUUID:      clientID,
 					Content:     jsonString,
 					ContentType: variable.SFU,
 					EventType:   variable.SFU_EVENT_PRODUCER_MEDIA_STATUS, // a producer is left

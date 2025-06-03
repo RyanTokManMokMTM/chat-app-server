@@ -36,7 +36,7 @@ func (l *GetStickerGroupListLogic) GetStickerGroupList(req *types.GetStickerList
 	stickerInfos := make([]types.StickerInfo, 0)
 	for _, info := range list {
 		stickerInfos = append(stickerInfos, types.StickerInfo{
-			StickerID:   info.Uuid,
+			StickerID:   info.UUID,
 			StickerName: info.StickerName,
 			StickerThum: info.StickerThum,
 		})

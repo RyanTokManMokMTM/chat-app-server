@@ -32,8 +32,8 @@ func NewGetGroupMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 
 func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GetGroupMembersReq) (resp *types.GetGroupMembersResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -41,7 +41,7 @@ func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GetGroupMembersReq) (r
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	_, err = l.svcCtx.Uow.GroupRepo().FindOneById(l.ctx, req.GroupID)
+	_, err = l.svcCtx.Uow.GroupRepo().FindOneByID(l.ctx, req.GroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.GROUP_NOT_EXIST)
@@ -64,12 +64,12 @@ func (l *GetGroupMembersLogic) GetGroupMembers(req *types.GetGroupMembersReq) (r
 	for _, mem := range members {
 		membersList = append(membersList, types.GroupMemberInfo{
 			CommonUserInfo: types.CommonUserInfo{
-				ID:       mem.MemberInfo.Id,
-				Uuid:     mem.MemberInfo.Uuid,
+				ID:       mem.MemberInfo.ID,
+				UUID:     mem.MemberInfo.UUID,
 				NickName: mem.MemberInfo.NickName,
 				Avatar:   mem.MemberInfo.Avatar,
 			},
-			IsGroupLead: mem.GroupInfo.GroupLead == mem.MemberInfo.Id,
+			IsGroupLead: mem.GroupInfo.GroupLead == mem.MemberInfo.ID,
 		})
 	}
 

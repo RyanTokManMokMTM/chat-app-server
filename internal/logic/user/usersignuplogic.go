@@ -48,7 +48,7 @@ func (l *UserSignUpLogic) UserSignUp(req *types.SignUpReq) (resp *types.SignUpRe
 	}
 
 	encryptedPW := cryptox.PasswordEncrypt(req.Password, l.svcCtx.Config.Salt)
-	u, err := l.svcCtx.Uow.UserRepo().CreateOne(l.ctx, models.User{
+	u, err := l.svcCtx.Uow.UserRepo().CreateOne(l.ctx, &models.User{
 		NickName: req.Name,
 		Email:    req.Email,
 		Password: encryptedPW,
@@ -60,7 +60,7 @@ func (l *UserSignUpLogic) UserSignUp(req *types.SignUpReq) (resp *types.SignUpRe
 	now := time.Now().Unix()
 	exp := now + l.svcCtx.Config.Auth.AccessExpire
 	payLoad := map[string]interface{}{
-		ctxtool.CTXJWTUserId: u.Id,
+		ctxtool.CTXJWTUserID: u.ID,
 	}
 
 	token, err := jwtx.GetToken(now, exp, l.svcCtx.Config.Auth.AccessSecret, payLoad)

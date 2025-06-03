@@ -13,7 +13,7 @@ type DeleteMessageResp struct {
 
 type GetMessagesReq struct {
 	MessageType uint `json:"message_type"`
-	SouceId     uint `json:"id"` //can be a groupId or friendId
+	SouceID     uint `json:"id"` //can be a groupId or friendId
 	Page        uint `form:"page,default=1"`
 	Limit       uint `form:"limit,default=20"`
 	LatestID    uint `form:"latest_id,default=0"`

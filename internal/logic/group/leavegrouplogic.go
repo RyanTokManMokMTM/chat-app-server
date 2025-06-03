@@ -33,15 +33,15 @@ func NewLeaveGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LeaveG
 
 func (l *LeaveGroupLogic) LeaveGroup(req *types.LeaveGroupReq) (resp *types.LeaveGroupResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	u, err := l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	u, err := l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
 		}
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
-	g, err := l.svcCtx.Uow.GroupRepo().FindOneById(l.ctx, req.GroupID)
+	g, err := l.svcCtx.Uow.GroupRepo().FindOneByID(l.ctx, req.GroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.GROUP_NOT_EXIST)
@@ -49,7 +49,7 @@ func (l *LeaveGroupLogic) LeaveGroup(req *types.LeaveGroupReq) (resp *types.Leav
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	_, err = l.svcCtx.Uow.UserGroupRepo().FindOneByGroupIdAndUserId(l.ctx, req.GroupID, userId)
+	_, err = l.svcCtx.Uow.UserGroupRepo().FindOneByGroupIDAndUserID(l.ctx, req.GroupID, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.NOT_JOIN_GROUP_YET)
@@ -57,14 +57,14 @@ func (l *LeaveGroupLogic) LeaveGroup(req *types.LeaveGroupReq) (resp *types.Leav
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	if err := l.svcCtx.Uow.UserGroupRepo().DeleteOneByGroupIdAndUserId(l.ctx, req.GroupID, userId); err != nil {
+	if err := l.svcCtx.Uow.UserGroupRepo().DeleteOneByGroupIDAndUserID(l.ctx, req.GroupID, userID); err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
 	go func() {
 		logx.Info("sending a system message")
 		sysMessage := fmt.Sprintf("%s left the group", u.NickName)
-		ws.SendGroupSystemNotification(u.Uuid, g.Uuid, sysMessage)
+		ws.SendGroupSystemNotification(u.UUID, g.UUID, sysMessage)
 	}()
 
 	return &types.LeaveGroupResp{

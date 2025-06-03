@@ -8,39 +8,39 @@ import (
 )
 
 type IStickerResourcesRepo[T any] interface {
-	CreateOne(ctx context.Context, stickerResource T) error
-	FindOneByID(ctx context.Context, uuid string) (T, error)
-	FindOneByUuid(ctx context.Context, uuid string) (T, error)
+	CreateOne(ctx context.Context, stickerResource T) (T, error)
+	FindOneByID(ctx context.Context, UUID string) (T, error)
+	FindOneByUuID(ctx context.Context, UUID string) (T, error)
 
 	UpdateOne(ctx context.Context, stickerResource T) error
-	DeleteOne(ctx context.Context, uuid string) error
+	DeleteOne(ctx context.Context, UUID string) error
 	CreateMany(ctx context.Context, paths []string) ([]T, error)
 }
 
-var _ IStickerResourcesRepo[models.StickerResource] = (*StickerResourcesRepo)(nil)
+var _ IStickerResourcesRepo[*models.StickerResource] = (*stickerResourcesRepo)(nil)
 
-type StickerResourcesRepo struct {
+type stickerResourcesRepo struct {
 	engine *gorm.DB
 	IRepository[*models.StickerResource, models.StickerResource]
 }
 
-func NewStickerResourcesRepo(engine *gorm.DB) *StickerResourcesRepo {
-	return &StickerResourcesRepo{
+func NewStickerResourcesRepo(engine *gorm.DB) IStickerResourcesRepo[*models.StickerResource] {
+	return &stickerResourcesRepo{
 		engine:      engine,
 		IRepository: NewRepository[*models.StickerResource, models.StickerResource](engine),
 	}
 }
 
-func (stickerResourcesRepo *StickerResourcesRepo) CreateOne(ctx context.Context, stickerResource models.StickerResource) error {
-	return stickerResourcesRepo.Create(ctx, &stickerResource)
+func (stickerResourcesRepo *stickerResourcesRepo) CreateOne(ctx context.Context, stickerResource *models.StickerResource) (*models.StickerResource, error) {
+	return stickerResourcesRepo.Create(ctx, stickerResource)
 }
 
-func (stickerResourcesRepo *StickerResourcesRepo) CreateMany(
+func (stickerResourcesRepo *stickerResourcesRepo) CreateMany(
 	ctx context.Context,
-	paths []string) ([]models.StickerResource, error) {
-	resources := make([]models.StickerResource, 0)
+	paths []string) ([]*models.StickerResource, error) {
+	resources := make([]*models.StickerResource, 0)
 	for _, path := range paths {
-		resources = append(resources, models.StickerResource{
+		resources = append(resources, &models.StickerResource{
 			Path: path,
 		})
 	}
@@ -52,18 +52,18 @@ func (stickerResourcesRepo *StickerResourcesRepo) CreateMany(
 	return resources, nil
 }
 
-func (stickerResourcesRepo *StickerResourcesRepo) FindOneByID(ctx context.Context, uuid string) (models.StickerResource, error) {
-	return stickerResourcesRepo.Find(ctx, &models.StickerResource{Uuid: uuid})
+func (stickerResourcesRepo *stickerResourcesRepo) FindOneByID(ctx context.Context, UUID string) (*models.StickerResource, error) {
+	return stickerResourcesRepo.Find(ctx, &models.StickerResource{UUID: UUID})
 }
 
-func (stickerResourcesRepo *StickerResourcesRepo) UpdateOne(ctx context.Context, stickerResource models.StickerResource) error {
-	return stickerResourcesRepo.Update(ctx, &stickerResource)
+func (stickerResourcesRepo *stickerResourcesRepo) UpdateOne(ctx context.Context, stickerResource *models.StickerResource) error {
+	return stickerResourcesRepo.Update(ctx, stickerResource)
 }
 
-func (stickerResourcesRepo *StickerResourcesRepo) DeleteOne(ctx context.Context, uuid string) error {
-	return stickerResourcesRepo.Delete(ctx, &models.StickerResource{Uuid: uuid})
+func (stickerResourcesRepo *stickerResourcesRepo) DeleteOne(ctx context.Context, UUID string) error {
+	return stickerResourcesRepo.Delete(ctx, &models.StickerResource{UUID: UUID})
 }
 
-func (stickerResourcesRepo *StickerResourcesRepo) FindOneByUuid(ctx context.Context, uuid string) (models.StickerResource, error) {
-	return stickerResourcesRepo.Find(ctx, &models.StickerResource{Uuid: uuid})
+func (stickerResourcesRepo *stickerResourcesRepo) FindOneByUuID(ctx context.Context, UUID string) (*models.StickerResource, error) {
+	return stickerResourcesRepo.Find(ctx, &models.StickerResource{UUID: UUID})
 }

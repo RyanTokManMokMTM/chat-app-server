@@ -26,10 +26,10 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 		w.Write([]byte("Websocket upgrade error"))
 		return
 	}
-	//TODO : Get userId from Context
-	userId := ctxtool.GetUserIDFromCTX(r.Context())
+	//TODO : Get userID from Context
+	userID := ctxtool.GetUserIDFromCTX(r.Context())
 	//TODO : Find User Info from DB
-	u, err := svcCtx.Uow.UserRepo().FindOneUserByID(r.Context(), userId)
+	u, err := svcCtx.Uow.UserRepo().FindOneUserByID(r.Context(), userID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(errx.NewCustomErrCode(errx.USER_NOT_EXIST).GetMessage()))
@@ -37,7 +37,7 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 	}
 
 	websocketServer := wsServer.(*socketServer.SocketServer)
-	client := socketClient.NewSocketClient(u.Uuid, u.NickName, conn, websocketServer, svcCtx)
+	client := socketClient.NewSocketClient(u.UUID, u.NickName, conn, websocketServer, svcCtx)
 	wsServer.RegisterClient(client)
 
 	go client.ReadLoop()
@@ -47,13 +47,13 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 		ctx := context.Background()
 
 		//we need to create a connection for each user?
-		len, err := variable.RedisConnection.LLen(ctx, u.Uuid).Result()
+		len, err := variable.RedisConnection.LLen(ctx, u.UUID).Result()
 		if err != nil {
 			logx.Error("getting Redis length err ", err)
 			return
 		}
 
-		messages, err := svcCtx.RedisClient.LRange(ctx, u.Uuid, 0, len).Result()
+		messages, err := svcCtx.RedisClient.LRange(ctx, u.UUID, 0, len).Result()
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			logx.Errorf("get offline messages error %s ", err.Error())
@@ -65,7 +65,7 @@ func ServeWS(svcCtx *svc.ServiceContext, w http.ResponseWriter, r *http.Request,
 			time.Sleep(time.Second / 50)
 		}
 
-		_, err = svcCtx.RedisClient.LTrim(ctx, u.Uuid, 100, -1).Result()
+		_, err = svcCtx.RedisClient.LTrim(ctx, u.UUID, 100, -1).Result()
 		if err != nil {
 			logx.Error(err)
 		}

@@ -3,20 +3,36 @@ package models
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 )
 
+type Model interface {
+	TableName() string
+}
+
 type Base struct {
+	ID        uint   `gorm:"primaryKey;autoIncrement;not null"`
+	UUID      string `gorm:"primaryKey;autoIncrement;not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
-func NewEngine(c *config.Config) *gorm.DB {
+func (b *Base) BeforeCreate(tx *gorm.DB) error {
+	b.UUID = uuid.New().String()
+	return nil
+}
 
+func (b *Base) BeforeUpdate(tx *gorm.DB) error {
+	tx.Statement.SetColumn("UpdatedAt", time.Now())
+	return nil
+}
+
+func NewEngine(c *config.Config) *gorm.DB {
 	sql, err := gorm.Open(mysql.Open(c.MySQL.DataSource), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,

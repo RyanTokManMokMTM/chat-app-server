@@ -8,7 +8,7 @@ const (
 	REQ_PARAM_ERROR        InternalCode = 100002
 	TOKEN_EXPIRED_ERROR    InternalCode = 100003
 	TOKEN_GENERATE_ERROR   InternalCode = 100004
-	TOKEN_INVALID_ERROR    InternalCode = 100005
+	TOKEN_INVALId_ERROR    InternalCode = 100005
 	DB_ERROR               InternalCode = 100006
 	DB_AFFECTED_ZERO_ERROR InternalCode = 100007
 	FILE_UPLOAD_FAILED     InternalCode = 100008

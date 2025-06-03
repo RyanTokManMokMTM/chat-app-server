@@ -23,8 +23,8 @@ import (
 
 type TransportClient struct {
 	sync.Mutex
-	clientId  string
-	sessionId string
+	clientID  string
+	sessionID string
 	//session                *session.Session
 	socketClient           *socketClient.SocketClient
 	trackLocalGroup        *trackGroup.TrackGroup
@@ -34,11 +34,11 @@ type TransportClient struct {
 	producerConnectedAudio chan struct{}
 }
 
-func NewTransportClient(clientId string, sessionId string, socketClient *socketClient.SocketClient) *TransportClient {
+func NewTransportClient(clientID string, sessionID string, socketClient *socketClient.SocketClient) *TransportClient {
 	return &TransportClient{
-		clientId:     clientId,
+		clientID:     clientID,
 		socketClient: socketClient,
-		sessionId:    sessionId,
+		sessionID:    sessionID,
 		//session:            session,
 		trackLocalGroup:    trackGroup.NewTrackGroup(),
 		transportProducer:  producer.NewProducer(),
@@ -200,7 +200,7 @@ func NewTransportClient(clientId string, sessionId string, socketClient *socketC
 
 func (tc *TransportClient) NewConnection(iceServer []string, sdpType *types.Signaling,
 	onConnectionState func(state webrtc.PeerConnectionState),
-	onNewTrackReceived func(clientId string, track *webrtc.TrackLocalStaticRTP)) error {
+	onNewTrackReceived func(clientID string, track *webrtc.TrackLocalStaticRTP)) error {
 	if err := tc.transportProducer.NewConnection(iceServer); err != nil {
 		return err
 	}
@@ -218,7 +218,7 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdpType *types.Sign
 
 	conn := tc.transportProducer.GetPeerConnection()
 	if conn != nil {
-		tc.connectionEventHandler(conn, tc.clientId, true, sdpType, onConnectionState, onNewTrackReceived)
+		tc.connectionEventHandler(conn, tc.clientID, true, sdpType, onConnectionState, onNewTrackReceived)
 	}
 	ansStr := ans.SDP
 	//ansStr, err := jsonx.Marshal(ans)
@@ -238,7 +238,7 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdpType *types.Sign
 	}
 
 	sfuResp := types.SfuConnectSessionResp{
-		SessionId: tc.sessionId,
+		SessionID: tc.sessionID,
 		SDPType:   string(sdpResp),
 	}
 
@@ -248,7 +248,7 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdpType *types.Sign
 	}
 
 	sfuMsg := &socket_message.Message{ //Send ans to producer
-		ToUUID:      tc.clientId, //Back to the user.
+		ToUUID:      tc.clientID, //Back to the user.
 		Content:     string(resp),
 		ContentType: variable.SFU,
 		MessageType: variable.MESSAGE_TYPE_GROUPCHAT,
@@ -266,15 +266,15 @@ func (tc *TransportClient) NewConnection(iceServer []string, sdpType *types.Sign
 }
 
 func (tc *TransportClient) Consume(
-	clientId string,
+	clientID string,
 	iceServer []string,
 	sdpType *types.Signaling,
 	producer producer.IProducer,
 	onConnectionState func(state webrtc.PeerConnectionState),
-	onNewTrackReceived func(clientId string, track *webrtc.TrackLocalStaticRTP)) error {
+	onNewTrackReceived func(clientID string, track *webrtc.TrackLocalStaticRTP)) error {
 	//TODO: Create consumer...
 	newConsumer := consumer.NewConsumer(
-		clientId,
+		clientID,
 	)
 
 	if err := newConsumer.CreateConnection(iceServer); err != nil {
@@ -289,9 +289,9 @@ func (tc *TransportClient) Consume(
 
 	ans, err := newConsumer.CreateAnswer(sdpType.SDP)
 	conn := newConsumer.GetPeerConnection()
-	tc.addConsumer(clientId, newConsumer)
+	tc.addConsumer(clientID, newConsumer)
 	if conn != nil {
-		tc.connectionEventHandler(conn, clientId, false, sdpType, onConnectionState, onNewTrackReceived)
+		tc.connectionEventHandler(conn, clientID, false, sdpType, onConnectionState, onNewTrackReceived)
 	}
 
 	ansStr := ans.SDP
@@ -307,8 +307,8 @@ func (tc *TransportClient) Consume(
 	}
 
 	sfuResp := types.SFUConsumeProducerResp{
-		SessionId:  tc.sessionId,
-		ProducerId: clientId,
+		SessionID:  tc.sessionID,
+		ProducerID: clientID,
 		SDPType:    string(sdpResp),
 	}
 
@@ -318,7 +318,7 @@ func (tc *TransportClient) Consume(
 	}
 
 	sfuMsg := &socket_message.Message{
-		ToUUID:      tc.clientId, //Back to the user.
+		ToUUID:      tc.clientID, //Back to the user.
 		Content:     string(resp),
 		ContentType: variable.SFU,
 		MessageType: variable.MESSAGE_TYPE_GROUPCHAT,
@@ -337,11 +337,11 @@ func (tc *TransportClient) Consume(
 
 func (tc *TransportClient) connectionEventHandler(
 	conn *webrtc.PeerConnection,
-	userId string,
+	userID string,
 	isProducer bool,
 	sdpType *types.Signaling,
 	onConnectionStatus func(webrtc.PeerConnectionState),
-	onNewTrackReceived func(clientId string, track *webrtc.TrackLocalStaticRTP)) {
+	onNewTrackReceived func(clientID string, track *webrtc.TrackLocalStaticRTP)) {
 
 	conn.OnDataChannel(func(channel *webrtc.DataChannel) {
 
@@ -396,7 +396,7 @@ func (tc *TransportClient) connectionEventHandler(
 		sdpCandidate := candidate.ToJSON().Candidate
 
 		signaling := types.Signaling{
-			Type: types.CANDIDATE,
+			Type: types.CANDINDATE,
 			Call: sdpType.Call,
 			SDP:  sdpCandidate,
 		}
@@ -407,9 +407,9 @@ func (tc *TransportClient) connectionEventHandler(
 			return
 		}
 		resp := types.SFUSendIceCandidateReq{
-			SessionId:        tc.sessionId,
+			SessionID:        tc.sessionID,
 			IsProducer:       isProducer,
-			ClientId:         userId,
+			ClientID:         userID,
 			IceCandidateType: string(candidateData),
 		}
 
@@ -424,7 +424,7 @@ func (tc *TransportClient) connectionEventHandler(
 		}
 
 		msg := &socket_message.Message{
-			ToUUID:      tc.clientId,
+			ToUUID:      tc.clientID,
 			Content:     string(respStr),
 			ContentType: variable.SFU,
 			EventType:   eventType, //join room.
@@ -449,13 +449,13 @@ func (tc *TransportClient) connectionEventHandler(
 		logx.Info(t.StreamID())
 		logx.Info(t.Codec().MimeType)
 		logx.Info(t.Codec().RTPCodecCapability)
-		trackId := fmt.Sprintf("%s_%s_%s", userId, t.Kind(), t.ID())
-		trackStreamId := fmt.Sprintf("%s_%s_%s", userId, t.Kind(), t.StreamID())
+		trackID := fmt.Sprintf("%s_%s_%s", userID, t.Kind(), t.ID())
+		trackStreamID := fmt.Sprintf("%s_%s_%s", userID, t.Kind(), t.StreamID())
 
 		trackLocal, err := webrtc.NewTrackLocalStaticRTP(
 			t.Codec().RTPCodecCapability,
-			trackId,
-			trackStreamId)
+			trackID,
+			trackStreamID)
 		if err != nil {
 			logx.Error(err)
 			return
@@ -470,7 +470,7 @@ func (tc *TransportClient) connectionEventHandler(
 		p.SetLocalTracks(trackLocal)
 
 		//MARK: Announce any consumer in the session that producer has a new track.
-		onNewTrackReceived(userId, trackLocal)
+		onNewTrackReceived(userID, trackLocal)
 
 		//TODO: Write track data to track.
 		go func() {
@@ -505,26 +505,26 @@ func (tc *TransportClient) connectionEventHandler(
 
 }
 
-func (tc *TransportClient) addConsumer(clientId string, ic consumer.IConsumer) {
+func (tc *TransportClient) addConsumer(clientID string, ic consumer.IConsumer) {
 	tc.Lock()
 	defer tc.Unlock()
-	if c, ok := tc.transportConsumers[clientId]; ok {
+	if c, ok := tc.transportConsumers[clientID]; ok {
 		_ = c.Close()
 	}
-	tc.transportConsumers[clientId] = ic
+	tc.transportConsumers[clientID] = ic
 }
 
-func (tc *TransportClient) removeConsumer(clientId string) {
+func (tc *TransportClient) removeConsumer(clientID string) {
 	tc.Lock()
 	defer tc.Unlock()
-	if c, ok := tc.transportConsumers[clientId]; ok {
+	if c, ok := tc.transportConsumers[clientID]; ok {
 		_ = c.Close()
-		delete(tc.transportConsumers, clientId)
+		delete(tc.transportConsumers, clientID)
 	}
 }
 
-func (tc *TransportClient) getConsumer(clientId string) (consumer.IConsumer, error) {
-	if c, ok := tc.transportConsumers[clientId]; ok {
+func (tc *TransportClient) getConsumer(clientID string) (consumer.IConsumer, error) {
+	if c, ok := tc.transportConsumers[clientID]; ok {
 		return c, nil
 	}
 	return nil, errors.New("consumer not found")
@@ -535,13 +535,13 @@ func (tc *TransportClient) Close() error {
 		if err := c.Close(); err != nil {
 			logx.Error("Close consumer connection err :", err)
 		}
-		tc.removeConsumer(c.ClientId())
+		tc.removeConsumer(c.ClientID())
 	}
 	return tc.transportProducer.CloseConnection()
 }
 
-func (tc *TransportClient) GetClientId() string {
-	return tc.clientId
+func (tc *TransportClient) GetClientID() string {
+	return tc.clientID
 }
 
 func (tc *TransportClient) ExchangeIceCandidateForProducer(iceData string) error {
@@ -551,17 +551,17 @@ func (tc *TransportClient) ExchangeIceCandidateForProducer(iceData string) error
 	return tc.transportProducer.UpdateIceCandidate([]byte(iceData))
 }
 
-func (tc *TransportClient) CloseConsumer(clientId string) error {
-	if c, ok := tc.transportConsumers[clientId]; ok {
+func (tc *TransportClient) CloseConsumer(clientID string) error {
+	if c, ok := tc.transportConsumers[clientID]; ok {
 		_ = c.Close()
-		tc.removeConsumer(clientId)
+		tc.removeConsumer(clientID)
 		return nil
 	}
 	return errors.New("consumer not found while closing the connection")
 }
 
-func (tc *TransportClient) ExchangeIceCandidateForConsumers(consumerId, iceData string) error {
-	c, err := tc.getConsumer(consumerId)
+func (tc *TransportClient) ExchangeIceCandidateForConsumers(consumerID, iceData string) error {
+	c, err := tc.getConsumer(consumerID)
 	if err != nil {
 		return err
 	}
@@ -575,8 +575,8 @@ func (tc *TransportClient) GetProducer() (producer.IProducer, error) {
 	return tc.transportProducer, nil
 }
 
-func (tc *TransportClient) GetConsumerById(consumerId string) (consumer.IConsumer, error) {
-	c, ok := tc.transportConsumers[consumerId]
+func (tc *TransportClient) GetConsumerByID(consumerID string) (consumer.IConsumer, error) {
+	c, ok := tc.transportConsumers[consumerID]
 	if !ok {
 		return nil, errors.New("consumer not exist")
 	}

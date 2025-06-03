@@ -35,8 +35,8 @@ func NewUploadUserCoverLogic(ctx context.Context, svcCtx *svc.ServiceContext, r 
 
 func (l *UploadUserCoverLogic) UploadUserCover(req *types.UploadUserAvatarReq) (resp *types.UploadUserAvatarResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -50,7 +50,7 @@ func (l *UploadUserCoverLogic) UploadUserCover(req *types.UploadUserAvatarReq) (
 	}
 
 	path := fmt.Sprintf("/%v", name)
-	if err = l.svcCtx.Uow.UserRepo().UpdateOneUserCover(l.ctx, userId, path); err != nil {
+	if err = l.svcCtx.Uow.UserRepo().UpdateOneUserCover(l.ctx, userID, path); err != nil {
 		return nil, errx.NewCustomError(errx.SERVER_COMMON_ERROR, err.Error())
 	}
 	return &types.UploadUserAvatarResp{

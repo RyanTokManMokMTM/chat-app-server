@@ -10,17 +10,17 @@ type UpdateUserFriendDTO struct {
 	FriendId uint
 }
 
+const userFriendTableName = "users_friends"
+
 type UserFriend struct {
 	//user A added user B ,but it doesn't mean user B has added userA ?
 	Base
-	ID       uint `gorm:"primaryKey;autoIncrement"`
-	UserId   uint `gorm:"not null;index"`
+	UserID   uint `gorm:"not null;index"`
 	FriendID uint `gorm:"not null;index"`
 
-	//UserInfo   User `gorm:"foreignKey:UserId"`
 	FriendInfo User `gorm:"foreignKey:FriendID"`
 }
 
 func (uf *UserFriend) TableName() string {
-	return "users_friends"
+	return userFriendTableName
 }

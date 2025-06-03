@@ -31,8 +31,8 @@ func NewDeleteStoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delet
 
 func (l *DeleteStoryLogic) DeleteStory(req *types.DeleteStoryReq) (resp *types.DeleteStoryResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -41,7 +41,7 @@ func (l *DeleteStoryLogic) DeleteStory(req *types.DeleteStoryReq) (resp *types.D
 	}
 
 	//TODO： Get story if the story is available and belongs to the user
-	_, err = l.svcCtx.Uow.StoryRepo().FindOneUserStory(l.ctx, req.StoryID, userId)
+	_, err = l.svcCtx.Uow.StoryRepo().FindOneUserStory(l.ctx, req.StoryID, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.STORY_NOT_EXIST)
@@ -49,7 +49,7 @@ func (l *DeleteStoryLogic) DeleteStory(req *types.DeleteStoryReq) (resp *types.D
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	if err = l.svcCtx.Uow.StoryRepo().DeleteOneById(l.ctx, req.StoryID); err != nil {
+	if err = l.svcCtx.Uow.StoryRepo().DeleteOneByID(l.ctx, req.StoryID); err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 

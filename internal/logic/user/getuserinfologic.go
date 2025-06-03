@@ -31,13 +31,13 @@ func NewGetUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUs
 func (l *GetUserInfoLogic) GetUserInfo(req *types.GetUserInfoReq) (resp *types.GetUserInfoResp, err error) {
 	// todo: add your logic here and delete this line
 
-	if req.UUID == "" && req.UserId == 0 {
+	if req.UUID == "" && req.UserID == 0 {
 		return nil, errx.NewCustomErrCode(errx.REQ_PARAM_ERROR)
 	}
 
 	var u *models.User
-	if req.UserId != 0 {
-		u, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, req.UserId)
+	if req.UserID != 0 {
+		u, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, req.UserID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -56,7 +56,7 @@ func (l *GetUserInfoLogic) GetUserInfo(req *types.GetUserInfoReq) (resp *types.G
 
 	return &types.GetUserInfoResp{
 		Code:          uint(http.StatusOK),
-		UUID:          u.Uuid,
+		UUID:          u.UUID,
 		Email:         u.Email,
 		Name:          u.NickName,
 		Avatar:        u.Avatar,

@@ -32,7 +32,7 @@ type (
 type (
 	CommonUserInfo {
 		ID            uint   `json:"id,omitempty"`
-		Uuid          string `json:"uuid,omitempty"`
+		UUID          string `json:"uuid,omitempty"`
 		NickName      string `json:"name,omitempty"`
 		Avatar        string `json:"avatar,omitempty"`
 		Email         string `json:"email,omitempty"`

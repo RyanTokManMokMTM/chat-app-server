@@ -51,7 +51,7 @@ func (l *UserSignInLogic) UserSignIn(req *types.SignInReq) (resp *types.SignInRe
 	now := time.Now().Unix()
 	exp := now + l.svcCtx.Config.Auth.AccessExpire
 	payLoad := map[string]interface{}{
-		ctxtool.CTXJWTUserId: u.Id,
+		ctxtool.CTXJWTUserID: u.ID,
 	}
 
 	token, err := jwtx.GetToken(now, exp, l.svcCtx.Config.Auth.AccessSecret, payLoad)
@@ -64,8 +64,8 @@ func (l *UserSignInLogic) UserSignIn(req *types.SignInReq) (resp *types.SignInRe
 		Token:       token,
 		ExpiredTime: uint(exp),
 		UserInfo: types.CommonUserInfo{
-			ID:            u.Id,
-			Uuid:          u.Uuid,
+			ID:            u.ID,
+			UUID:          u.UUID,
 			NickName:      u.NickName,
 			Avatar:        u.Avatar,
 			Email:         u.Email,

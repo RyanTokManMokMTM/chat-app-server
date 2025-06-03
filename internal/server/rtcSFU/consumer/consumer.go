@@ -2,6 +2,7 @@ package consumer
 
 import (
 	"errors"
+
 	"github.com/pion/webrtc/v3"
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -11,17 +12,17 @@ var _ IConsumer = (*Consumer)(nil)
 
 // Consumer uses to send the media to client, not to receive any media's track from the user it's connected.
 type Consumer struct {
-	clientId string
+	clientID string
 	conn     *webrtc.PeerConnection
 
 	trackLocal *webrtc.TrackLocalStaticRTP
 }
 
 func NewConsumer(
-	clientId string,
+	clientID string,
 ) *Consumer {
 	return &Consumer{
-		clientId: clientId,
+		clientID: clientID,
 	}
 }
 
@@ -84,8 +85,8 @@ func (c *Consumer) Close() error {
 	return c.conn.Close()
 }
 
-func (c *Consumer) ClientId() string {
-	return c.clientId
+func (c *Consumer) ClientID() string {
+	return c.clientID
 }
 
 func (c *Consumer) UpdateIceCandidate(data []byte) error {

@@ -35,8 +35,8 @@ func NewUploadGroupAvatarLogic(ctx context.Context, svcCtx *svc.ServiceContext, 
 
 func (l *UploadGroupAvatarLogic) UploadGroupAvatar(req *types.UploadGroupAvatarReq) (resp *types.UploadGroupAvatarResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -44,7 +44,7 @@ func (l *UploadGroupAvatarLogic) UploadGroupAvatar(req *types.UploadGroupAvatarR
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	group, err := l.svcCtx.Uow.GroupRepo().FindOneById(l.ctx, req.GroupID)
+	group, err := l.svcCtx.Uow.GroupRepo().FindOneByID(l.ctx, req.GroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.GROUP_NOT_EXIST)
@@ -52,7 +52,7 @@ func (l *UploadGroupAvatarLogic) UploadGroupAvatar(req *types.UploadGroupAvatarR
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	if group.GroupLead != userId {
+	if group.GroupLead != userID {
 		return nil, errx.NewCustomErrCode(errx.NO_GROUP_AUTHORITY)
 	}
 
@@ -63,7 +63,7 @@ func (l *UploadGroupAvatarLogic) UploadGroupAvatar(req *types.UploadGroupAvatarR
 	}
 
 	path := fmt.Sprintf("/%s", name)
-	if err := l.svcCtx.Uow.GroupRepo().UpdateOneAvatar(l.ctx, group.Id, path); err != nil {
+	if err := l.svcCtx.Uow.GroupRepo().UpdateOneAvatar(l.ctx, group.ID, path); err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 	return &types.UploadGroupAvatarResp{

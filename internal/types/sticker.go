@@ -35,6 +35,6 @@ type GetStickerResourcesReq struct {
 
 type GetStickerResourcesResp struct {
 	Code          uint     `json:"code"`
-	StickerId     string   `json:"sticker_id"`
+	StickerID     string   `json:"sticker_id"`
 	ResourcesPath []string `json:"resources_path"`
 }

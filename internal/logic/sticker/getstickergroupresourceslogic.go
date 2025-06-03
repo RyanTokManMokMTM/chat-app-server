@@ -45,7 +45,7 @@ func (l *GetStickerGroupResourcesLogic) GetStickerGroupResources(req *types.GetS
 	}
 	return &types.GetStickerResourcesResp{
 		Code:          http.StatusOK,
-		StickerId:     sticker.Uuid,
+		StickerID:     sticker.UUID,
 		ResourcesPath: resources,
 	}, nil
 }

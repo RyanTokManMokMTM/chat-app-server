@@ -32,8 +32,8 @@ func NewUpdateGroupInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *U
 
 func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (resp *types.UpdateGroupInfoResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -41,7 +41,7 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	group, err := l.svcCtx.Uow.GroupRepo().FindOneById(l.ctx, req.GroupID)
+	group, err := l.svcCtx.Uow.GroupRepo().FindOneByID(l.ctx, req.GroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.GROUP_NOT_EXIST)
@@ -49,11 +49,13 @@ func (l *UpdateGroupInfoLogic) UpdateGroupInfo(req *types.UpdateGroupInfoReq) (r
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	if group.GroupLead != userId {
+	if group.GroupLead != userID {
 		return nil, errx.NewCustomErrCode(errx.NO_GROUP_AUTHORITY)
 	}
-	if err := l.svcCtx.Uow.GroupRepo().UpdateOne(l.ctx, models.Group{
-		Id:        group.Id,
+	if err := l.svcCtx.Uow.GroupRepo().UpdateOne(l.ctx, &models.Group{
+		Base: models.Base{
+			ID: group.ID,
+		},
 		GroupName: req.GroupName,
 		GroupDesc: req.GroupDesc,
 	}); err != nil {

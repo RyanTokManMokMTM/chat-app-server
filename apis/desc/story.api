@@ -66,36 +66,36 @@ type (
 )
 type (
     StorySeenUserBasicInfo{
-        Id uint `json:"user_id"`
+        ID uint `json:"user_id"`
         Avatar string `json:"avatar"`
      }
 )
 
 type (
     UpdateStorySeenReq {
-        FriendId uint `json:"friend_id"`
-        StoryId uint `json:"story_id"`
+        FriendID uint `json:"friend_id"`
+        StoryID uint `json:"story_id"`
     }
     UpdateStorySeenResp {
         Code uint `json:"code"`
     }
 
     CreateStoryLikeReq {
-        StoryId uint `json:"story_id"`
+        StoryID uint `json:"story_id"`
     }
     CreateStoryLikeResp {
         Code uint `json:"code"`
     }
 
     DeleteStoryLikeReq {
-        StoryId uint `json:"story_id"`
+        StoryID uint `json:"story_id"`
     }
     DeleteStoryLikeResp {
         Code uint `json:"code"`
     }
 
     GetStorySeenListReq {
-        StoryId uint `path:"story_id"`
+        StoryID uint `path:"story_id"`
     }
 
     GetStorySeenListResp {
@@ -107,8 +107,8 @@ type (
 
 type (
     FriendStroy {
-        userId uint `json:"id"`
-        Uuid string `json:"uuid"`
+        userID uint `json:"id"`
+        UUID string `json:"uuid"`
         UserName string `json:"name"`
         UserAvatar string `json:"avatar"`
         IsSeen bool `json:"is_seen"`
@@ -116,8 +116,8 @@ type (
     }
 
     StorySeenInfo {
-        userId uint `json:"id"`
-        Uuid string `json:"uuid"`
+        userID uint `json:"id"`
+        UUID string `json:"uuid"`
         UserName string `json:"name"`
         UserAvatar string `json:"avatar"`
         IsLiked bool `json:"is_liked"`
@@ -156,7 +156,7 @@ service ChatApp{
     get /stories/active(GetActiveStoryReq) returns (GetActiveStoryResp)
 
     @doc(
-        summary : "Update story Id which is latest seen"
+        summary : "Update story ID which is latest seen"
     )
     @handler UpdateStorySeen
     put /story/seen(UpdateStorySeenReq) returns (UpdateStorySeenResp)

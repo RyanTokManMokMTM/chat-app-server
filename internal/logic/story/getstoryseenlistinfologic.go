@@ -31,8 +31,8 @@ func NewGetStorySeenListInfoLogic(ctx context.Context, svcCtx *svc.ServiceContex
 
 func (l *GetStorySeenListInfoLogic) GetStorySeenListInfo(req *types.GetStorySeenListReq) (resp *types.GetStorySeenListResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -40,7 +40,7 @@ func (l *GetStorySeenListInfoLogic) GetStorySeenListInfo(req *types.GetStorySeen
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	_, err = l.svcCtx.Uow.StoryRepo().FindOneByID(l.ctx, req.StoryId)
+	_, err = l.svcCtx.Uow.StoryRepo().FindOneByID(l.ctx, req.StoryID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.STORY_NOT_EXIST)
@@ -48,19 +48,19 @@ func (l *GetStorySeenListInfoLogic) GetStorySeenListInfo(req *types.GetStorySeen
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	storyList, err := l.svcCtx.Uow.UserStorySeenRepo().GetStoryLikedUserSeen(l.ctx, req.StoryId, 20)
+	storyList, err := l.svcCtx.Uow.UserStorySeenRepo().GetStoryLikedUserSeen(l.ctx, req.StoryID, 20)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	count, err := l.svcCtx.Uow.UserStorySeenRepo().CountOneStorySeen(l.ctx, req.StoryId)
+	count, err := l.svcCtx.Uow.UserStorySeenRepo().CountOneStorySeen(l.ctx, req.StoryID)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
 	var seenList = make([]types.StorySeenInfo, 0)
 	for _, seen := range storyList {
-		likes, err := l.svcCtx.Uow.UserStoryLikesRepo().FindOneByUserIdAndStoryId(l.ctx, seen.UserId, req.StoryId)
+		likes, err := l.svcCtx.Uow.UserStoryLikesRepo().FindOneByUserIDAndStoryID(l.ctx, seen.UserID, req.StoryID)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 		}
@@ -70,8 +70,8 @@ func (l *GetStorySeenListInfoLogic) GetStorySeenListInfo(req *types.GetStorySeen
 			isLikes = true
 		}
 		seenList = append(seenList, types.StorySeenInfo{
-			UserId:     seen.UserInfo.Id,
-			Uuid:       seen.UserInfo.Uuid,
+			UserID:     seen.UserInfo.ID,
+			UUID:       seen.UserInfo.UUID,
 			UserAvatar: seen.UserInfo.Avatar,
 			UserName:   seen.UserInfo.NickName,
 			IsLiked:    isLikes,

@@ -35,8 +35,8 @@ func NewGetMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetMe
 func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.GetMessagesResp, err error) {
 	// todo: add your logic here and delete this line
 	var respMessages = make([]types.MessageUser, 0)
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -46,7 +46,7 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 
 	if req.MessageType == variable.MESSAGE_TYPE_USERCHAT {
 		//TODO: Check User is friend
-		_, err = l.svcCtx.Uow.UserFriendsRepo().FindOneByUserIdAndFriendId(l.ctx, userId, req.SouceId)
+		_, err = l.svcCtx.Uow.UserFriendsRepo().FindOneByUserIDAndFriendID(l.ctx, userID, req.SouceID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errx.NewCustomErrCode(errx.NOT_YET_FRIEND)
@@ -55,7 +55,7 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 		}
 	} else if req.MessageType == variable.MESSAGE_TYPE_GROUPCHAT {
 		//TODO: Check User is group member
-		_, err := l.svcCtx.Uow.GroupRepo().FindOneByGroupIdAndUserId(l.ctx, req.SouceId, userId)
+		_, err := l.svcCtx.Uow.GroupRepo().FindOneByGroupIDAndUserID(l.ctx, req.SouceID, userID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errx.NewCustomErrCode(errx.NOT_JOIN_GROUP_YET)
@@ -65,7 +65,7 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 	}
 
 	pageLimit := pagerx.GetLimit(req.Limit)
-	messages, err := l.svcCtx.Uow.MessageRepo().FindMessages(l.ctx, userId, req.SouceId, models.MessageType(req.MessageType), int(pageLimit), req.LatestID)
+	messages, err := l.svcCtx.Uow.MessageRepo().FindMessages(l.ctx, userID, req.SouceID, models.MessageType(req.MessageType), int(pageLimit), req.LatestID)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -73,8 +73,8 @@ func (l *GetMessagesLogic) GetMessages(req *types.GetMessagesReq) (resp *types.G
 	for _, msg := range messages {
 		respMessages = append(respMessages, types.MessageUser{
 			MessageID:   msg.ID,
-			FromID:      msg.FromUserId,
-			ToID:        msg.ToUserId,
+			FromID:      msg.FromUserID,
+			ToID:        msg.ToUserID,
 			Content:     msg.Content,
 			ContentType: msg.ContentType,
 			MessageType: msg.MessageType,

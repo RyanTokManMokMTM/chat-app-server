@@ -244,7 +244,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: story.DeleteStoryLikeHandler(serverCtx),
 			},
 			{
-				// Update story Id which is latest seen
+				// Update story ID which is latest seen
 				Method:  http.MethodPut,
 				Path:    "/story/seen",
 				Handler: story.UpdateStorySeenHandler(serverCtx),

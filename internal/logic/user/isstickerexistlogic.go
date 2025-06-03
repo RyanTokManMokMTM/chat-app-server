@@ -31,8 +31,8 @@ func NewIsStickerExistLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Is
 
 func (l *IsStickerExistLogic) IsStickerExist(req *types.IsStickerExistReq) (resp *types.IsStickerExistResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -41,12 +41,12 @@ func (l *IsStickerExistLogic) IsStickerExist(req *types.IsStickerExistReq) (resp
 	}
 
 	var isExist = false
-	sticker, err := l.svcCtx.Uow.UserRepo().FindOneSticker(l.ctx, userId, req.StickerUUID)
+	sticker, err := l.svcCtx.Uow.UserRepo().FindOneSticker(l.ctx, userID, req.StickerUUID)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	if sticker != nil && sticker.Id != 0 {
+	if sticker != nil && sticker.ID != 0 {
 		isExist = true
 	}
 

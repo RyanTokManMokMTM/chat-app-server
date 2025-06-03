@@ -66,7 +66,7 @@ func (err *CustomError) StatusCode() int {
 
 	case TOKEN_EXPIRED_ERROR:
 		fallthrough
-	case TOKEN_INVALID_ERROR:
+	case TOKEN_INVALId_ERROR:
 		return http.StatusUnauthorized
 	}
 	return http.StatusInternalServerError

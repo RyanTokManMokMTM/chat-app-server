@@ -7,100 +7,90 @@ import (
 	"gorm.io/gorm"
 )
 
-type IGroupRepo[T any] interface {
-	CreateOne(ctx context.Context, group T) (*T, error)
-	FindOneById(ctx context.Context, id uint) (*T, error)
-	FindOneByUUID(ctx context.Context, uuid string) (*T, error)
-	FindOneByGroupIdAndUserId(ctx context.Context, groupId, userId uint) (*T, error)
+type IGroupRepo[T models.Model] interface {
+	CreateOne(ctx context.Context, group T) (T, error)
+	FindOneByID(ctx context.Context, ID uint) (T, error)
+	FindOneByUUID(ctx context.Context, UUID string) (T, error)
+	FindOneByGroupIDAndUserID(ctx context.Context, groupID, userID uint) (T, error)
 	UpdateOne(ctx context.Context, group T) error
-	DeleteOne(ctx context.Context, uuid string) error
-	DeleteOneById(ctx context.Context, id uint) error
+	DeleteOne(ctx context.Context, UUID string) error
+	DeleteOneByID(ctx context.Context, ID uint) error
 
-	UpdateOneByNameAndDesc(ctx context.Context, id uint, name, desc string) error
-	UpdateOneAvatar(ctx context.Context, id uint, avatarPath string) error
-	FindOneByQuery(ctx context.Context, query string) ([]*models.Group, error)
+	UpdateOneByNameAndDesc(ctx context.Context, ID uint, name, desc string) error
+	UpdateOneAvatar(ctx context.Context, ID uint, avatarPath string) error
+	FindOneByQuery(ctx context.Context, query string) ([]T, error)
 }
 
-var _ IGroupRepo[models.Group] = (*GroupRepo)(nil)
+var _ IGroupRepo[*models.Group] = (*groupRepo)(nil)
 
-type GroupRepo struct {
+type groupRepo struct {
 	engine *gorm.DB
 	IRepository[*models.Group, models.Group]
 }
 
-func NewGroupRepo(engine *gorm.DB) IGroupRepo[models.Group] {
-	return &GroupRepo{
-		IRepository: NewRepository[*models.Group, models.Group](engine), // repo for group
+func NewGroupRepo(engine *gorm.DB) IGroupRepo[*models.Group] {
+	return &groupRepo{
+		IRepository: NewRepository[*models.Group, models.Group](engine),
 		engine:      engine,
 	}
 }
 
-func (groupRepo *GroupRepo) CreateOne(ctx context.Context, group models.Group) (*models.Group, error) {
-	if err := groupRepo.Create(ctx, &group); err != nil {
-		return nil, err
-	}
-	return &group, nil
+func (groupRepo *groupRepo) CreateOne(ctx context.Context, group *models.Group) (*models.Group, error) {
+	return groupRepo.Create(ctx, group)
 }
 
-func (groupRepo *GroupRepo) FindOneById(ctx context.Context, id uint) (*models.Group, error) {
-	result, err := groupRepo.Find(ctx, &models.Group{Id: id})
-	if err != nil {
-		return nil, err
-	}
-	return &result, nil
+func (groupRepo *groupRepo) FindOneByID(ctx context.Context, ID uint) (*models.Group, error) {
+	return groupRepo.Find(ctx, &models.Group{Base: models.Base{
+		ID: ID,
+	}})
 }
 
-func (groupRepo *GroupRepo) FindOneByUUID(ctx context.Context, uuid string) (*models.Group, error) {
-	result, err := groupRepo.Find(ctx, &models.Group{Uuid: uuid})
-	if err != nil {
-		return nil, err
-	}
-	return &result, nil
+func (groupRepo *groupRepo) FindOneByUUID(ctx context.Context, UUID string) (*models.Group, error) {
+	return groupRepo.Find(ctx, &models.Group{
+		Base: models.Base{
+			UUID: UUID,
+		}})
 }
 
-func (groupRepo *GroupRepo) UpdateOne(ctx context.Context, group models.Group) error {
-	return groupRepo.Update(ctx, &group)
+func (groupRepo *groupRepo) UpdateOne(ctx context.Context, group *models.Group) error {
+	return groupRepo.Update(ctx, group)
 }
 
-func (groupRepo *GroupRepo) DeleteOne(ctx context.Context, uuid string) error {
-	return groupRepo.Delete(ctx, &models.Group{Uuid: uuid})
+func (groupRepo *groupRepo) DeleteOne(ctx context.Context, UUID string) error {
+	return groupRepo.Delete(ctx, &models.Group{Base: models.Base{UUID: UUID}})
 }
 
-func (groupRepo *GroupRepo) DeleteOneById(ctx context.Context, id uint) error {
-	return groupRepo.Delete(ctx, &models.Group{Id: id})
+func (groupRepo *groupRepo) DeleteOneByID(ctx context.Context, ID uint) error {
+	return groupRepo.Delete(ctx, &models.Group{Base: models.Base{ID: ID}})
 }
 
 // Other
 
-func (groupRepo *GroupRepo) FindOneByUUID(ctx context.Context, uuid string) (*models.Group, error) {
-	result, err := groupRepo.Find(ctx, &models.Group{Uuid: uuid})
-	if err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func (groupRepo *GroupRepo) UpdateOneByNameAndDesc(ctx context.Context, id uint, name, desc string) error {
+func (groupRepo *groupRepo) UpdateOneByNameAndDesc(ctx context.Context, ID uint, name, desc string) error {
 	group := models.Group{
-		Id:        id,
+		Base: models.Base{
+			ID: ID,
+		},
 		GroupName: name,
 		GroupDesc: desc,
 	}
-	return groupRepo.engine.WithContext(ctx).Debug().Model(models.Group{}).Where("id = ?", group.Id).UpdateColumns(map[string]any{
+	return groupRepo.engine.WithContext(ctx).Debug().Model(models.Group{}).Where("ID = ?", group.ID).UpdateColumns(map[string]any{
 		"GroupName": group.GroupName,
 		"GroupDesc": group.GroupDesc,
 	}).Error
 }
 
-func (groupRepo *GroupRepo) UpdateOneAvatar(ctx context.Context, id uint, avatarPath string) error {
+func (groupRepo *groupRepo) UpdateOneAvatar(ctx context.Context, ID uint, avatarPath string) error {
 	group := models.Group{
-		Id:          id,
+		Base: models.Base{
+			ID: ID,
+		},
 		GroupAvatar: avatarPath,
 	}
-	return groupRepo.engine.WithContext(ctx).Debug().Model(group).Where("id = ?", group.Id).Update("GroupAvatar", group.GroupAvatar).Error
+	return groupRepo.engine.WithContext(ctx).Debug().Model(group).Where("ID = ?", group.ID).Update("GroupAvatar", group.GroupAvatar).Error
 }
 
-func (groupRepo *GroupRepo) FindOneByQuery(ctx context.Context, query string) ([]*models.Group, error) {
+func (groupRepo *groupRepo) FindOneByQuery(ctx context.Context, query string) ([]*models.Group, error) {
 	var groups []*models.Group
 	if err := groupRepo.
 		engine.
@@ -113,9 +103,9 @@ func (groupRepo *GroupRepo) FindOneByQuery(ctx context.Context, query string) ([
 	return groups, nil
 }
 
-func (groupRepo *GroupRepo) FindOneByGroupIdAndUserId(ctx context.Context, groupId, userId uint) (*models.Group, error) {
+func (groupRepo *groupRepo) FindOneByGroupIDAndUserID(ctx context.Context, groupID, userID uint) (*models.Group, error) {
 	var group models.Group
-	err := groupRepo.engine.WithContext(ctx).Debug().Where("group_id = ? AND user_id = ?", groupId, userId).First(&group).Error
+	err := groupRepo.engine.WithContext(ctx).Debug().Where("group_ID = ? AND user_ID = ?", groupID, userID).First(&group).Error
 	if err != nil {
 		return nil, err
 	}

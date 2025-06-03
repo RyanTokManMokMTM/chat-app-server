@@ -32,8 +32,8 @@ func NewDeleteMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 func (l *DeleteMessageLogic) DeleteMessage(req *types.DeleteMessageReq) (resp *types.DeleteMessageResp, err error) {
 	// todo: add your logic here and delete this line
 
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -49,7 +49,7 @@ func (l *DeleteMessageLogic) DeleteMessage(req *types.DeleteMessageReq) (resp *t
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	if msg.FromUserId != userId {
+	if msg.FromUserID != userID {
 		return nil, errx.NewCustomErrCode(errx.NO_MESSAGE_DELETE_AUTHORITY)
 	}
 

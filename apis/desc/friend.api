@@ -10,14 +10,14 @@ info(
 
 type (
     AddFriendReq {
-        userId uint `json:"user_id"`
+        UserID uint `json:"user_id"`
     }
     AddFriendResp {
         Code uint `json:"code"`
     }
 
     DeleteFriendReq {
-        userId uint `json:"user_id"`
+        UserID uint `json:"user_id"`
     }
     DeleteFriendResp {
         Code uint `json:"code"`
@@ -34,7 +34,7 @@ type (
     }
 
     GetFriendInfoReq{
-        uuid string `path:"uuid"`
+        UUID string `path:"uuid"`
     }
     GetFriendInfoResp{
         Code uint `json:"code"`
@@ -46,7 +46,7 @@ type (
 type (
     FriendInfo {
         ID            uint   `json:"id,omitempty"`
-        Uuid          string `json:"uuid,omitempty"`
+        UUID          string `json:"uuid,omitempty"`
         NickName      string `json:"name,omitempty"`
         Avatar        string `json:"avatar,omitempty"`
     }

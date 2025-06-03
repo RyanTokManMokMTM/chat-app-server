@@ -10,16 +10,17 @@ type UpdateUserGroupDTO struct {
 	GroupId uint
 }
 
+const userGroupTableName = "users_groups"
+
 type UserGroup struct {
 	Base
-	ID      uint `gorm:"primaryKey;autoIncrement"`
-	GroupId uint `gorm:"not uniqueIndex;index;comment:'belong to which group Id'"`
-	UserId  uint `gorm:"not uniqueIndex;index;comment:'who belong to this group'"`
+	GroupID uint `gorm:"not uniqueIndex;index;comment:'belong to which group ID'"`
+	UserID  uint `gorm:"not uniqueIndex;index;comment:'who belong to this group'"`
 
-	MemberInfo User  `gorm:"foreignKey:UserId"`
-	GroupInfo  Group `gorm:"foreignKey:GroupId"`
+	MemberInfo User  `gorm:"foreignKey:UserID"`
+	GroupInfo  Group `gorm:"foreignKey:GroupID"`
 }
 
 func (ug *UserGroup) TableName() string {
-	return "users_groups"
+	return userGroupTableName
 }

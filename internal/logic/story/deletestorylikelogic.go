@@ -31,8 +31,8 @@ func NewDeleteStoryLikeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *D
 
 func (l *DeleteStoryLikeLogic) DeleteStoryLike(req *types.DeleteStoryLikeReq) (resp *types.DeleteStoryLikeResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -40,7 +40,7 @@ func (l *DeleteStoryLikeLogic) DeleteStoryLike(req *types.DeleteStoryLikeReq) (r
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	likes, err := l.svcCtx.Uow.UserStoryLikesRepo().FindOneByUserIdAndStoryId(l.ctx, userId, req.StoryId)
+	likes, err := l.svcCtx.Uow.UserStoryLikesRepo().FindOneByUserIDAndStoryID(l.ctx, userID, req.StoryID)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}

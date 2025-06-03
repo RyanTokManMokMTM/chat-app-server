@@ -41,7 +41,7 @@ func (l *GetStickerGroupInfoLogic) GetStickerGroupInfo(req *types.GetStickerInfo
 	return &types.GetStickerInfoResp{
 		Code: http.StatusOK,
 		StickerInfo: types.StickerInfo{
-			StickerID:   sticker.Uuid,
+			StickerID:   sticker.UUID,
 			StickerName: sticker.StickerName,
 			StickerThum: sticker.StickerThum,
 		},

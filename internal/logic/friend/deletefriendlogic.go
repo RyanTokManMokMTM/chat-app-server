@@ -31,8 +31,8 @@ func NewDeleteFriendLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Dele
 
 func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *types.DeleteFriendResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -41,7 +41,7 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 	}
 
 	//TODO: Find Friend
-	_, err = l.svcCtx.Uow.UserFriendsRepo().FindOneByUserIdAndFriendId(l.ctx, userId, req.UserId)
+	_, err = l.svcCtx.Uow.UserFriendsRepo().FindOneByUserIDAndFriendID(l.ctx, userID, req.UserID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.NOT_YET_FRIEND)
@@ -49,7 +49,7 @@ func (l *DeleteFriendLogic) DeleteFriend(req *types.DeleteFriendReq) (resp *type
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	if err := l.svcCtx.Uow.UserFriendsRepo().DeleteOneByUserIdAndFriendID(l.ctx, userId, req.UserId); err != nil {
+	if err := l.svcCtx.Uow.UserFriendsRepo().DeleteOneByUserIDAndFriendID(l.ctx, userID, req.UserID); err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 	return &types.DeleteFriendResp{

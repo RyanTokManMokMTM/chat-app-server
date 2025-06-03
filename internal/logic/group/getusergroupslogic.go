@@ -32,8 +32,8 @@ func NewGetUserGroupsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 
 func (l *GetUserGroupsLogic) GetUserGroups(req *types.GetUserGroupReq) (resp *types.GetUserGroupResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -41,13 +41,13 @@ func (l *GetUserGroupsLogic) GetUserGroups(req *types.GetUserGroupReq) (resp *ty
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	total := l.svcCtx.Uow.UserRepo().CountUserGroups(l.ctx, userId)
+	total := l.svcCtx.Uow.UserRepo().CountUserGroups(l.ctx, userID)
 	//
 	pageLimit := pagerx.GetLimit(req.Limit)
 	pageSize := pagerx.GetTotalPageByPageSize(uint(total), pageLimit)
 	pageOffset := pagerx.PageOffset(pageSize, req.Page)
 
-	groups, err := l.svcCtx.Uow.UserGroupRepo().FindUserGroup(l.ctx, userId, int(pageOffset), int(pageLimit))
+	groups, err := l.svcCtx.Uow.UserGroupRepo().FindUserGroup(l.ctx, userID, int(pageOffset), int(pageLimit))
 	if err != nil {
 		logx.Infof(err.Error())
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
@@ -56,8 +56,8 @@ func (l *GetUserGroupsLogic) GetUserGroups(req *types.GetUserGroupReq) (resp *ty
 	var userGroups = make([]types.GroupInfo, 0)
 	for _, g := range groups {
 		userGroups = append(userGroups, types.GroupInfo{
-			ID:        g.GroupInfo.Id,
-			Uuid:      g.GroupInfo.Uuid,
+			ID:        g.GroupInfo.ID,
+			UUID:      g.GroupInfo.UUID,
 			Name:      g.GroupInfo.GroupName,
 			Avatar:    g.GroupInfo.GroupAvatar,
 			CreatedAt: uint(g.GroupInfo.CreatedAt.Unix()),

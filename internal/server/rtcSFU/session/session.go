@@ -2,29 +2,30 @@ package session
 
 import (
 	"errors"
+	"sync"
+
 	"github.com/pion/webrtc/v3"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/server/rtcSFU/transportClient"
 	"github.com/zeromicro/go-zero/core/logx"
-	"sync"
 )
 
 type Session struct {
 	sync.Mutex
-	SessionId            string //roomId
+	SessionID            string //roomID
 	CallType             string
 	sessionClients       map[string]*transportClient.TransportClient
 	newTrackLoadReceived chan struct {
-		clientId string
+		clientID string
 		track    *webrtc.TrackLocalStaticRTP
 	}
 }
 
-func NewSession(SessionId, callType string) *Session {
+func NewSession(SessionID, callType string) *Session {
 	return &Session{
-		SessionId:      SessionId,
+		SessionID:      SessionID,
 		sessionClients: make(map[string]*transportClient.TransportClient),
 		newTrackLoadReceived: make(chan struct {
-			clientId string
+			clientID string
 			track    *webrtc.TrackLocalStaticRTP
 		}),
 		CallType: callType,
@@ -44,9 +45,9 @@ func (s *Session) OnListingNewTrack() {
 				logx.Error("Track is nil")
 				return
 			}
-			logx.Infof("On received a new track.from client %s............", info.clientId)
+			logx.Infof("On received a new track.from client %s............", info.clientID)
 			for _, id := range s.GetSessionClients() {
-				if id == info.clientId {
+				if id == info.clientID {
 					//Track from the client id
 					continue
 				}
@@ -59,7 +60,7 @@ func (s *Session) OnListingNewTrack() {
 				}
 
 				//Get Client current consumer info
-				c, err := tc.GetConsumerById(info.clientId)
+				c, err := tc.GetConsumerByID(info.clientID)
 				if err != nil {
 					logx.Error(err)
 					continue
@@ -90,11 +91,11 @@ func (s *Session) OnListingNewTrack() {
 	}
 }
 
-func (s *Session) AddNewSessionClient(clientId string, client *transportClient.TransportClient) {
+func (s *Session) AddNewSessionClient(clientID string, client *transportClient.TransportClient) {
 	s.Lock()
 	defer s.Unlock()
-	s.sessionClients[clientId] = client
-	logx.Infof("Added %s to session", clientId)
+	s.sessionClients[clientID] = client
+	logx.Infof("Added %s to session", clientID)
 }
 
 func (s *Session) GetSessionClients() []string {
@@ -113,17 +114,17 @@ func (s *Session) IsEmpty() bool {
 	return false
 }
 
-func (s *Session) RemoveSessionClient(clientId string) {
+func (s *Session) RemoveSessionClient(clientID string) {
 	s.Lock()
 	defer s.Unlock()
-	_, ok := s.sessionClients[clientId]
+	_, ok := s.sessionClients[clientID]
 	if ok {
-		delete(s.sessionClients, clientId)
+		delete(s.sessionClients, clientID)
 	}
 }
 
-func (s *Session) GetTransportClient(clientId string) (*transportClient.TransportClient, error) {
-	client, ok := s.sessionClients[clientId]
+func (s *Session) GetTransportClient(clientID string) (*transportClient.TransportClient, error) {
+	client, ok := s.sessionClients[clientID]
 	if !ok {
 		return nil, errors.New("client not in the session")
 	}
@@ -131,9 +132,9 @@ func (s *Session) GetTransportClient(clientId string) (*transportClient.Transpor
 	return client, nil
 }
 
-func (s *Session) OnNewTrack(clientId string, track *webrtc.TrackLocalStaticRTP) {
+func (s *Session) OnNewTrack(clientID string, track *webrtc.TrackLocalStaticRTP) {
 	s.newTrackLoadReceived <- struct {
-		clientId string
+		clientID string
 		track    *webrtc.TrackLocalStaticRTP
-	}{clientId: clientId, track: track}
+	}{clientID: clientID, track: track}
 }

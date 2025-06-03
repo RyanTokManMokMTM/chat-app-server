@@ -31,8 +31,8 @@ func NewDeleteGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delet
 
 func (l *DeleteGroupLogic) DeleteGroup(req *types.DeleteGroupReq) (resp *types.DeleteGroupResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -41,7 +41,7 @@ func (l *DeleteGroupLogic) DeleteGroup(req *types.DeleteGroupReq) (resp *types.D
 	}
 
 	//TODO: GET GROUP INFO
-	group, err := l.svcCtx.Uow.GroupRepo().FindOneById(l.ctx, req.GroupID)
+	group, err := l.svcCtx.Uow.GroupRepo().FindOneByID(l.ctx, req.GroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.GROUP_NOT_EXIST)
@@ -49,7 +49,7 @@ func (l *DeleteGroupLogic) DeleteGroup(req *types.DeleteGroupReq) (resp *types.D
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	if group.GroupLead != userId {
+	if group.GroupLead != userID {
 		return nil, errx.NewCustomErrCode(errx.NO_GROUP_AUTHORITY)
 	}
 
@@ -61,7 +61,7 @@ func (l *DeleteGroupLogic) DeleteGroup(req *types.DeleteGroupReq) (resp *types.D
 	}
 
 	//TODO: Remove entire group
-	if err := l.svcCtx.Uow.GroupRepo().DeleteOneById(l.ctx, req.GroupID); err != nil {
+	if err := l.svcCtx.Uow.GroupRepo().DeleteOneByID(l.ctx, req.GroupID); err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 

@@ -33,15 +33,15 @@ func NewJoinGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *JoinGro
 
 func (l *JoinGroupLogic) JoinGroup(req *types.JoinGroupReq) (resp *types.JoinGroupResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	u, err := l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	u, err := l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
 		}
 	}
 
-	g, err := l.svcCtx.Uow.GroupRepo().FindOneById(l.ctx, req.GroupID)
+	g, err := l.svcCtx.Uow.GroupRepo().FindOneByID(l.ctx, req.GroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.GROUP_NOT_EXIST)
@@ -49,7 +49,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.JoinGroupReq) (resp *types.JoinGro
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	member, err := l.svcCtx.Uow.UserGroupRepo().FindOneByGroupIdAndUserId(l.ctx, req.GroupID, userId)
+	member, err := l.svcCtx.Uow.UserGroupRepo().FindOneByGroupIDAndUserID(l.ctx, req.GroupID, userID)
 	if member != nil {
 		return nil, errx.NewCustomErrCode(errx.ALREADY_IN_GROUP)
 	}
@@ -58,9 +58,9 @@ func (l *JoinGroupLogic) JoinGroup(req *types.JoinGroupReq) (resp *types.JoinGro
 	}
 
 	//TODO: Add it to group
-	_, err = l.svcCtx.Uow.UserGroupRepo().CreateOne(l.ctx, models.UserGroup{
-		GroupId: req.GroupID,
-		UserId:  userId,
+	_, err = l.svcCtx.Uow.UserGroupRepo().CreateOne(l.ctx, &models.UserGroup{
+		GroupID: req.GroupID,
+		UserID:  userID,
 	})
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
@@ -69,7 +69,7 @@ func (l *JoinGroupLogic) JoinGroup(req *types.JoinGroupReq) (resp *types.JoinGro
 	go func() {
 		logx.Info("sending a system message")
 		sysMessage := fmt.Sprintf("%s joined the group", u.NickName)
-		ws.SendGroupSystemNotification(u.Uuid, g.Uuid, sysMessage)
+		ws.SendGroupSystemNotification(u.UUID, g.UUID, sysMessage)
 	}()
 	return &types.JoinGroupResp{
 		Code: uint(http.StatusOK),

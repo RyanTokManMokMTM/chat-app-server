@@ -38,8 +38,8 @@ func NewCreateGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext, r *htt
 
 func (l *CreateGroupLogic) CreateGroup(req *types.CreateGroupReq) (resp *types.CreateGroupResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	u, err := l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	u, err := l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -56,10 +56,10 @@ func (l *CreateGroupLogic) CreateGroup(req *types.CreateGroupReq) (resp *types.C
 
 		avatar = path
 	}
-	group, err := l.svcCtx.Uow.GroupRepo().CreateOne(l.ctx, models.Group{
+	group, err := l.svcCtx.Uow.GroupRepo().CreateOne(l.ctx, &models.Group{
 		GroupName:   req.GroupName,
 		GroupAvatar: avatar,
-		GroupLead:   userId,
+		GroupLead:   userID,
 	})
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
@@ -69,9 +69,9 @@ func (l *CreateGroupLogic) CreateGroup(req *types.CreateGroupReq) (resp *types.C
 	if len(req.GroupMembers) > 0 {
 		var members []string
 		for _, memberID := range req.GroupMembers {
-			_, err := l.svcCtx.Uow.UserGroupRepo().CreateOne(l.ctx, models.UserGroup{
-				GroupId: group.Id,
-				UserId:  memberID,
+			_, err := l.svcCtx.Uow.UserGroupRepo().CreateOne(l.ctx, &models.UserGroup{
+				GroupID: group.ID,
+				UserID:  memberID,
 			})
 			if err != nil {
 				logx.Error(err.Error())
@@ -91,12 +91,12 @@ func (l *CreateGroupLogic) CreateGroup(req *types.CreateGroupReq) (resp *types.C
 
 	go func() {
 		logx.Info("sending a system message")
-		ws.SendGroupSystemNotification(u.Uuid, group.Uuid, sysMessage)
+		ws.SendGroupSystemNotification(u.UUID, group.UUID, sysMessage)
 	}()
 
 	return &types.CreateGroupResp{
 		Code:        uint(http.StatusOK),
-		GroupUUID:   group.Uuid,
+		GroupUUID:   group.UUID,
 		GroupAvatar: group.GroupAvatar,
 	}, nil
 }

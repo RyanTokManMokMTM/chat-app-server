@@ -5,13 +5,13 @@ import (
 	socket_message "github.com/ryantokmanmokmtm/chat-app-server/socket-proto"
 )
 
-// FIXME: should be use UUID instead
+// FIXME: should be use UUId instead
 func ConvertSocketMessageToMessage(fromId, toId uint, message *socket_message.Message) *models.Message {
 	if message == nil {
 		return nil
 	}
 	return &models.Message{
-		Uuid:                 message.MessageID,
+		UUId:                 message.MessageId,
 		FromUserId:           fromId,
 		ToUserId:             toId,
 		Content:              message.Content,
@@ -21,9 +21,9 @@ func ConvertSocketMessageToMessage(fromId, toId uint, message *socket_message.Me
 		FileName:             message.FileName,
 		FileSize:             uint(message.FileSize),
 		ContentAvailableTime: uint(message.ContentAvailableTime),
-		ContentId:            message.ContentUUID,
+		ContentId:            message.ContentUUId,
 		ContentUserName:      message.ContentUserName,
 		ContentUserAvatar:    message.ContentUserAvatar,
-		ContentUserUUID:      message.ContentUserUUID,
+		ContentUserUUId:      message.ContentUserUUId,
 	}
 }

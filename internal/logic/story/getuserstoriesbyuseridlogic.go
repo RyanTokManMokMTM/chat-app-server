@@ -16,24 +16,24 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type GetUserStoriesByuserIdLogic struct {
+type GetUserStoriesByuserIDLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewGetUserStoriesByuserIdLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserStoriesByuserIdLogic {
-	return &GetUserStoriesByuserIdLogic{
+func NewGetUserStoriesByuserIDLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserStoriesByuserIDLogic {
+	return &GetUserStoriesByuserIDLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *GetUserStoriesByuserIdLogic) GetUserStoriesByuserId(req *types.GetUserStoryReq) (resp *types.GetUserStoryResp, err error) {
+func (l *GetUserStoriesByuserIDLogic) GetUserStoriesByuserID(req *types.GetUserStoryReq) (resp *types.GetUserStoryResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -46,32 +46,32 @@ func (l *GetUserStoriesByuserIdLogic) GetUserStoriesByuserId(req *types.GetUserS
 		storyTimeStamp = time.Now().Unix()
 	}
 
-	storys, err := l.svcCtx.Uow.StoryRepo().FindAllUserStoriesByTimeStamp(l.ctx, req.UserId, storyTimeStamp)
+	storys, err := l.svcCtx.Uow.StoryRepo().FindAllUserStoriesByTimeStamp(l.ctx, req.UserID, storyTimeStamp)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
 	var lastStoryID uint = 0
-	seenStory, err := l.svcCtx.Uow.UserStorySeenRepo().FindLatestOne(l.ctx, userId, req.UserId)
+	seenStory, err := l.svcCtx.Uow.UserStorySeenRepo().FindLatestOne(l.ctx, userID, req.UserID)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
 	if seenStory != nil {
-		lastStoryID = seenStory.StoryId
+		lastStoryID = seenStory.StoryID
 	}
 
 	var storiesList = make([]types.StoryInfo, 0)
 	for _, s := range storys {
 		storiesList = append(storiesList, types.StoryInfo{
-			StoryID:       s.Id,
-			StoryUUID:     s.Uuid,
+			StoryID:       s.ID,
+			StoryUUID:     s.UUID,
 			StoryMediaURL: s.StoryMediaPath,
 		})
 	}
 	return &types.GetUserStoryResp{
 		Code:        uint(http.StatusOK),
 		Stories:     storiesList,
-		LastStoryId: lastStoryID,
+		LastStoryID: lastStoryID,
 	}, nil
 }

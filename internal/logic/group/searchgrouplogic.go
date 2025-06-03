@@ -31,8 +31,8 @@ func NewSearchGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Searc
 
 func (l *SearchGroupLogic) SearchGroup(req *types.SearchGroupReq) (resp *types.SearchGroupResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -52,13 +52,13 @@ func (l *SearchGroupLogic) SearchGroup(req *types.SearchGroupReq) (resp *types.S
 	groupInfo := make([]types.FullGroupInfo, 0)
 	for _, group := range groups {
 
-		count, err := l.svcCtx.Uow.UserGroupRepo().CountGroupMembers(l.ctx, group.Id)
+		count, err := l.svcCtx.Uow.UserGroupRepo().CountGroupMembers(l.ctx, group.ID)
 		if err != nil {
 			logx.Error(err.Error())
 			continue
 		}
 
-		u, err := l.svcCtx.Uow.UserGroupRepo().FindOneByGroupIdAndUserId(l.ctx, group.Id, userId)
+		u, err := l.svcCtx.Uow.UserGroupRepo().FindOneByGroupIDAndUserID(l.ctx, group.ID, userID)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			logx.Error(err.Error())
 			continue
@@ -68,8 +68,8 @@ func (l *SearchGroupLogic) SearchGroup(req *types.SearchGroupReq) (resp *types.S
 
 		groupInfo = append(groupInfo, types.FullGroupInfo{
 			GroupInfo: types.GroupInfo{
-				ID:        group.Id,
-				Uuid:      group.Uuid,
+				ID:        group.ID,
+				UUID:      group.UUID,
 				Name:      group.GroupName,
 				Avatar:    group.GroupAvatar,
 				CreatedAt: uint(group.CreatedAt.Unix()),
@@ -77,7 +77,7 @@ func (l *SearchGroupLogic) SearchGroup(req *types.SearchGroupReq) (resp *types.S
 			Members:   uint(count),
 			IsJoined:  isJoined,
 			CreatedBy: group.LeadInfo.NickName,
-			IsOwner:   group.GroupLead == userId,
+			IsOwner:   group.GroupLead == userID,
 		})
 	}
 	return &types.SearchGroupResp{

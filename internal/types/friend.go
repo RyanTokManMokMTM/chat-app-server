@@ -4,7 +4,7 @@
 package types
 
 type AddFriendReq struct {
-	UserId uint `json:"user_id"`
+	UserID uint `json:"user_id"`
 }
 
 type AddFriendResp struct {
@@ -12,7 +12,7 @@ type AddFriendResp struct {
 }
 
 type DeleteFriendReq struct {
-	UserId uint `json:"user_id"`
+	UserID uint `json:"user_id"`
 }
 
 type DeleteFriendResp struct {
@@ -20,7 +20,7 @@ type DeleteFriendResp struct {
 }
 
 type GetFriendInfoReq struct {
-	Uuid string `path:"uuid"`
+	UUID string `path:"uuid"`
 }
 
 type GetFriendInfoResp struct {

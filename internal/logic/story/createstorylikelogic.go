@@ -32,8 +32,8 @@ func NewCreateStoryLikeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *C
 
 func (l *CreateStoryLikeLogic) CreateStoryLike(req *types.CreateStoryLikeReq) (resp *types.CreateStoryLikeResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -41,7 +41,7 @@ func (l *CreateStoryLikeLogic) CreateStoryLike(req *types.CreateStoryLikeReq) (r
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	_, err = l.svcCtx.Uow.StoryRepo().FindOneByID(l.ctx, req.StoryId)
+	_, err = l.svcCtx.Uow.StoryRepo().FindOneByID(l.ctx, req.StoryID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.STORY_NOT_EXIST)
@@ -49,9 +49,9 @@ func (l *CreateStoryLikeLogic) CreateStoryLike(req *types.CreateStoryLikeReq) (r
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	_, err = l.svcCtx.Uow.UserStoryLikesRepo().CreateOne(l.ctx, models.UserStoryLikes{
-		UserId:  userId,
-		StoryId: req.StoryId,
+	_, err = l.svcCtx.Uow.UserStoryLikesRepo().CreateOne(l.ctx, &models.UserStoryLikes{
+		UserID:  userID,
+		StoryID: req.StoryID,
 	})
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())

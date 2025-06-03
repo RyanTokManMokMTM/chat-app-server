@@ -12,7 +12,7 @@ type AddStoryResp struct {
 }
 
 type CreateStoryLikeReq struct {
-	StoryId uint `json:"story_id"`
+	StoryID uint `json:"story_id"`
 }
 
 type CreateStoryLikeResp struct {
@@ -20,7 +20,7 @@ type CreateStoryLikeResp struct {
 }
 
 type DeleteStoryLikeReq struct {
-	StoryId uint `json:"story_id"`
+	StoryID uint `json:"story_id"`
 }
 
 type DeleteStoryLikeResp struct {
@@ -63,7 +63,7 @@ type GetStoryInfoByIdResp struct {
 }
 
 type GetStorySeenListReq struct {
-	StoryId uint `path:"story_id"`
+	StoryID uint `path:"story_id"`
 }
 
 type GetStorySeenListResp struct {
@@ -84,8 +84,8 @@ type GetUserStoryResp struct {
 }
 
 type UpdateStorySeenReq struct {
-	FriendId uint `json:"friend_id"`
-	StoryId  uint `json:"story_id"`
+	FriendID uint `json:"friend_id"`
+	StoryID  uint `json:"story_id"`
 }
 
 type UpdateStorySeenResp struct {

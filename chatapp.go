@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	_ "github.com/golang/mock/mockgen/model"
 	"github.com/ryantokmanmokmtm/chat-app-server/internal/config"
-	_ "github.com/ryantokmanmokmtm/chat-app-server/internal/dao"
 	routerConf "github.com/ryantokmanmokmtm/chat-app-server/router"
 	"github.com/zeromicro/go-zero/core/conf"
 )

@@ -113,7 +113,7 @@ type (
 
     GroupInfo {
         ID uint `json:"id"`
-        Uuid string `json:"uuid"`
+        UUID string `json:"uuid"`
         Name string `json:"name"`
         Avatar string `json:"avatar"`
         Desc string `json:"desc"`

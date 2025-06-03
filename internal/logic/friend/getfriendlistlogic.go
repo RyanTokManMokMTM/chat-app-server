@@ -32,8 +32,8 @@ func NewGetFriendListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 
 func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *types.GetFriendListResp, err error) {
 	// todo: add your logic here and delete this line
-	userId := ctxtool.GetUserIDFromCTX(l.ctx)
-	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userId)
+	userID := ctxtool.GetUserIDFromCTX(l.ctx)
+	_, err = l.svcCtx.Uow.UserRepo().FindOneUserByID(l.ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errx.NewCustomErrCode(errx.USER_NOT_EXIST)
@@ -41,7 +41,7 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
 
-	total, err := l.svcCtx.Uow.UserFriendsRepo().CountUserFriends(l.ctx, userId)
+	total, err := l.svcCtx.Uow.UserFriendsRepo().CountUserFriends(l.ctx, userID)
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -50,7 +50,7 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 	pageSize := pagerx.GetTotalPageByPageSize(uint(total), pageLimit)
 	pageOffset := pagerx.PageOffset(pageLimit, req.Page)
 
-	list, err := l.svcCtx.Uow.UserFriendsRepo().GetFriendList(l.ctx, userId, int(pageOffset), int(pageLimit))
+	list, err := l.svcCtx.Uow.UserFriendsRepo().GetFriendList(l.ctx, userID, int(pageOffset), int(pageLimit))
 	if err != nil {
 		return nil, errx.NewCustomError(errx.DB_ERROR, err.Error())
 	}
@@ -58,8 +58,8 @@ func (l *GetFriendListLogic) GetFriendList(req *types.GetFriendListReq) (resp *t
 	var respList = make([]types.CommonUserInfo, 0)
 	for _, info := range list {
 		respList = append(respList, types.CommonUserInfo{
-			ID:       info.FriendInfo.Id,
-			Uuid:     info.FriendInfo.Uuid,
+			ID:       info.FriendInfo.ID,
+			UUID:     info.FriendInfo.UUID,
 			NickName: info.FriendInfo.NickName,
 			Avatar:   info.FriendInfo.Avatar,
 			Email:    info.FriendInfo.Email,

@@ -1,26 +1,27 @@
 package models
 
 type CreateUserStorySeenDTO struct {
-	UserId   uint
-	FriendId uint
-	StoryId  uint
+	UserID   uint
+	FriendID uint
+	StoryID  uint
 }
 
 type UpdateUserStorySeenDTO struct {
-	StoryId uint
+	StoryID uint
 }
+
+const userStorySeenTableName = "user_story_seen"
 
 type UserStorySeen struct {
 	Base
-	ID       uint `gorm:"primaryKey;autoIncrement"`
-	UserId   uint `gorm:"comment:'belong to which user Id'"`
-	FriendId uint `gorm:"comment:'belong to which friend Id'"`
-	StoryId  uint `gorm:"comment:'belong to which story Id'"`
+	UserID   uint `gorm:"comment:'belong to which user ID'"`
+	FriendID uint `gorm:"comment:'belong to which friend ID'"`
+	StoryID  uint `gorm:"comment:'belong to which story ID'"`
 
-	StoryInfo StoryModel `gorm:"foreignKey:StoryId"`
-	UserInfo  User       `gorm:"foreignKey:UserId"`
+	StoryInfo StoryModel `gorm:"foreignKey:StoryID"`
+	UserInfo  User       `gorm:"foreignKey:UserID"`
 }
 
 func (uss *UserStorySeen) TableName() string {
-	return "user_story_seen"
+	return userStorySeenTableName
 }
